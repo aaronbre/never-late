@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Never Late</string>
+    <string name="permissions_explanation_text">In order for Never Late to properly work access to your location and to calendar events is needed. Please grant the required permissions</string>
+    <string name="ok">Ok</string>
+</resources>
