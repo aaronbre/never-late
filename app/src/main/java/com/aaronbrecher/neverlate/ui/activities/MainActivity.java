@@ -42,7 +42,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        final TextView textView = findViewById(R.id.main_text);
         setUpNotificationChannel();
         ((NeverLateApp) getApplication())
                 .getAppComponent()
@@ -51,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
                 .get(MainActivityViewModel.class);
         if(PermissionUtils.hasPermissions(this)){
             //TODO this will not be needed on a normal basis as the service will load all events into
-            //the database, for the edge case that this doesn't happen will display a button to reload all
+            //the database, for the edge case that this doesn't happen will display a button to resync all
             //events for today...
             Cursor cursor = CalendarUtils.getCalendarEventsForToday(this);
             while (cursor.moveToNext()){
@@ -68,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
             public void onChanged(@Nullable List<Event> events) {
                 for(Event event : events){
                     Log.i(TAG, "onChanged: " + event.getTitle() + " " + event.getLocation());
-                    textView.append(event.getTitle() + " " + event.getLocation());
                 }
             }
         });
