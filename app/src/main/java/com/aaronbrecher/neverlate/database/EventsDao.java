@@ -15,7 +15,7 @@ import java.util.List;
 @Dao
 public interface EventsDao {
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<Event> events);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -24,6 +24,9 @@ public interface EventsDao {
     //query all events in the database
     @Query("SELECT * FROM events ORDER BY startTime")
     LiveData<List<Event>> queryAllEvents();
+
+    @Query("SELECT * FROM events WHERE id = :id")
+    Event queryEventById(int id);
 
     //query events for a specific calendar
     @Query("SELECT * FROM events WHERE calendarId = :calId ORDER BY startTime")

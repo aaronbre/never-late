@@ -1,61 +1,61 @@
-package com.aaronbrecher.neverlate.CalendarUtils;
+package com.aaronbrecher.neverlate.Utils;
 
 import android.Manifest;
-import android.app.Application;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.net.Uri;
 import android.provider.BaseColumns;
-import android.provider.CalendarContract;
 import android.provider.CalendarContract.Events;
 import android.support.v4.content.ContextCompat;
 import android.util.Pair;
+
+import com.aaronbrecher.neverlate.Constants;
 
 import org.threeten.bp.LocalDate;
 import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.LocalTime;
 import org.threeten.bp.ZoneId;
 import org.threeten.bp.ZonedDateTime;
-import org.threeten.bp.zone.ZoneRules;
 
 import java.util.TimeZone;
 
-import javax.inject.Inject;
-
 
 public class CalendarUtils {
-    public static final Uri CALENDAR_URI = Events.CONTENT_URI;
 
-    @Inject
-    SharedPreferences mSharedPreferences;
+//    @Inject
+//    SharedPreferences mSharedPreferences;
 
     public static Cursor getCalendarEventsForToday(Context context){
         String[] projection = new String[]{BaseColumns._ID,
-                Events.TITLE,
-                Events.DESCRIPTION,
-                Events.CALENDAR_ID,
-                Events.DTSTART,
-                Events.DTEND,
-                Events.EVENT_LOCATION};
+                Constants.CALENDAR_EVENTS_TITLE,
+                Constants.CALENDAR_EVENTS_DESCRIPTION,
+                Constants.CALENDAR_EVENTS_CALENDAR_ID,
+                Constants.CALENDAR_EVENTS_DTSTART,
+                Constants.CALENDAR_EVENTS_DTEND,
+                Constants.CALENDAR_EVENTS_EVENT_LOCATION};
         //TODO change this to only query calendars user has selected {NOT_MVP}
-        String selection = Events.DTSTART + " >= ? AND " + Events.DTSTART + " <= ?";
+        //as of now filters for only events starting at midnight of that day until 11:59PM
+        //the last selection of deleted is needed as sometimes deleting an event will not
+        //actually delete right away but will set the deleted column to 1
+        String selection = Constants.CALENDAR_EVENTS_DTSTART + " >= ? AND "
+                + Constants.CALENDAR_EVENTS_DTSTART + " <= ? AND "
+                + Constants.CALENDAR_EVENTS_EVENT_LOCATION + " IS NOT NULL AND " + Constants.CALENDAR_EVENTS_EVENT_LOCATION + " != '' "
+                + "AND (deleted != 1)";
         String[] args = getSelectionArgs();
         if(ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) ==
                 PackageManager.PERMISSION_GRANTED){
             return context.getContentResolver().query(
-                    CALENDAR_URI,
+                    Constants.CALENDAR_EVENTS_URI,
                     projection,
                     selection,
                     getSelectionArgs(),
-                    Events.DTSTART + " ASC");
+                    Constants.CALENDAR_EVENTS_DTSTART + " ASC");
         }
         else return null;
     }
 
     /**
-     * TODO implement this function to give selection args for calendars and dates {NOT_MVP}
+     * TODO implement this function to give selection args for calendars {NOT_MVP}
      * This function will return the selection to only select events for today
      * Ultimately this will also filter according to shared prefs to only select
      * calendars that the user would like to have

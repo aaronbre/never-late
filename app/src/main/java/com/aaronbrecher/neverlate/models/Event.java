@@ -4,10 +4,12 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 @Entity(tableName = "events")
-public class Event {
+public class Event implements Parcelable {
 
     @PrimaryKey(autoGenerate = false)
     @NonNull
@@ -103,4 +105,46 @@ public class Event {
     public void setLocation(String location) {
         this.location = location;
     }
+
+    @Override
+    @Ignore
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    @Ignore
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.id);
+        dest.writeLong(this.calendarId);
+        dest.writeString(this.title);
+        dest.writeString(this.description);
+        dest.writeLong(this.startTime);
+        dest.writeLong(this.endTime);
+        dest.writeString(this.location);
+    }
+
+    @Ignore
+    protected Event(Parcel in) {
+        this.id = in.readInt();
+        this.calendarId = in.readLong();
+        this.title = in.readString();
+        this.description = in.readString();
+        this.startTime = in.readLong();
+        this.endTime = in.readLong();
+        this.location = in.readString();
+    }
+
+    @Ignore
+    public static final Parcelable.Creator<Event> CREATOR = new Parcelable.Creator<Event>() {
+        @Override
+        public Event createFromParcel(Parcel source) {
+            return new Event(source);
+        }
+
+        @Override
+        public Event[] newArray(int size) {
+            return new Event[size];
+        }
+    };
 }

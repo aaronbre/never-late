@@ -5,6 +5,7 @@ import android.app.Application;
 import com.aaronbrecher.neverlate.dependencyinjection.AppComponent;
 import com.aaronbrecher.neverlate.dependencyinjection.AppModule;
 import com.aaronbrecher.neverlate.dependencyinjection.DaggerAppComponent;
+import com.aaronbrecher.neverlate.dependencyinjection.RoomModule;
 import com.jakewharton.threetenabp.AndroidThreeTen;
 
 public class NeverLateApp extends Application {
@@ -18,6 +19,7 @@ public class NeverLateApp extends Application {
         AndroidThreeTen.init(this);
         mAppComponent = DaggerAppComponent.builder()
                 .appModule(new AppModule(this))
+                .roomModule(new RoomModule(this))
                 .build();
 
     }

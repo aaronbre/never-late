@@ -1,12 +1,14 @@
 package com.aaronbrecher.neverlate.dependencyinjection;
 
 import android.app.Application;
+import android.arch.lifecycle.ViewModelProvider;
 import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 
 import com.aaronbrecher.neverlate.database.EventsDao;
 import com.aaronbrecher.neverlate.database.EventsDatabase;
 import com.aaronbrecher.neverlate.database.EventsRepository;
+import com.aaronbrecher.neverlate.viewmodels.CustomViewModelFactory;
 
 import javax.inject.Singleton;
 
@@ -26,9 +28,11 @@ public class RoomModule {
     @Provides
     @Singleton
     EventsDatabase provideEventDatabase(Application application){
+        //TODO remove allow main thread queries
         return Room.databaseBuilder(application,
                 EventsDatabase.class,
                 DATABASE_NAME)
+                .allowMainThreadQueries()
                 .build();
     }
 
@@ -42,5 +46,11 @@ public class RoomModule {
     @Singleton
     EventsRepository provideEventsRepository(EventsDao eventsDao){
         return new EventsRepository(eventsDao);
+    }
+
+    @Provides
+    @Singleton
+    ViewModelProvider.Factory provideViewModelFactory(EventsRepository eventsRepository){
+        return new CustomViewModelFactory(eventsRepository);
     }
 }

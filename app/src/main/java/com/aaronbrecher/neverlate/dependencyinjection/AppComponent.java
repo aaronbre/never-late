@@ -1,6 +1,8 @@
 package com.aaronbrecher.neverlate.dependencyinjection;
 
-import com.aaronbrecher.neverlate.MainActivity;
+import android.content.SharedPreferences;
+
+import com.aaronbrecher.neverlate.ui.activities.MainActivity;
 
 import javax.inject.Singleton;
 
@@ -10,4 +12,5 @@ import dagger.Component;
 @Component(modules = {AppModule.class, RoomModule.class})
 public interface AppComponent {
     void inject(MainActivity mainActivity);
+    SharedPreferences getSharedPreferences();
 }
