@@ -10,6 +10,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.Pair;
 
 import com.aaronbrecher.neverlate.Constants;
+import com.aaronbrecher.neverlate.models.Event;
 
 import org.threeten.bp.LocalDate;
 import org.threeten.bp.LocalDateTime;
@@ -17,6 +18,8 @@ import org.threeten.bp.LocalTime;
 import org.threeten.bp.ZoneId;
 import org.threeten.bp.ZonedDateTime;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TimeZone;
 
 
@@ -25,7 +28,7 @@ public class CalendarUtils {
 //    @Inject
 //    SharedPreferences mSharedPreferences;
 
-    public static Cursor getCalendarEventsForToday(Context context){
+    public static List<Event> getCalendarEventsForToday(Context context){
         String[] projection = new String[]{BaseColumns._ID,
                 Constants.CALENDAR_EVENTS_TITLE,
                 Constants.CALENDAR_EVENTS_DESCRIPTION,
@@ -44,14 +47,15 @@ public class CalendarUtils {
         String[] args = getSelectionArgs();
         if(ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) ==
                 PackageManager.PERMISSION_GRANTED){
-            return context.getContentResolver().query(
+            Cursor calendarCursor = context.getContentResolver().query(
                     Constants.CALENDAR_EVENTS_URI,
                     projection,
                     selection,
                     getSelectionArgs(),
                     Constants.CALENDAR_EVENTS_DTSTART + " ASC");
+            return convertCursorToEventList(calendarCursor);
         }
-        else return null;
+        else return new ArrayList<>();
     }
 
     /**
@@ -81,5 +85,35 @@ public class CalendarUtils {
     private static String getTimeInMillis(LocalDateTime dateTime){
         ZonedDateTime zdt = dateTime.atZone(ZoneId.of(TimeZone.getDefault().getID()));
         return String.valueOf(zdt.toInstant().toEpochMilli());
+    }
+
+    private static List<Event> convertCursorToEventList(Cursor cursor){
+        List<Event> eventList = new ArrayList<>();
+        if(cursor != null){
+            while (cursor.moveToNext()){
+                eventList.add(getEvent(cursor));
+            }
+        }
+        return eventList;
+    }
+
+    private static Event getEvent(Cursor cursor) {
+        int idIndex = cursor.getColumnIndex(BaseColumns._ID);
+        int titleIndex = cursor.getColumnIndex(Constants.CALENDAR_EVENTS_TITLE);
+        int descriptionIndex = cursor.getColumnIndex(Constants.CALENDAR_EVENTS_DESCRIPTION);
+        int locationIndex = cursor.getColumnIndex(Constants.CALENDAR_EVENTS_EVENT_LOCATION);
+        int startIndex = cursor.getColumnIndex(Constants.CALENDAR_EVENTS_DTSTART);
+        int endIndex = cursor.getColumnIndex(Constants.CALENDAR_EVENTS_DTEND);
+        int calendarIdIndex = cursor.getColumnIndex(Constants.CALENDAR_EVENTS_CALENDAR_ID);
+
+        Event event = new Event();
+        event.setId(cursor.getInt(idIndex));
+        event.setTitle(cursor.getString(titleIndex));
+        event.setDescription(cursor.getString(descriptionIndex));
+        event.setLocation(cursor.getString(locationIndex));
+        event.setStartTime(cursor.getLong(startIndex));
+        event.setEndTime(cursor.getLong(endIndex));
+        event.setCalendarId(cursor.getLong(calendarIdIndex));
+        return event;
     }
 }

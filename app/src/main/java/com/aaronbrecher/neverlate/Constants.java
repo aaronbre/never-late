@@ -9,7 +9,9 @@ public class Constants {
     public static final String MILES_PER_MINUTE_PREFS_KEY = "miles-per-minute";
     public static final int GEOFENCE_TRANSITION_PENDING_INTENT_CODE = 0;
     public static final String NOTIFICATION_CHANNEL_ID = "geofencing-channel";
-    public static String EVENT_DETAIL_INTENT_EXTRA = "event-details";
+    public static final String EVENT_DETAIL_INTENT_EXTRA = "event-details";
+    public static final String EVENT_LIST_TAG = "event-list-frag";
+    public static final String EVENT_DETAIL_FRAGMENT_TAG = "event-detail-frag";
 
     //calendar constants
     public static final String CALENDAR_EVENTS_TITLE = Events.TITLE;

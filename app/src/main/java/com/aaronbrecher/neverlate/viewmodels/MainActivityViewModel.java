@@ -2,7 +2,10 @@ package com.aaronbrecher.neverlate.viewmodels;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModel;
+import android.content.Context;
+import android.database.Cursor;
 
+import com.aaronbrecher.neverlate.Utils.CalendarUtils;
 import com.aaronbrecher.neverlate.database.EventsRepository;
 import com.aaronbrecher.neverlate.models.Event;
 
@@ -19,11 +22,12 @@ public class MainActivityViewModel extends ViewModel {
         this.mEventsRepository = eventsRepository;
     }
 
-    public void insertEvent(Event event){
-        mEventsRepository.insertEvent(event);
+    public void insertEvents(List<Event> events){
+        mEventsRepository.insertAll(events);
     }
 
-    public LiveData<List<Event>> getAllEvents(){
-        return mEventsRepository.queryAllEvents();
+    public LiveData<List<Event>> getAllCurrentEvents(){
+        return mEventsRepository.queryAllCurrentEvents();
     }
+
 }

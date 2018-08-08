@@ -8,5 +8,7 @@
     <string name="geofence_added_failed">failed to load the geofences, will try again on the next scheduled update</string>
     <string name="exiting_geofence_notification_content">You are leaving the maximum distance to able to make your calendar appointment :</string>
     <string name="exiting_geofence_notification_title">Leaving drivable distance to -</string>
+    <string name="start_time">Start Time</string>
+    <string name="end_time">End Time</string>
 
 </resources>

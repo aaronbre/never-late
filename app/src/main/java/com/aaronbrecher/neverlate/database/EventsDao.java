@@ -25,6 +25,10 @@ public interface EventsDao {
     @Query("SELECT * FROM events ORDER BY startTime")
     LiveData<List<Event>> queryAllEvents();
 
+    //query all not expired events in the database
+    @Query("SELECT * FROM events WHERE endTime < :currentTime ORDER BY startTime")
+    LiveData<List<Event>> queryAllCurrentEvents(long currentTime);
+
     @Query("SELECT * FROM events WHERE id = :id")
     Event queryEventById(int id);
 

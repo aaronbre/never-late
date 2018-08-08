@@ -11,19 +11,24 @@ import javax.inject.Singleton;
 
 @Singleton
 public class CustomViewModelFactory implements ViewModelProvider.Factory {
+
     private EventsRepository mEventsRepository;
+
+    @Inject
+    public CustomViewModelFactory(EventsRepository eventsRepository) {
+        this.mEventsRepository = eventsRepository;
+    }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        if(modelClass.isAssignableFrom(MainActivityViewModel.class)){
+        if (modelClass.isAssignableFrom(MainActivityViewModel.class)) {
             return (T) new MainActivityViewModel(mEventsRepository);
-        }else
-            throw new IllegalArgumentException("ViewModel does not exist");
+        } else if (modelClass.isAssignableFrom(DetailActivityViewModel.class)) {
+            return (T) new DetailActivityViewModel(mEventsRepository);
+        }
+        else throw new IllegalArgumentException("ViewModel does not exist");
     }
 
-    @Inject
-    public CustomViewModelFactory(EventsRepository eventsRepository){
-        this.mEventsRepository = eventsRepository;
-    }
+
 }

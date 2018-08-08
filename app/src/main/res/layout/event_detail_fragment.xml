@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="event"
+            type="com.aaronbrecher.neverlate.models.Event" />
+    </data>
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/event_detail_title_image"
+            style="@style/eventDetailImage"
+            android:src="@drawable/ic_title_gray_24dp"
+            app:layout_constraintTop_toTopOf="@id/event_detail_title" />
+
+        <TextView
+            android:id="@+id/event_detail_title"
+            style="@style/smallHeadline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/material_layout_keylines_content_left_margin_from_screen_edge"
+            android:layout_marginTop="@dimen/material_layout_vertical_spacing_between_content_areas"
+            android:text="@{event.title}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Doctor appointment - Susan" />
+
+        <TextView
+            android:id="@+id/event_detail_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/material_layout_keylines_screen_edge_margin"
+            android:layout_marginStart="@dimen/material_layout_keylines_content_left_margin_from_screen_edge"
+            android:layout_marginTop="@dimen/margin_very_small"
+            android:text="@{event.description}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/event_detail_title"
+            tools:text="Check up appointment for susan with Doctor Gittelman" />
+
+        <ImageView
+            android:id="@+id/title_time_divider"
+            style="@style/eventDetailDivder"
+            app:layout_constraintTop_toBottomOf="@id/event_detail_description" />
+
+        <ImageView
+            android:id="@+id/event_detail_time_image"
+            style="@style/eventDetailImage"
+            android:layout_marginStart="@dimen/material_layout_keylines_screen_edge_margin"
+            android:layout_marginTop="@dimen/vertical_content_spacing_x_2"
+            android:src="@drawable/ic_access_time_gray_24dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/title_time_divider" />
+
+        <TextView
+            android:id="@+id/start_label"
+            style="@style/smallSubHeading"
+            android:layout_marginStart="@dimen/material_layout_keylines_content_left_margin_from_screen_edge"
+            android:text="@string/start_time"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/event_detail_time_image" />
+
+        <TextView
+            android:id="@+id/event_detail_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_very_small"
+            android:text="@{event.startTime}"
+            app:layout_constraintStart_toStartOf="@+id/start_label"
+            app:layout_constraintTop_toBottomOf="@+id/start_label"
+            tools:text="1:30PM" />
+
+        <TextView
+            android:id="@+id/end_label"
+            style="@style/smallSubHeading"
+            android:text="@string/end_time"
+            app:layout_constraintStart_toStartOf="@id/event_detail_end"
+            app:layout_constraintTop_toTopOf="@+id/event_detail_time_image" />
+
+        <TextView
+            android:id="@+id/event_detail_end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/material_layout_keylines_screen_edge_margin"
+            android:layout_marginTop="@dimen/margin_very_small"
+            android:text="@{event.endTime}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/end_label"
+            tools:text="1:45PM" />
+
+        <ImageView
+            android:id="@+id/time_location_divider"
+            style="@style/eventDetailDivder"
+            app:layout_constraintTop_toBottomOf="@id/event_detail_start" />
+
+        <ImageView
+            android:id="@+id/event_detail_location_image"
+            style="@style/eventDetailImage"
+            android:layout_marginTop="@dimen/vertical_content_spacing_x_2"
+            android:src="@drawable/ic_location_gray_24dp"
+            app:layout_constraintTop_toBottomOf="@+id/time_location_divider" />
+
+        <TextView
+            android:id="@+id/event_detail_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/material_layout_keylines_content_left_margin_from_screen_edge"
+            android:text="@{event.location}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/event_detail_location_image"
+            tools:text="665 Princeton Avenue, Lakewood NJ 08701" />
+
+        <ImageView
+            android:id="@+id/location_map_divider"
+            style="@style/eventDetailDivder"
+            app:layout_constraintTop_toBottomOf="@id/event_detail_location" />
+
+        <android.support.constraint.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintGuide_percent="0.5"
+            app:layout_constraintTop_toBottomOf="@+id/event_detail_location_image" />
+
+
+    </android.support.constraint.ConstraintLayout>
+</layout>

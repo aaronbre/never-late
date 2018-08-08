@@ -17,7 +17,7 @@ android {
         }
     }
 
-    dataBinding{
+    dataBinding {
         enabled = true
     }
 }
@@ -50,9 +50,10 @@ dependencies {
     //dagger 2 dependency injection
     implementation 'com.google.dagger:dagger:2.13'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.13'
+    implementation 'com.google.dagger:dagger-android-support:2.13'
 
     //material dimensions
-    compile 'com.dmitrymalkovich.android:material-design-dimens:1.4'
+    implementation 'com.dmitrymalkovich.android:material-design-dimens:1.4'
 
     //testing dependencies
     testImplementation 'junit:junit:4.12'

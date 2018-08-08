@@ -32,6 +32,11 @@ public class EventsRepository {
         return mEventsDao.queryAllEvents();
     }
 
+    //query all events in the database
+    public LiveData<List<Event>> queryAllCurrentEvents(){
+        return mEventsDao.queryAllCurrentEvents(System.currentTimeMillis());
+    }
+
     //query events for a specific calendar
     public LiveData<List<Event>> queryEventForCalendar(long calId){
         return mEventsDao.queryEventForCalendar(calId);
