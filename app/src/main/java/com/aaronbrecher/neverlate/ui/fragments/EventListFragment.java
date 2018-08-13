@@ -88,7 +88,6 @@ public class EventListFragment extends Fragment {
         //getting events 2) on getting location. Fix this so only one is needed not sure how yet
         //may not be possible as events should display even without the location...
         mViewModel.getAllCurrentEvents().observe(this, eventsObserver);
-        mViewModel.getLocation().observe(this, locationObserver);
     }
 
     @Nullable
@@ -105,7 +104,6 @@ public class EventListFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         mViewModel.getAllCurrentEvents().removeObserver(eventsObserver);
-        mViewModel.getLocation().removeObserver(locationObserver);
     }
 
     private final Observer<List<Event>> eventsObserver = new Observer<List<Event>>() {
@@ -116,12 +114,6 @@ public class EventListFragment extends Fragment {
         }
     };
 
-    private final Observer<Location> locationObserver = new Observer<Location>() {
-        @Override
-        public void onChanged(@Nullable Location location) {
-            mListAdapter.setLocation(location);
-        }
-    };
 
 //    private void getDistance(final Event event){
 //        final String distance;

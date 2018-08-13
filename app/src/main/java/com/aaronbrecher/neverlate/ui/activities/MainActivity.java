@@ -32,6 +32,7 @@ import com.aaronbrecher.neverlate.models.GeofenceModel;
 import com.aaronbrecher.neverlate.ui.fragments.EventListFragment;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.maps.DirectionsApiRequest;
@@ -104,17 +105,19 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     }
 
     private List<Event> addLocationToEvents(Location location, List<Event> events) {
-        List<Event> eventsWithLocation = new ArrayList<>();
         for(Event event : events){
+            //set the distance to the event using the location
+            event.setDistance(getDistance(location, event.getLocation()));
             DirectionsApiRequest apiRequest = DirectionsUtils.getDirectionsApiRequest(
                     LocationUtils.latlngFromAddress(this, event.getLocation()),
                     LocationUtils.locationToLatLng(location));
             try {
                 DirectionsResult result = apiRequest.await();
-                event.setDistance(result.routes[0].legs[0].duration.humanReadable);
+                event.setTimeTo(result.routes[0].legs[0].duration.humanReadable);
             } catch (ApiException | InterruptedException | IOException e) { e.printStackTrace(); }
+
         }
-        return eventsWithLocation;
+        return new ArrayList<>(events);
     }
 
     private void loadData(List<Event> events) {
@@ -123,12 +126,18 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         List<GeofenceModel> geofenceModels = geofencing.setUpGeofences();
     }
 
+    private String getDistance(Location location, String destinationAddress){
+        LatLng latLng = LocationUtils.latlngFromAddress(this, destinationAddress);
+        Location destination = LocationUtils.latlngToLocation(latLng);
+        return LocationUtils.getDistance(location, destination);
+    }
+
     private void loadFragment() {
         if(getIntent().hasExtra(Constants.EVENT_DETAIL_INTENT_EXTRA)){
             //load the details fragment for phone or tablet...
         } else {
             EventListFragment listFragment = new EventListFragment();
-            mFragmentManager.beginTransaction().add(R.id.main_activity_list_fragment_container,
+            mFragmentManager.beginTransaction().replace(R.id.main_activity_list_fragment_container,
                     listFragment, Constants.EVENT_LIST_TAG)
                     .commit();
         }

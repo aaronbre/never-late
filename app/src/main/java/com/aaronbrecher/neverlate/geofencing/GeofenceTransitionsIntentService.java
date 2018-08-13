@@ -9,6 +9,7 @@ import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import com.aaronbrecher.neverlate.Constants;
+import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.database.EventsRepository;
 import com.aaronbrecher.neverlate.models.Event;
@@ -27,6 +28,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
     @Inject
     EventsRepository mEventsRepository;
+
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
      *
@@ -34,6 +36,14 @@ public class GeofenceTransitionsIntentService extends IntentService {
      */
     public GeofenceTransitionsIntentService() {
         super(GeofenceTransitionsIntentService.class.getSimpleName());
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        ((NeverLateApp)getApplication())
+                .getAppComponent()
+                .inject(this);
     }
 
     @Override

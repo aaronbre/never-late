@@ -2,6 +2,7 @@ package com.aaronbrecher.neverlate.dependencyinjection;
 
 import android.content.SharedPreferences;
 
+import com.aaronbrecher.neverlate.geofencing.GeofenceTransitionsIntentService;
 import com.aaronbrecher.neverlate.ui.activities.EventDetailActivity;
 import com.aaronbrecher.neverlate.ui.activities.MainActivity;
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
@@ -18,4 +19,5 @@ public interface AppComponent {
     void inject(EventListFragment fragment);
     void inject(EventDetailActivity detailActivity);
     void inject(EventDetailFragment fragment);
+    void inject(GeofenceTransitionsIntentService service);
 }

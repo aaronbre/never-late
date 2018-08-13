@@ -49,6 +49,9 @@ public class Event implements Parcelable {
     private String distance;
 
     @Ignore
+    private String timeTo;
+
+    @Ignore
     public Event(@NonNull int id, @NonNull long calendarId, String title, String description,
                  LocalDateTime startTime, LocalDateTime endTime, String location, boolean watching) {
         this.id = id;
@@ -133,6 +136,14 @@ public class Event implements Parcelable {
     public String getDistance() { return distance; }
 
     public void setDistance(String distance) { this.distance = distance; }
+
+    public String getTimeTo() {
+        return timeTo;
+    }
+
+    public void setTimeTo(String timeTo) {
+        this.timeTo = timeTo;
+    }
 
     @Ignore
     @Override
