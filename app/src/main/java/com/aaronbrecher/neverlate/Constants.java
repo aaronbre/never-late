@@ -12,6 +12,8 @@ public class Constants {
     public static final String EVENT_DETAIL_INTENT_EXTRA = "event-details";
     public static final String EVENT_LIST_TAG = "event-list-frag";
     public static final String EVENT_DETAIL_FRAGMENT_TAG = "event-detail-frag";
+    public static final String GEOFENCE_REQUEST_ID = "never-late-fences";
+    public static final int GEOFENCE_RESPONSE_MILLIS = 100000;
 
     //calendar constants
     public static final String CALENDAR_EVENTS_TITLE = Events.TITLE;

@@ -10,6 +10,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.Pair;
 
 import com.aaronbrecher.neverlate.Constants;
+import com.aaronbrecher.neverlate.database.Converters;
 import com.aaronbrecher.neverlate.models.Event;
 
 import org.threeten.bp.LocalDate;
@@ -38,8 +39,9 @@ public class CalendarUtils {
                 Constants.CALENDAR_EVENTS_EVENT_LOCATION};
         //TODO change this to only query calendars user has selected {NOT_MVP}
         //as of now filters for only events starting at midnight of that day until 11:59PM
-        //the last selection of deleted is needed as sometimes deleting an event will not
-        //actually delete right away but will set the deleted column to 1
+        //TODO currently filters out events without a location here possibly retrieve even events
+        //without a location and have the Room query filter, (this will allow more flexability to
+        //add the location in app..
         String selection = Constants.CALENDAR_EVENTS_DTSTART + " >= ? AND "
                 + Constants.CALENDAR_EVENTS_DTSTART + " <= ? AND "
                 + Constants.CALENDAR_EVENTS_EVENT_LOCATION + " IS NOT NULL AND " + Constants.CALENDAR_EVENTS_EVENT_LOCATION + " != '' "
@@ -83,7 +85,7 @@ public class CalendarUtils {
     }
 
     private static String getTimeInMillis(LocalDateTime dateTime){
-        ZonedDateTime zdt = dateTime.atZone(ZoneId.of(TimeZone.getDefault().getID()));
+        ZonedDateTime zdt = dateTime.atZone(ZoneId.systemDefault());
         return String.valueOf(zdt.toInstant().toEpochMilli());
     }
 
@@ -111,9 +113,10 @@ public class CalendarUtils {
         event.setTitle(cursor.getString(titleIndex));
         event.setDescription(cursor.getString(descriptionIndex));
         event.setLocation(cursor.getString(locationIndex));
-        event.setStartTime(cursor.getLong(startIndex));
-        event.setEndTime(cursor.getLong(endIndex));
+        event.setStartTime(Converters.dateTimeFromUnix(cursor.getLong(startIndex)));
+        event.setEndTime(Converters.dateTimeFromUnix(cursor.getLong(endIndex)));
         event.setCalendarId(cursor.getLong(calendarIdIndex));
+        event.setWatching(true);
         return event;
     }
 }

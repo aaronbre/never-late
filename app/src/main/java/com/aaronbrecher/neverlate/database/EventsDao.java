@@ -26,7 +26,7 @@ public interface EventsDao {
     LiveData<List<Event>> queryAllEvents();
 
     //query all not expired events in the database
-    @Query("SELECT * FROM events WHERE endTime < :currentTime ORDER BY startTime")
+    @Query("SELECT * FROM events WHERE endTime > :currentTime ORDER BY startTime")
     LiveData<List<Event>> queryAllCurrentEvents(long currentTime);
 
     @Query("SELECT * FROM events WHERE id = :id")
@@ -43,4 +43,6 @@ public interface EventsDao {
     @Query("DELETE FROM events WHERE calendarId = :calId")
     void deleteCalendar(long calId);
 
+    @Delete
+    void deleteEvents(Event... event);
 }

@@ -1,10 +1,14 @@
 package com.aaronbrecher.neverlate.ui.activities;
 
+import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -18,15 +22,29 @@ import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.CalendarUtils;
+import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
+import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.Utils.PermissionUtils;
+import com.aaronbrecher.neverlate.geofencing.Geofencing;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
 import com.aaronbrecher.neverlate.models.Event;
+import com.aaronbrecher.neverlate.models.GeofenceModel;
 import com.aaronbrecher.neverlate.ui.fragments.EventListFragment;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.maps.DirectionsApiRequest;
+import com.google.maps.errors.ApiException;
+import com.google.maps.model.DirectionsResult;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+
+import androidx.work.WorkManager;
 
 import static com.aaronbrecher.neverlate.Constants.PERMISSIONS_REQUEST_CODE;
 
@@ -36,8 +54,15 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
     @Inject
     ViewModelProvider.Factory mViewModelFactory;
+    @Inject
+    SharedPreferences mSharedPreferences;
+
     MainActivityViewModel mViewModel;
     private FragmentManager mFragmentManager;
+    @Inject
+    FusedLocationProviderClient mLocationProviderClient;
+
+    private Geofencing mGeofencing;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,16 +74,56 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                 .inject(this);
         mViewModel = ViewModelProviders.of(this,mViewModelFactory)
                 .get(MainActivityViewModel.class);
+        mFragmentManager = getSupportFragmentManager();
         if(PermissionUtils.hasPermissions(this)){
-            //TODO this will not be needed on a normal basis as the service will load all events into
-            //the database, for the edge case that this doesn't happen will display a button to resync all
-            //events for today...
-            mViewModel.insertEvents(CalendarUtils.getCalendarEventsForToday(this));
+            final List<Event> events = CalendarUtils.getCalendarEventsForToday(this);
+            locateDevice(events);
         } else {
             PermissionUtils.requestCalendarAndLocationPermissions(this, findViewById(R.id.main_container));
         }
 
-        mFragmentManager = getSupportFragmentManager();
+        loadFragment();
+    }
+
+    @SuppressLint("MissingPermission")
+    private void locateDevice(final List<Event> events) {
+        mLocationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                List<Event> eventsWithLocation = addLocationToEvents(location, events);
+                loadData(eventsWithLocation);
+                loadFragment();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                loadData(events);
+                loadFragment();
+            }
+        });
+    }
+
+    private List<Event> addLocationToEvents(Location location, List<Event> events) {
+        List<Event> eventsWithLocation = new ArrayList<>();
+        for(Event event : events){
+            DirectionsApiRequest apiRequest = DirectionsUtils.getDirectionsApiRequest(
+                    LocationUtils.latlngFromAddress(this, event.getLocation()),
+                    LocationUtils.locationToLatLng(location));
+            try {
+                DirectionsResult result = apiRequest.await();
+                event.setDistance(result.routes[0].legs[0].duration.humanReadable);
+            } catch (ApiException | InterruptedException | IOException e) { e.printStackTrace(); }
+        }
+        return eventsWithLocation;
+    }
+
+    private void loadData(List<Event> events) {
+        mViewModel.insertEvents(events);
+        Geofencing geofencing = new Geofencing(MainActivity.this, events, mSharedPreferences);
+        List<GeofenceModel> geofenceModels = geofencing.setUpGeofences();
+    }
+
+    private void loadFragment() {
         if(getIntent().hasExtra(Constants.EVENT_DETAIL_INTENT_EXTRA)){
             //load the details fragment for phone or tablet...
         } else {
@@ -67,20 +132,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                     listFragment, Constants.EVENT_LIST_TAG)
                     .commit();
         }
-
-
-
-        //this is for testing only, TODO change this to update a recyclerView with the events data
-        mViewModel.getAllCurrentEvents().observe(this, new Observer<List<Event>>() {
-            @Override
-            public void onChanged(@Nullable List<Event> events) {
-                for(Event event : events){
-                    Log.i(TAG, "onChanged: " + event.getTitle() + " " + event.getLocation());
-                }
-            }
-        });
     }
-
 
 
     @Override
@@ -113,7 +165,12 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
     @Override
     public void onListItemClick(Parcelable event) {
-        //TODO either replace the fragment with event details fragment (if do so need to work out back button)
-        //or start new activity with details...
+        if(getResources().getBoolean(R.bool.is_tablet)){
+            //replace event in viewmodel to update the fragment
+        } else {
+            Intent intent = new Intent(this, EventDetailActivity.class);
+            intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, event);
+            startActivity(intent);
+        }
     }
 }

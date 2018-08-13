@@ -7,6 +7,8 @@
         <variable
             name="event"
             type="com.aaronbrecher.neverlate.models.Event" />
+        <variable name="formatter" type="org.threeten.bp.format.DateTimeFormatter"/>
+        <import type="android.view.View" />
     </data>
 
     <android.support.constraint.ConstraintLayout
@@ -39,6 +41,7 @@
             android:layout_marginStart="@dimen/material_layout_keylines_content_left_margin_from_screen_edge"
             android:layout_marginTop="@dimen/margin_very_small"
             android:text="@{event.description}"
+            android:visibility="@{event.description == null ? View.VISIBLE : View.GONE}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/event_detail_title"
             tools:text="Check up appointment for susan with Doctor Gittelman" />
@@ -70,7 +73,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin_very_small"
-            android:text="@{event.startTime}"
+            android:text="@{event.startTime.format(formatter)}"
             app:layout_constraintStart_toStartOf="@+id/start_label"
             app:layout_constraintTop_toBottomOf="@+id/start_label"
             tools:text="1:30PM" />
@@ -88,7 +91,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/material_layout_keylines_screen_edge_margin"
             android:layout_marginTop="@dimen/margin_very_small"
-            android:text="@{event.endTime}"
+            android:text="@{event.endTime.format(formatter)}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/end_label"
             tools:text="1:45PM" />
@@ -118,17 +121,6 @@
         <ImageView
             android:id="@+id/location_map_divider"
             style="@style/eventDetailDivder"
-            app:layout_constraintTop_toBottomOf="@id/event_detail_location" />
-
-        <android.support.constraint.Guideline
-            android:id="@+id/guideline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintGuide_percent="0.5"
-            app:layout_constraintTop_toBottomOf="@+id/event_detail_location_image" />
-
-
+            app:layout_constraintTop_toBottomOf="parent" />
     </android.support.constraint.ConstraintLayout>
 </layout>

@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.aaronbrecher.neverlate.NeverLateApp;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 
 import javax.inject.Singleton;
 
@@ -35,5 +37,11 @@ public class AppModule {
     @Singleton
     SharedPreferences provideSharedPrefs(Application application){
         return PreferenceManager.getDefaultSharedPreferences(application);
+    }
+
+    @Provides
+    @Singleton
+    FusedLocationProviderClient provideFusedLocationProviderClient(Application application){
+        return LocationServices.getFusedLocationProviderClient(application);
     }
 }

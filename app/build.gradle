@@ -9,6 +9,14 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "DIRECTIONS_API_KEY", GOOGLE_API_KEY)
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
     }
     buildTypes {
         release {
@@ -36,6 +44,11 @@ dependencies {
     //play services dependencies
     implementation 'com.google.android.gms:play-services-places:15.0.1'
     implementation 'com.google.android.gms:play-services-location:15.0.1'
+    implementation 'com.google.android.gms:play-services-maps:15.0.1'
+    implementation 'com.google.android.gms:play-services-places:15.0.1'
+
+    //web Maps Service
+    implementation 'com.google.maps:google-maps-services:0.1.20'
 
     //Room live Data and view model
     def room_version = "1.1.1"
@@ -43,6 +56,7 @@ dependencies {
     implementation "android.arch.lifecycle:extensions:$lifecycle_version"
     implementation "android.arch.persistence.room:runtime:$room_version"
     annotationProcessor "android.arch.persistence.room:compiler:$room_version"
+    implementation "android.arch.work:work-runtime:1.0.0-alpha06"
 
     //Helper for time functions
     implementation 'com.jakewharton.threetenabp:threetenabp:1.1.0'
@@ -59,4 +73,6 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    //view the database at localhost
+    debugImplementation 'com.amitshekhar.android:debug-db:1.0.4'
 }

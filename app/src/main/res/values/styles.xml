@@ -15,7 +15,7 @@
     </style>
 
     <style name="smallHeadline" parent="headline">
-        <item name="textSize">@dimen/material_typography_subheading</item>
+        <item name="android:textSize">@dimen/material_typography_subheading</item>
     </style>
 
     <style name="smallSubHeading">

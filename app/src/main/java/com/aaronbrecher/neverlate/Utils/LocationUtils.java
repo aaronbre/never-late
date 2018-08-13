@@ -18,7 +18,6 @@ import java.text.DecimalFormat;
 import java.util.List;
 
 public class LocationUtils {
-    public static FusedLocationProviderClient sClient =  null;
 
     public static LatLng latlngFromAddress(Context context, String address){
         Geocoder geocoder = new Geocoder(context);
@@ -26,7 +25,7 @@ public class LocationUtils {
         LatLng latLng = null;
         try{
             addresses = geocoder.getFromLocationName(address, 1);
-            if(address == null) return null;
+            if(addresses == null) return null;
             Address location = addresses.get(0);
             latLng = new LatLng(location.getLatitude(), location.getLongitude());
 
@@ -34,11 +33,6 @@ public class LocationUtils {
             e.printStackTrace();
         }
         return latLng;
-    }
-
-    @SuppressLint("MissingPermission")
-    public static void getDeviceLocation(Context context) {
-        if(sClient == null) sClient = LocationServices.getFusedLocationProviderClient(context);
     }
 
     /**
@@ -49,15 +43,25 @@ public class LocationUtils {
      */
     public static String getDistance(Location userLocation, Location destination) {
         float distance = userLocation.distanceTo(destination)/1000;
-        boolean useMiles = true;
         if(isUsa()){
             double miles = kmToMiles(distance);
-            DecimalFormat df = new DecimalFormat("#");
-            return df.format(miles) + "\nMILES";
+            DecimalFormat df = new DecimalFormat("#.#");
+            return df.format(miles) + " MILES";
         }else{
-            DecimalFormat df = new DecimalFormat("#");
-            return df.format(distance) + "\nKM";
+            DecimalFormat df = new DecimalFormat("#.#");
+            return df.format(distance) + " KM";
         }
+    }
+
+    public static Location latlngToLocation(LatLng latLng){
+        Location location = new Location(LocationManager.GPS_PROVIDER);
+        location.setLatitude(latLng.latitude);
+        location.setLongitude(latLng.longitude);
+        return location;
+    }
+
+    public static LatLng locationToLatLng(Location location){
+        return new LatLng(location.getLatitude(), location.getLongitude());
     }
 
     private static boolean isUsa() {

@@ -18,5 +18,4 @@ public interface AppComponent {
     void inject(EventListFragment fragment);
     void inject(EventDetailActivity detailActivity);
     void inject(EventDetailFragment fragment);
-    SharedPreferences getSharedPreferences();
 }

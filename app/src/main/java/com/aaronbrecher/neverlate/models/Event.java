@@ -8,6 +8,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
+import org.threeten.bp.LocalDateTime;
+
+/**
+ * Event class to represent the calendar event in a local DB
+ * the id will always equal the same id as the calendar event to
+ * allow easy updating and referencing
+ */
 @Entity(tableName = "events")
 public class Event implements Parcelable {
 
@@ -26,16 +33,24 @@ public class Event implements Parcelable {
     private String description;
 
     @ColumnInfo
-    private long startTime;
+    private LocalDateTime startTime;
 
     @ColumnInfo
-    private long endTime;
+    private LocalDateTime endTime;
 
     @ColumnInfo
     private String location;
 
+    @ColumnInfo
+    private boolean watching;
+
+    //this will not be used by Room only in app once user location is found
     @Ignore
-    public Event(@NonNull int id, @NonNull long calendarId, String title, String description, long startTime, long endTime, String location) {
+    private String distance;
+
+    @Ignore
+    public Event(@NonNull int id, @NonNull long calendarId, String title, String description,
+                 LocalDateTime startTime, LocalDateTime endTime, String location, boolean watching) {
         this.id = id;
         this.calendarId = calendarId;
         this.title = title;
@@ -43,6 +58,7 @@ public class Event implements Parcelable {
         this.startTime = startTime;
         this.endTime = endTime;
         this.location = location;
+        this.watching = watching;
     }
 
     public Event() {
@@ -82,19 +98,19 @@ public class Event implements Parcelable {
         this.description = description;
     }
 
-    public long getStartTime() {
+    public LocalDateTime getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(long startTime) {
+    public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
 
-    public long getEndTime() {
+    public LocalDateTime getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(long endTime) {
+    public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
     }
 
@@ -106,21 +122,33 @@ public class Event implements Parcelable {
         this.location = location;
     }
 
-    @Override
+    public boolean isWatching() {
+        return watching;
+    }
+
+    public void setWatching(boolean watching) {
+        this.watching = watching;
+    }
+
+    public String getDistance() { return distance; }
+
+    public void setDistance(String distance) { this.distance = distance; }
+
     @Ignore
+    @Override
     public int describeContents() {
         return 0;
     }
 
-    @Override
     @Ignore
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(this.id);
         dest.writeLong(this.calendarId);
         dest.writeString(this.title);
         dest.writeString(this.description);
-        dest.writeLong(this.startTime);
-        dest.writeLong(this.endTime);
+        dest.writeSerializable(this.startTime);
+        dest.writeSerializable(this.endTime);
         dest.writeString(this.location);
     }
 
@@ -130,8 +158,8 @@ public class Event implements Parcelable {
         this.calendarId = in.readLong();
         this.title = in.readString();
         this.description = in.readString();
-        this.startTime = in.readLong();
-        this.endTime = in.readLong();
+        this.startTime = (LocalDateTime) in.readSerializable();
+        this.endTime = (LocalDateTime) in.readSerializable();
         this.location = in.readString();
     }
 

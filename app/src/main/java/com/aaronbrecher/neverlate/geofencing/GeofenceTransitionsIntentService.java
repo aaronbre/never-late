@@ -64,7 +64,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
      * @param geofence
      */
     private NotificationCompat.Builder createNotificationForFence(Geofence geofence) {
-        int id = Integer.valueOf(geofence.getRequestId());
+        String str = geofence.getRequestId().replaceAll("\\D+","");
+        int id = Integer.valueOf(str);
         Event event = mEventsRepository.queryEventById(id);
         //create the intent to be used to launch the detail screen of this event
         Intent intent = new Intent(this, MainActivity.class);

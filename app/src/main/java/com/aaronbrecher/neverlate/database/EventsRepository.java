@@ -32,6 +32,8 @@ public class EventsRepository {
         return mEventsDao.queryAllEvents();
     }
 
+    public List<Event> queryAllEventsNotLive(){return mEventsDao.queryAllEvents().getValue();}
+
     //query all events in the database
     public LiveData<List<Event>> queryAllCurrentEvents(){
         return mEventsDao.queryAllCurrentEvents(System.currentTimeMillis());
@@ -45,6 +47,8 @@ public class EventsRepository {
     public Event queryEventById(int id){
         return mEventsDao.queryEventById(id);
     }
+
+    public void deleteEvents(Event... events){mEventsDao.deleteEvents(events);}
 
     public void deleteAllEvents(){
         mEventsDao.deleteAllEvents();

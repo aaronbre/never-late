@@ -18,6 +18,8 @@ import com.aaronbrecher.neverlate.dependencyinjection.AppComponent;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.viewmodels.DetailActivityViewModel;
 
+import org.threeten.bp.format.DateTimeFormatter;
+
 import javax.inject.Inject;
 
 public class EventDetailFragment extends Fragment {
@@ -47,6 +49,8 @@ public class EventDetailFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mBinding = EventDetailFragmentBinding.inflate(inflater, container, false);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM d  h:mm a");
+        mBinding.setFormatter(formatter);
         mViewModel.getEvent().observe(getActivity(), mEventObserver);
         return mBinding.getRoot();
     }
