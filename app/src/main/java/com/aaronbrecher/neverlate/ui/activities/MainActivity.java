@@ -16,7 +16,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.FrameLayout;
 
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
@@ -45,11 +49,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import androidx.work.WorkManager;
-
 import static com.aaronbrecher.neverlate.Constants.PERMISSIONS_REQUEST_CODE;
 
-public class MainActivity extends AppCompatActivity implements ListItemClickListener{
+public class MainActivity extends AppCompatActivity implements ListItemClickListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -57,12 +59,12 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     ViewModelProvider.Factory mViewModelFactory;
     @Inject
     SharedPreferences mSharedPreferences;
-
-    MainActivityViewModel mViewModel;
-    private FragmentManager mFragmentManager;
     @Inject
     FusedLocationProviderClient mLocationProviderClient;
 
+    MainActivityViewModel mViewModel;
+    private FragmentManager mFragmentManager;
+    private FrameLayout mListContainer;
     private Geofencing mGeofencing;
 
     @Override
@@ -73,21 +75,25 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         ((NeverLateApp) getApplication())
                 .getAppComponent()
                 .inject(this);
-        mViewModel = ViewModelProviders.of(this,mViewModelFactory)
+        mViewModel = ViewModelProviders.of(this, mViewModelFactory)
                 .get(MainActivityViewModel.class);
         mFragmentManager = getSupportFragmentManager();
-        if(PermissionUtils.hasPermissions(this)){
-            final List<Event> events = CalendarUtils.getCalendarEventsForToday(this);
-            locateDevice(events);
-        } else {
+        mListContainer = findViewById(R.id.main_activity_list_fragment_container);
+        mListContainer.setVisibility(View.GONE);
+        if (!PermissionUtils.hasPermissions(this)) {
             PermissionUtils.requestCalendarAndLocationPermissions(this, findViewById(R.id.main_container));
         }
-
-        loadFragment();
+        mViewModel.getAllCurrentEvents().observe(this, new Observer<List<Event>>() {
+            @Override
+            public void onChanged(@Nullable List<Event> events) {
+                locateDeviceAndLoadUi(events);
+            }
+        });
     }
 
     @SuppressLint("MissingPermission")
-    private void locateDevice(final List<Event> events) {
+    private void locateDeviceAndLoadUi(final List<Event> events) {
+        //TODO add a progress spinner and show here - remove in loadFragment()
         mLocationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
@@ -105,35 +111,43 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     }
 
     private List<Event> addLocationToEvents(Location location, List<Event> events) {
-        for(Event event : events){
+        for (Event event : events) {
             //set the distance to the event using the location
             event.setDistance(getDistance(location, event.getLocation()));
+            //get the travel time to the event using the google directions api this blocks the
+            //main UI thread as all information is needed to update the viewModel
+            //TODO see if there is a better way...
             DirectionsApiRequest apiRequest = DirectionsUtils.getDirectionsApiRequest(
                     LocationUtils.latlngFromAddress(this, event.getLocation()),
                     LocationUtils.locationToLatLng(location));
             try {
                 DirectionsResult result = apiRequest.await();
                 event.setTimeTo(result.routes[0].legs[0].duration.humanReadable);
-            } catch (ApiException | InterruptedException | IOException e) { e.printStackTrace(); }
+            } catch (ApiException | InterruptedException | IOException e) {
+                e.printStackTrace();
+            }
 
         }
         return new ArrayList<>(events);
     }
 
     private void loadData(List<Event> events) {
-        mViewModel.insertEvents(events);
+        //load the updated events with the location aware information to the VM
+        mViewModel.setEventsWithLocation(events);
+        //TODO this is for testing only Geofencing will be handled by job service
         Geofencing geofencing = new Geofencing(MainActivity.this, events, mSharedPreferences);
         List<GeofenceModel> geofenceModels = geofencing.setUpGeofences();
     }
 
-    private String getDistance(Location location, String destinationAddress){
+    private String getDistance(Location location, String destinationAddress) {
         LatLng latLng = LocationUtils.latlngFromAddress(this, destinationAddress);
         Location destination = LocationUtils.latlngToLocation(latLng);
         return LocationUtils.getDistance(location, destination);
     }
 
     private void loadFragment() {
-        if(getIntent().hasExtra(Constants.EVENT_DETAIL_INTENT_EXTRA)){
+        mListContainer.setVisibility(View.VISIBLE);
+        if (getIntent().hasExtra(Constants.EVENT_DETAIL_INTENT_EXTRA)) {
             //load the details fragment for phone or tablet...
         } else {
             EventListFragment listFragment = new EventListFragment();
@@ -150,8 +164,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             //if permissions are granted for the first time, assume data was not loaded into room and
             //do so now...
             if (PermissionUtils.verifyPermissions(grantResults)) {
-                List<Event> events = CalendarUtils.getCalendarEventsForToday(this);
-                mViewModel.insertEvents(events);
+                mViewModel.insertEvents(CalendarUtils.getCalendarEventsForToday(this));
             } else {
                 PermissionUtils.requestCalendarAndLocationPermissions(this, findViewById(R.id.main_container));
                 // TODO change this to Show image showing error with button to rerequest permissions...
@@ -161,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     }
 
     private void setUpNotificationChannel() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence channelName = getString(R.string.notification_channel_name);
             String description = getString(R.string.notification_channel_description);
             int importance = NotificationManager.IMPORTANCE_HIGH;
@@ -173,8 +186,23 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.main_activity_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.main_activity_menu_sync) {
+            mViewModel.insertEvents(CalendarUtils.getCalendarEventsForToday(this));
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onListItemClick(Parcelable event) {
-        if(getResources().getBoolean(R.bool.is_tablet)){
+        if (getResources().getBoolean(R.bool.is_tablet)) {
             //replace event in viewmodel to update the fragment
         } else {
             Intent intent = new Intent(this, EventDetailActivity.class);

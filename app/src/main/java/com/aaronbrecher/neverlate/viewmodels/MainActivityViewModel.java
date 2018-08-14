@@ -19,7 +19,10 @@ public class MainActivityViewModel extends ViewModel {
 
     private EventsRepository mEventsRepository;
     private MutableLiveData<Event> mEvent;
-    private MutableLiveData<Location> mLocation;
+
+    //this field differs from the getAllCurrentEvents as the db is not location aware
+    //this field will contain the location info as well (distance and time to travel)
+    private MutableLiveData<List<Event>> mEventsWithLocation;
 
 
     @Inject
@@ -52,17 +55,15 @@ public class MainActivityViewModel extends ViewModel {
         mEvent.postValue(event);
     }
 
-    public MutableLiveData<Location> getLocation(){
-        if(mLocation == null)
-            mLocation = new MutableLiveData<>();
-        return mLocation;
+    public MutableLiveData<List<Event>> getEventsWithLocation() {
+        if(mEventsWithLocation == null)
+            mEventsWithLocation = new MutableLiveData<>();
+        return mEventsWithLocation;
     }
 
-    public void setLocation(Location location) {
-        if (mLocation == null){
-            mLocation = new MutableLiveData<>();
-        }
-        mLocation.postValue(location);
+    public void setEventsWithLocation(List<Event> eventsWithLocation) {
+        if(mEventsWithLocation == null)
+            mEventsWithLocation = new MutableLiveData<>();
+        mEventsWithLocation.postValue(eventsWithLocation);
     }
-
 }

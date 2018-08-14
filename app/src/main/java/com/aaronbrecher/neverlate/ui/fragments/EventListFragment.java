@@ -67,27 +67,10 @@ public class EventListFragment extends Fragment {
         }
         AppComponent appComponent = ((NeverLateApp) getActivity().getApplication()).getAppComponent();
         appComponent.inject(this);
-        mViewModel = ViewModelProviders.of(getActivity()).get(MainActivityViewModel.class);
+        mViewModel = ViewModelProviders.of(getActivity(), mViewModelFactory).get(MainActivityViewModel.class);
         mActivity = (MainActivity) getActivity();
-
-        //get the device location to determine distance from event and set
-        //the viewModel to update the recyclerView
-        if (PermissionUtils.hasPermissions(getActivity())) {
-            mLocationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    mLocation = location;
-                    mViewModel.setLocation(location);
-                }
-            });
-        }
-
-
         mListAdapter = new EventListAdapter(null, null, mActivity);
-        //TODO currently this will cause two dataSetChanged calls to the recyclerView 1) on
-        //getting events 2) on getting location. Fix this so only one is needed not sure how yet
-        //may not be possible as events should display even without the location...
-        mViewModel.getAllCurrentEvents().observe(this, eventsObserver);
+        mViewModel.getEventsWithLocation().observe(this, eventsObserver);
     }
 
     @Nullable
@@ -109,26 +92,8 @@ public class EventListFragment extends Fragment {
     private final Observer<List<Event>> eventsObserver = new Observer<List<Event>>() {
         @Override
         public void onChanged(@Nullable List<Event> events) {
-
             mListAdapter.swapLists(events);
         }
     };
 
-
-//    private void getDistance(final Event event){
-//        final String distance;
-//        DirectionsApiRequest apiRequest = DirectionsUtils.getDirectionsApiRequest(
-//                LocationUtils.latlngFromAddress(getActivity(), event.getLocation()),
-//                LocationUtils.locationToLatLng(mLocation));
-//        apiRequest.setCallback(new PendingResult.Callback<DirectionsResult>() {
-//            @Override
-//            public void onResult(DirectionsResult result) {
-//                event.setDistance(result.routes[0].legs[0].duration.humanReadable);
-//            }
-//
-//            @Override
-//            public void onFailure(Throwable e) {
-//            }
-//        });
-//    }
 }

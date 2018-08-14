@@ -112,7 +112,7 @@ public class Geofencing {
                 .setRequestId(Constants.GEOFENCE_REQUEST_ID + event.getId())
                 .setCircularRegion(latLng.latitude, latLng.longitude, fenceRadius)
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
-                .setExpirationDuration(Converters.unixFromDateTime(event.getEndTime()))
+                .setExpirationDuration(Converters.unixFromDateTime(event.getEndTime()) - System.currentTimeMillis())
                 .setNotificationResponsiveness(Constants.GEOFENCE_RESPONSE_MILLIS)
                 .build();
         mGeofenceList.add(geofence);
