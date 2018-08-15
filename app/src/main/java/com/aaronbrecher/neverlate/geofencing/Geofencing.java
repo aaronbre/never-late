@@ -108,15 +108,16 @@ public class Geofencing {
     private GeofenceModel addGeofence(Event event) {
         int fenceRadius = MapUtils.getFenceRadius(MapUtils.determineRelevantTime(event.getStartTime(), event.getEndTime()), mMilesPerMinute);
         LatLng latLng = LocationUtils.latlngFromAddress(mContext, event.getLocation());
+        String requestId = Constants.GEOFENCE_REQUEST_ID + event.getId();
         Geofence geofence = new Geofence.Builder()
-                .setRequestId(Constants.GEOFENCE_REQUEST_ID + event.getId())
+                .setRequestId(requestId)
                 .setCircularRegion(latLng.latitude, latLng.longitude, fenceRadius)
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
                 .setExpirationDuration(Converters.unixFromDateTime(event.getEndTime()) - System.currentTimeMillis())
                 .setNotificationResponsiveness(Constants.GEOFENCE_RESPONSE_MILLIS)
                 .build();
         mGeofenceList.add(geofence);
-        return new GeofenceModel();
+        return new GeofenceModel(requestId, fenceRadius);
     }
 
 

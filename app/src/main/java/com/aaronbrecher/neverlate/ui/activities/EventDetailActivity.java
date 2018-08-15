@@ -38,6 +38,7 @@ public class EventDetailActivity extends AppCompatActivity implements OnMapReady
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //TODO when opening the detail view force an update on the geofence(i.e. update just this fence)
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_detail);
         ((NeverLateApp) getApplication())
@@ -69,6 +70,7 @@ public class EventDetailActivity extends AppCompatActivity implements OnMapReady
         LatLng latLng = LocationUtils.latlngFromAddress(this, mEvent.getLocation());
         float milesPerMinute = mSharedPreferences.getFloat(Constants.MILES_PER_MINUTE_PREFS_KEY, .5f);
         long relevantTime = MapUtils.determineRelevantTime(mEvent.getStartTime(), mEvent.getEndTime());
+        //TODO change the radius here to use the radius from the geofence DB for better fidelity
         CircleOptions circleOptions = new CircleOptions()
                 .center(latLng)
                 .radius(MapUtils.getFenceRadius(relevantTime ,milesPerMinute));

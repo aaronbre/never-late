@@ -32,7 +32,6 @@ public class RoomModule {
         return Room.databaseBuilder(application,
                 EventsDatabase.class,
                 DATABASE_NAME)
-                .allowMainThreadQueries()
                 .build();
     }
 
@@ -50,7 +49,7 @@ public class RoomModule {
 
     @Provides
     @Singleton
-    ViewModelProvider.Factory provideViewModelFactory(EventsRepository eventsRepository){
-        return new CustomViewModelFactory(eventsRepository);
+    ViewModelProvider.Factory provideViewModelFactory(EventsRepository eventsRepository, Application application){
+        return new CustomViewModelFactory(eventsRepository, application);
     }
 }

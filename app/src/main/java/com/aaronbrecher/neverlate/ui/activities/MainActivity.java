@@ -9,6 +9,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -16,8 +17,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.util.Pair;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -79,13 +81,13 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                 .get(MainActivityViewModel.class);
         mFragmentManager = getSupportFragmentManager();
         mListContainer = findViewById(R.id.main_activity_list_fragment_container);
-        mListContainer.setVisibility(View.GONE);
         if (!PermissionUtils.hasPermissions(this)) {
             PermissionUtils.requestCalendarAndLocationPermissions(this, findViewById(R.id.main_container));
         }
         mViewModel.getAllCurrentEvents().observe(this, new Observer<List<Event>>() {
             @Override
             public void onChanged(@Nullable List<Event> events) {
+                Log.i(TAG, "onChanged: was called");
                 locateDeviceAndLoadUi(events);
             }
         });
@@ -94,12 +96,26 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     @SuppressLint("MissingPermission")
     private void locateDeviceAndLoadUi(final List<Event> events) {
         //TODO add a progress spinner and show here - remove in loadFragment()
+        mListContainer.setVisibility(View.GONE);
         mLocationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
-                List<Event> eventsWithLocation = addLocationToEvents(location, events);
-                loadData(eventsWithLocation);
-                loadFragment();
+                //This currently works as expected TODO possibly change this to loader to deal with lifecycle events...
+                new AsyncTask<Pair<List<Event>, Location>, Void, Void>(){
+
+                    @Override
+                    protected Void doInBackground(Pair<List<Event>, Location>... pairs) {
+                        Pair<List<Event>, Location> pair = pairs[0];
+                        MainActivity.this.addLocationToEvents(pair.second, pair.first);
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Void aVoid) {
+                        loadData(events);
+                        loadFragment();
+                    }
+                }.execute(new Pair<List<Event>, Location>(events, location));
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -111,6 +127,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     }
 
     private List<Event> addLocationToEvents(Location location, List<Event> events) {
+        //TODO currently does this on orientation change.. fix
         for (Event event : events) {
             //set the distance to the event using the location
             event.setDistance(getDistance(location, event.getLocation()));
@@ -210,4 +227,5 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             startActivity(intent);
         }
     }
+
 }

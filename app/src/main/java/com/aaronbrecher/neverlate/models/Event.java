@@ -133,9 +133,13 @@ public class Event implements Parcelable {
         this.watching = watching;
     }
 
-    public String getDistance() { return distance; }
+    public String getDistance() {
+        return distance;
+    }
 
-    public void setDistance(String distance) { this.distance = distance; }
+    public void setDistance(String distance) {
+        this.distance = distance;
+    }
 
     public String getTimeTo() {
         return timeTo;
@@ -186,4 +190,23 @@ public class Event implements Parcelable {
             return new Event[size];
         }
     };
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        else if (obj == null) return false;
+        else if (obj instanceof Event) {
+            Event event = (Event) obj;
+            if (event.getId() == this.getId()
+                    && event.getLocation().equals(this.getLocation())
+                    && event.getStartTime() == this.getStartTime()
+                    && event.getEndTime() == this.getEndTime()
+                    && event.getTitle().equals(this.getTitle())
+                    && event.getDescription().equals(this.getDescription())
+                    && event.getCalendarId() == this.getCalendarId()
+                    && event.watching == this.watching
+                    ) return true;
+        }
+        return false;
+    }
 }
