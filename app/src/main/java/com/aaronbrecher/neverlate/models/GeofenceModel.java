@@ -8,11 +8,9 @@ import android.support.annotation.NonNull;
 
 @Entity(tableName = "geofences")
 public class GeofenceModel {
-    @PrimaryKey(autoGenerate = true)
-    @NonNull
-    private int id;
 
-    @ColumnInfo
+    @PrimaryKey(autoGenerate = false)
+    @NonNull
     private String requestKey;
 
     @ColumnInfo
@@ -25,15 +23,6 @@ public class GeofenceModel {
     public GeofenceModel(String requestKey, int fenceRadius) {
         this.requestKey = requestKey;
         this.fenceRadius = fenceRadius;
-    }
-
-    @NonNull
-    public int getId() {
-        return id;
-    }
-
-    public void setId(@NonNull int id) {
-        this.id = id;
     }
 
     public String getRequestKey() {

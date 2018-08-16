@@ -13,6 +13,7 @@ import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.database.EventsRepository;
 import com.aaronbrecher.neverlate.models.Event;
+import com.aaronbrecher.neverlate.ui.activities.EventDetailActivity;
 import com.aaronbrecher.neverlate.ui.activities.MainActivity;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofenceStatusCodes;
@@ -78,7 +79,12 @@ public class GeofenceTransitionsIntentService extends IntentService {
         int id = Integer.valueOf(str);
         Event event = mEventsRepository.queryEventById(id);
         //create the intent to be used to launch the detail screen of this event
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent;
+        if(this.getResources().getBoolean(R.bool.is_tablet)){
+            intent = new Intent(this, MainActivity.class);
+        } else {
+            intent = new Intent(this, EventDetailActivity.class);
+        }
         intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, event);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,0);
 

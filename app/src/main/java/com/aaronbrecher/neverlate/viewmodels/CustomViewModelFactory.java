@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
 import com.aaronbrecher.neverlate.database.EventsRepository;
+import com.aaronbrecher.neverlate.database.GeofencesRepository;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -14,11 +15,13 @@ import javax.inject.Singleton;
 public class CustomViewModelFactory implements ViewModelProvider.Factory {
 
     private EventsRepository mEventsRepository;
+    private GeofencesRepository mGeofencesRepository;
     private Application mApplication;
 
     @Inject
-    public CustomViewModelFactory(EventsRepository eventsRepository, Application application) {
+    public CustomViewModelFactory(EventsRepository eventsRepository, GeofencesRepository geofencesRepository, Application application) {
         this.mEventsRepository = eventsRepository;
+        this.mGeofencesRepository = geofencesRepository;
         this.mApplication = application;
     }
 
@@ -26,9 +29,9 @@ public class CustomViewModelFactory implements ViewModelProvider.Factory {
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         if (modelClass.isAssignableFrom(MainActivityViewModel.class)) {
-            return (T) new MainActivityViewModel(mEventsRepository, mApplication);
+            return (T) new MainActivityViewModel(mEventsRepository,mGeofencesRepository, mApplication);
         } else if (modelClass.isAssignableFrom(DetailActivityViewModel.class)) {
-            return (T) new DetailActivityViewModel(mEventsRepository);
+            return (T) new DetailActivityViewModel(mEventsRepository, mGeofencesRepository);
         }
         else throw new IllegalArgumentException("ViewModel does not exist");
     }

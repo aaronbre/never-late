@@ -1,9 +1,11 @@
 package com.aaronbrecher.neverlate.ui.activities;
 
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,6 +17,7 @@ import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.Utils.MapUtils;
 import com.aaronbrecher.neverlate.models.Event;
+import com.aaronbrecher.neverlate.models.GeofenceModel;
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
 import com.aaronbrecher.neverlate.viewmodels.DetailActivityViewModel;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
@@ -66,14 +69,21 @@ public class EventDetailActivity extends AppCompatActivity implements OnMapReady
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(final GoogleMap googleMap) {
+        mViewModel.getGeofenceForKey(mEvent.getId()).observe(this, new Observer<GeofenceModel>() {
+            @Override
+            public void onChanged(@Nullable GeofenceModel geofenceModel) {
+                addGeofenceToMap(googleMap, geofenceModel.getFenceRadius());
+            }
+        });
+    }
+
+    private void addGeofenceToMap(GoogleMap googleMap, int fenceRadius) {
         LatLng latLng = LocationUtils.latlngFromAddress(this, mEvent.getLocation());
-        float milesPerMinute = mSharedPreferences.getFloat(Constants.MILES_PER_MINUTE_PREFS_KEY, .5f);
-        long relevantTime = MapUtils.determineRelevantTime(mEvent.getStartTime(), mEvent.getEndTime());
         //TODO change the radius here to use the radius from the geofence DB for better fidelity
         CircleOptions circleOptions = new CircleOptions()
                 .center(latLng)
-                .radius(MapUtils.getFenceRadius(relevantTime ,milesPerMinute));
+                .radius(fenceRadius);
         googleMap.addMarker(new MarkerOptions().position(latLng)
                 .title(mEvent.getTitle()));
         googleMap.addCircle(circleOptions);

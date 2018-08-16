@@ -29,13 +29,6 @@ public class EventDetailFragment extends Fragment {
     private DetailActivityViewModel mViewModel;
     private EventDetailFragmentBinding mBinding;
 
-    final Observer<Event> mEventObserver = new Observer<Event>() {
-        @Override
-        public void onChanged(@Nullable Event event) {
-            mBinding.setEvent(event);
-        }
-    };
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -51,13 +44,7 @@ public class EventDetailFragment extends Fragment {
         mBinding = EventDetailFragmentBinding.inflate(inflater, container, false);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM d  h:mm a");
         mBinding.setFormatter(formatter);
-        mViewModel.getEvent().observe(getActivity(), mEventObserver);
+        mBinding.setEvent(mViewModel.getEvent());
         return mBinding.getRoot();
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        mViewModel.getEvent().removeObserver(mEventObserver);
     }
 }

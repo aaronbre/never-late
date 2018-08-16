@@ -1,5 +1,7 @@
 package com.aaronbrecher.neverlate.database;
 
+import android.arch.lifecycle.LiveData;
+
 import com.aaronbrecher.neverlate.models.GeofenceModel;
 
 import java.util.List;
@@ -24,7 +26,7 @@ public class GeofencesRepository {
         mGeofencesDao.insertFence(fence);
     }
 
-    public GeofenceModel getGeofencebyKey(String key){
+    public LiveData<GeofenceModel> getGeofencebyKey(String key){
         return mGeofencesDao.getGeofenceByKey(key);
     }
 

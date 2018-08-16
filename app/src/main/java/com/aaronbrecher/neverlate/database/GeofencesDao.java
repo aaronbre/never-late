@@ -1,5 +1,6 @@
 package com.aaronbrecher.neverlate.database;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
@@ -19,7 +20,7 @@ public interface GeofencesDao {
     long insertFence(GeofenceModel item);
 
     @Query("SELECT * FROM geofences WHERE requestKey = :requestKey")
-    GeofenceModel getGeofenceByKey(String requestKey);
+    LiveData<GeofenceModel> getGeofenceByKey(String requestKey);
 
     @Query("DELETE FROM geofences WHERE requestKey = :requestKey")
     void deleteGeofenceWithKey(String requestKey);

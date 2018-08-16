@@ -11,4 +11,5 @@ import com.aaronbrecher.neverlate.models.GeofenceModel;
 @TypeConverters({Converters.class})
 public abstract class EventsDatabase extends RoomDatabase{
     public abstract EventsDao eventsDao();
+    public abstract GeofencesDao geofencesDao();
 }

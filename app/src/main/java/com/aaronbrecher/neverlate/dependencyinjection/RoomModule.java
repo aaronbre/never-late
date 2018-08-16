@@ -8,6 +8,8 @@ import android.arch.persistence.room.RoomDatabase;
 import com.aaronbrecher.neverlate.database.EventsDao;
 import com.aaronbrecher.neverlate.database.EventsDatabase;
 import com.aaronbrecher.neverlate.database.EventsRepository;
+import com.aaronbrecher.neverlate.database.GeofencesDao;
+import com.aaronbrecher.neverlate.database.GeofencesRepository;
 import com.aaronbrecher.neverlate.viewmodels.CustomViewModelFactory;
 
 import javax.inject.Singleton;
@@ -28,7 +30,6 @@ public class RoomModule {
     @Provides
     @Singleton
     EventsDatabase provideEventDatabase(Application application){
-        //TODO remove allow main thread queries
         return Room.databaseBuilder(application,
                 EventsDatabase.class,
                 DATABASE_NAME)
@@ -49,7 +50,19 @@ public class RoomModule {
 
     @Provides
     @Singleton
-    ViewModelProvider.Factory provideViewModelFactory(EventsRepository eventsRepository, Application application){
-        return new CustomViewModelFactory(eventsRepository, application);
+    GeofencesDao provideGeofenceDao(EventsDatabase database){
+        return database.geofencesDao();
+    }
+
+    @Provides
+    @Singleton
+    GeofencesRepository provideGeofenceRepository(GeofencesDao geofencesDao){
+        return new GeofencesRepository(geofencesDao);
+    }
+
+    @Provides
+    @Singleton
+    ViewModelProvider.Factory provideViewModelFactory(EventsRepository eventsRepository, GeofencesRepository geofencesRepository, Application application){
+        return new CustomViewModelFactory(eventsRepository, geofencesRepository, application);
     }
 }
