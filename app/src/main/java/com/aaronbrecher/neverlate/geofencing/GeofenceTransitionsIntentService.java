@@ -32,7 +32,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
-     *
+     * <p>
      * Name Used to name the worker thread, important only for debugging.
      */
     public GeofenceTransitionsIntentService() {
@@ -42,7 +42,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        ((NeverLateApp)getApplication())
+        ((NeverLateApp) getApplication())
                 .getAppComponent()
                 .inject(this);
     }
@@ -50,54 +50,62 @@ public class GeofenceTransitionsIntentService extends IntentService {
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
-        if(geofencingEvent.hasError()){
+        if (geofencingEvent.hasError()) {
             String errorMessage = GeofenceStatusCodes.getStatusCodeString(geofencingEvent.getErrorCode());
             Log.e(TAG, "onHandleIntent: " + errorMessage);
         }
 
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
-        if(geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT){
-            List<Geofence> tiggeringGeofences = geofencingEvent.getTriggeringGeofences();
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-            for(Geofence geofence : tiggeringGeofences){
-                NotificationCompat.Builder builder = createNotificationForFence(geofence);
-                notificationManager.notify(mNotificationId, builder.build());
-                mNotificationId++;
-            }
-        } else if(geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER){
-            //TODO create notification for reentering the geofence
+
+        List<Geofence> tiggeringGeofences = geofencingEvent.getTriggeringGeofences();
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        for (Geofence geofence : tiggeringGeofences) {
+            NotificationCompat.Builder builder = createNotificationForFence(geofence, geofenceTransition);
+            notificationManager.notify(mNotificationId, builder.build());
+            mNotificationId++;
         }
     }
 
     /**
      * This will create a notification for the geofence by getting the event data
      * from Room using the Id of the geofence
+     *
      * @param geofence
      */
-    private NotificationCompat.Builder createNotificationForFence(Geofence geofence) {
-        String str = geofence.getRequestId().replaceAll("\\D+","");
+    private NotificationCompat.Builder createNotificationForFence(Geofence geofence, int transition) {
+        String str = geofence.getRequestId().replaceAll("\\D+", "");
         int id = Integer.valueOf(str);
         Event event = mEventsRepository.queryEventById(id);
         //create the intent to be used to launch the detail screen of this event
         Intent intent;
-        if(this.getResources().getBoolean(R.bool.is_tablet)){
+        if (this.getResources().getBoolean(R.bool.is_tablet)) {
             intent = new Intent(this, MainActivity.class);
         } else {
             intent = new Intent(this, EventDetailActivity.class);
         }
         intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, event);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,0);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID);
-        builder.setSmallIcon(R.drawable.ic_geofence_car)
-                .setContentTitle(getString(R.string.exiting_geofence_notification_title) + event.getLocation())
-                .setContentText(getString(R.string.exiting_geofence_notification_content) + event.getTitle())
-                .setStyle(new NotificationCompat.BigTextStyle()
-                .bigText(getString(R.string.exiting_geofence_notification_content) + event.getTitle()))
-                .setContentIntent(pendingIntent)
+        builder.setContentIntent(pendingIntent)
                 .setAutoCancel(true)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
+
+        if (transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+            builder.setSmallIcon(R.drawable.ic_geofence_car)
+                    .setContentTitle(getString(R.string.exiting_geofence_notification_title) + event.getLocation())
+                    .setContentText(getString(R.string.exiting_geofence_notification_content) + event.getTitle())
+                    .setStyle(new NotificationCompat.BigTextStyle()
+                            .bigText(getString(R.string.exiting_geofence_notification_content) + event.getTitle()));
+
+        } else {
+            builder.setSmallIcon(R.drawable.ic_geofence_car)
+                    .setContentTitle(getString(R.string.entering_geofence_notification_title) + event.getLocation())
+                    .setContentText(getString(R.string.entering_geofence_notification_content) + event.getTitle())
+                    .setStyle(new NotificationCompat.BigTextStyle()
+                            .bigText(getString(R.string.entering_geofence_notification_content) + event.getTitle()));
+        }
         return builder;
     }
 }

@@ -46,6 +46,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:15.0.1'
     implementation 'com.google.android.gms:play-services-maps:15.0.1'
     implementation 'com.google.android.gms:play-services-places:15.0.1'
+    implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
 
     //web Maps Service
     implementation 'com.google.maps:google-maps-services:0.1.20'

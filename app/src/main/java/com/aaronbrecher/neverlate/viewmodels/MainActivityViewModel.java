@@ -8,16 +8,28 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.util.Pair;
 
+import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
 import com.aaronbrecher.neverlate.Utils.LocationUtils;
+import com.aaronbrecher.neverlate.backgroundservices.RetrieveCalendarEventsInitialJobService;
 import com.aaronbrecher.neverlate.database.EventsRepository;
 import com.aaronbrecher.neverlate.database.GeofencesRepository;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.models.GeofenceModel;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.Job;
+import com.firebase.jobdispatcher.Lifetime;
+import com.firebase.jobdispatcher.Trigger;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.errors.ApiException;
 import com.google.maps.model.DirectionsResult;
+
+import org.threeten.bp.LocalDate;
+import org.threeten.bp.LocalDateTime;
+import org.threeten.bp.LocalTime;
+import org.threeten.bp.ZoneId;
+import org.threeten.bp.ZonedDateTime;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -91,7 +103,6 @@ public class MainActivityViewModel extends ViewModel {
      * this function will add all location information to the event list and create a new
      * LiveData object for the fragment to observe. API call is done in AsyncTask in viewModel
      * to prevent multiple calls in orientation change etc.
-     * TODO possible bug - list can be the same but previously did not have location resulting in not doing location dependent API calls now
      * @param events the list of updated events from the getAllCurrentEvents LiveData
      * @param location the current location of the user
      */
@@ -164,6 +175,23 @@ public class MainActivityViewModel extends ViewModel {
                 return null;
             }
         }.execute(geofences);
+    }
+
+    public Job createJob(FirebaseJobDispatcher dispatcher){
+
+        return dispatcher.newJobBuilder()
+                .setService(RetrieveCalendarEventsInitialJobService.class)
+                .setTag(Constants.CALENDAR_UPDATE_SERVICE_TAG)
+                .setLifetime(Lifetime.FOREVER)
+                .setTrigger(Trigger.executionWindow(getTriggerTime(),600 ))
+                .build();
+    }
+
+    private int getTriggerTime(){
+        LocalDateTime todayMidnight = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT);
+        ZonedDateTime zdt = todayMidnight.atZone(ZoneId.systemDefault());
+        long midnight =  zdt.toInstant().toEpochMilli();
+        return (int) ((midnight - System.currentTimeMillis())/1000);
     }
 
 }

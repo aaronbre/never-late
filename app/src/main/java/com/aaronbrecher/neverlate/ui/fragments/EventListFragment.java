@@ -13,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -78,7 +79,10 @@ public class EventListFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mBinding = MainActivityListFragmentBinding.inflate(inflater, container,false);
         mBinding.eventListRv.setAdapter(mListAdapter);
-        mBinding.eventListRv.setLayoutManager(new LinearLayoutManager(mActivity));
+        LinearLayoutManager layoutManager = new LinearLayoutManager(mActivity);
+        mBinding.eventListRv.setLayoutManager(layoutManager);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mActivity, layoutManager.getOrientation());
+        mBinding.eventListRv.addItemDecoration(dividerItemDecoration);
         return mBinding.getRoot();
     }
 

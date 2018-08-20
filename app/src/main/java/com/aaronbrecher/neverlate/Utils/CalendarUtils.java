@@ -84,7 +84,7 @@ public class CalendarUtils {
         return new Pair<>(todayMidnight, tommorowMidnight);
     }
 
-    private static String getTimeInMillis(LocalDateTime dateTime){
+    public static String getTimeInMillis(LocalDateTime dateTime){
         ZonedDateTime zdt = dateTime.atZone(ZoneId.systemDefault());
         return String.valueOf(zdt.toInstant().toEpochMilli());
     }

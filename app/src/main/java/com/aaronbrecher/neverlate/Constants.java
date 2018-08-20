@@ -24,5 +24,8 @@ public class Constants {
     public static final String CALENDAR_EVENTS_DTEND = Events.DTEND;
     public static final Uri CALENDAR_EVENTS_URI = Events.CONTENT_URI;;
 
+   //Services Constants
+   public static final String CALENDAR_UPDATE_SERVICE_TAG = "update-calendar-service" ;
+
 
 }
