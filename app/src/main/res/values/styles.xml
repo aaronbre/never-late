@@ -46,5 +46,16 @@
         <item name="android:layout_marginTop">@dimen/vertical_content_spacing_x_2</item>
     </style>
 
+    <style name="eventDetailDivderLand">
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_marginStart">@dimen/material_layout_keylines_content_left_margin_from_screen_edge</item>
+        <item name="android:layout_marginEnd">@dimen/material_layout_keylines_screen_edge_margin</item>
+        <item name="layout_constraintStart_toStartOf">parent</item>
+        <item name="layout_constraintEnd_toEndOf">parent</item>
+        <item name="android:background">@color/colorGray</item>
+        <item name="android:layout_marginTop">@dimen/vertical_content_spacing_x_2</item>
+    </style>
+
     <dimen name="small_margin">8dp</dimen>
 </resources>
