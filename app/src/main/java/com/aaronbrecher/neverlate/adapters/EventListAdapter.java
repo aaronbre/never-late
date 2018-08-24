@@ -20,6 +20,7 @@ import com.google.maps.DirectionsApiRequest;
 import com.google.maps.PendingResult;
 import com.google.maps.model.DirectionsResult;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.EventViewHolder> {
@@ -58,8 +59,23 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
         Event event = mEvents.get(position);
         holder.binding.eventTitle.setText(event.getTitle());
         holder.binding.eventLocation.setText(event.getLocation());
-        if (event.getDistance() != null) holder.binding.eventDistance.setText(event.getDistance());
-        if (event.getTimeTo() != null) holder.binding.eventTimeTo.setText(event.getTimeTo());
+        if (event.getDistance() != null) holder.binding.eventDistance.setText(getHumanReadableDistance(event.getDistance()));
+        if (event.getTimeTo() != null) holder.binding.eventTimeTo.setText(getHumanReadableTime(event.getTimeTo()));
+    }
+
+    private String getHumanReadableTime(Long time){
+        int totalMinutes = (int) (time/60);
+        int hours = totalMinutes/60;
+        int minutes = totalMinutes%60;
+        return hours + ":" + minutes;
+    }
+
+    private String getHumanReadableDistance(Long distance){
+        //TODO add a shared prefs to miles or km and fix this accordingly
+        float km = distance.floatValue()/1000;
+        double miles = LocationUtils.kmToMiles(km);
+        DecimalFormat df = new DecimalFormat("#.#");
+        return df.format(miles) + " MILES";
     }
 
     @Override

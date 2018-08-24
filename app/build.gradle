@@ -10,7 +10,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "DIRECTIONS_API_KEY", GOOGLE_API_KEY)
+        buildConfigField("String", "GOOGLE_API_KEY", GOOGLE_API_KEY)
 
         javaCompileOptions {
             annotationProcessorOptions {

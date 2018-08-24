@@ -27,6 +27,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.maps.errors.ApiException;
 
 import org.threeten.bp.LocalDateTime;
 
@@ -72,7 +73,7 @@ public class Geofencing {
     public List<GeofenceModel> setUpGeofences() {
         List<GeofenceModel> fenceList = new ArrayList<>();
         for (Event event : mEvents) {
-            //add a Geofence to the DB and to the Geofence List to be added to system
+            //add a Geofence to thex DB and to the Geofence List to be added to system
             fenceList.add(addGeofence(event));
         }
         GeofencingRequest request = getGeofencingRequest();
@@ -88,6 +89,8 @@ public class Geofencing {
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
+                            determineErrorMessage(e);
+                            Log.e(TAG, "Geofence-onFailure: ", e);
                             Toast.makeText(mContext, R.string.geofence_added_failed,
                                     Toast.LENGTH_LONG).show();
                         }
@@ -95,6 +98,14 @@ public class Geofencing {
         }
 
         return fenceList;
+    }
+
+    //TODO check why there is an error and react accordingly if error is 1000 geofences are not available
+    //either bec location is off or device does not support...
+    private String determineErrorMessage(Exception e) {
+        if(e instanceof ApiException){
+        }
+        return null;
     }
 
     /**
@@ -106,7 +117,14 @@ public class Geofencing {
      * @return GeofenceModel a representation of the fence to add to the DB
      */
     private GeofenceModel addGeofence(Event event) {
-        int fenceRadius = MapUtils.getFenceRadius(MapUtils.determineRelevantTime(event.getStartTime(), event.getEndTime()), mMilesPerMinute);
+        int fenceRadius;
+        long relevantTime = MapUtils.determineRelevantTime(event.getStartTime(), event.getEndTime());
+        if(event.getTimeTo() != null && event.getDistance() != null){
+            fenceRadius = MapUtils.getFenceRadius(event.getDistance(), event.getTimeTo(), relevantTime);
+        }else{
+            fenceRadius = MapUtils.getFenceRadius(relevantTime, mMilesPerMinute);
+
+        }
         LatLng latLng = LocationUtils.latlngFromAddress(mContext, event.getLocation());
         String requestId = Constants.GEOFENCE_REQUEST_ID + event.getId();
         Geofence geofence = new Geofence.Builder()

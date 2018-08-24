@@ -23,34 +23,24 @@
 
         <TextView
             android:id="@+id/event_detail_title"
-            style="@style/smallHeadline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/material_layout_keylines_content_left_margin_from_screen_edge"
-            android:layout_marginTop="@dimen/material_layout_vertical_spacing_between_content_areas"
+            style="@style/eventDetailText"
+            android:textSize="@dimen/material_typography_subheading"
             android:text="@{event.title}"
-            app:layout_constrainedWidth="true"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Doctor appointment - Susan" />
+            android:layout_marginTop="@dimen/vertical_content_spacing_x_2"
+            tools:text="Doctor Appointment - Susan" />
 
         <TextView
             android:id="@+id/event_detail_description"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/material_layout_keylines_screen_edge_margin"
-            android:layout_marginStart="@dimen/material_layout_keylines_content_left_margin_from_screen_edge"
-            android:layout_marginTop="@dimen/margin_very_small"
+            style="@style/eventDetailText"
             android:text="@{event.description}"
             android:visibility="@{event.description == null ? View.VISIBLE : View.GONE}"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constrainedWidth="true"
             app:layout_constraintTop_toBottomOf="@id/event_detail_title"
             tools:text="Check up appointment for susan with Doctor Gittelman" />
 
         <ImageView
             android:id="@+id/title_time_divider"
-            style="@style/eventDetailDivder"
+            style="@style/eventDetailDivder.Land"
             app:layout_constraintTop_toBottomOf="@id/event_detail_description" />
 
         <ImageView
@@ -101,7 +91,7 @@
 
         <ImageView
             android:id="@+id/time_location_divider"
-            style="@style/eventDetailDivderLand"
+            style="@style/eventDetailDivder.Land"
             app:layout_constraintTop_toBottomOf="@id/event_detail_end" />
 
         <ImageView
@@ -113,18 +103,32 @@
 
         <TextView
             android:id="@+id/event_detail_location"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/material_layout_keylines_content_left_margin_from_screen_edge"
+            style="@style/eventDetailText"
+            android:layout_marginEnd="8dp"
             android:text="@{event.location}"
-            app:layout_constrainedWidth="true"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/guideline"
             app:layout_constraintTop_toTopOf="@id/event_detail_location_image"
             tools:text="665 Princeton Avenue, Lakewood NJ 08701" />
 
         <ImageView
             android:id="@+id/location_map_divider"
-            style="@style/eventDetailDivder"
+            style="@style/eventDetailDivder.Land"
             app:layout_constraintTop_toBottomOf="parent" />
+
+        <android.support.constraint.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent=".4"/>
+
+        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/event_detail_map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toStartOf="@id/guideline"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
     </android.support.constraint.ConstraintLayout>
 </layout>
