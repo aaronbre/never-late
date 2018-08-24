@@ -31,7 +31,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import javax.inject.Inject;
 
-public class EventDetailActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class EventDetailActivity extends AppCompatActivity{
     @Inject
     ViewModelProvider.Factory mViewModelFactory;
     @Inject
@@ -62,31 +62,5 @@ public class EventDetailActivity extends AppCompatActivity implements OnMapReady
         fragmentManager.beginTransaction()
                 .add(R.id.event_detail_fragment_container, eventDetailFragment, Constants.EVENT_DETAIL_FRAGMENT_TAG)
                 .commit();
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.event_detail_map);
-        mapFragment.getMapAsync(this);
-
-    }
-
-    @Override
-    public void onMapReady(final GoogleMap googleMap) {
-        mViewModel.getGeofenceForKey(mEvent.getId()).observe(this, new Observer<GeofenceModel>() {
-            @Override
-            public void onChanged(@Nullable GeofenceModel geofenceModel) {
-                addGeofenceToMap(googleMap, geofenceModel.getFenceRadius());
-            }
-        });
-    }
-
-    private void addGeofenceToMap(GoogleMap googleMap, int fenceRadius) {
-        LatLng latLng = LocationUtils.latlngFromAddress(this, mEvent.getLocation());
-        //TODO change the radius here to use the radius from the geofence DB for better fidelity
-        CircleOptions circleOptions = new CircleOptions()
-                .center(latLng)
-                .radius(fenceRadius);
-        googleMap.addMarker(new MarkerOptions().position(latLng)
-                .title(mEvent.getTitle()));
-        googleMap.addCircle(circleOptions);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,10.0f));
     }
 }

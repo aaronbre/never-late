@@ -46,10 +46,10 @@ public class Event implements Parcelable {
 
     //this will not be used by Room only in app once user location is found
     @Ignore
-    private String distance;
+    private Long distance;
 
     @Ignore
-    private String timeTo;
+    private Long timeTo;
 
     @Ignore
     public Event(@NonNull int id, @NonNull long calendarId, String title, String description,
@@ -133,19 +133,19 @@ public class Event implements Parcelable {
         this.watching = watching;
     }
 
-    public String getDistance() {
+    public Long getDistance() {
         return distance;
     }
 
-    public void setDistance(String distance) {
+    public void setDistance(long distance) {
         this.distance = distance;
     }
 
-    public String getTimeTo() {
+    public Long getTimeTo() {
         return timeTo;
     }
 
-    public void setTimeTo(String timeTo) {
+    public void setTimeTo(long timeTo) {
         this.timeTo = timeTo;
     }
 

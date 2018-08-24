@@ -31,14 +31,15 @@ public class LocationUtils {
     }
 
     /**
-     * Method to calculate the distance from users location to the current donation center
+     * TODO currently these are not used - in the event they are not used at end remove
+     * Method to calculate the distance from users location to the destination
      * @param userLocation Location object with lat/lon of the user
      * @param destination - location of the destination
      * @return the distance between the two locations as a string formatted to one decimal point
      */
     public static String getDistance(Location userLocation, Location destination) {
         float distance = userLocation.distanceTo(destination)/1000;
-        if(isUsa()){
+        if(true){
             double miles = kmToMiles(distance);
             DecimalFormat df = new DecimalFormat("#.#");
             return df.format(miles) + " MILES";
@@ -59,12 +60,7 @@ public class LocationUtils {
         return new LatLng(location.getLatitude(), location.getLongitude());
     }
 
-    private static boolean isUsa() {
-        //TODO check if the user is in the US if so use miles can use TelephonyManager but need context...
-        return false;
-    }
-
-    private static double kmToMiles(float kilometers){
+    public static double kmToMiles(float kilometers){
         return kilometers * .621;
     }
 

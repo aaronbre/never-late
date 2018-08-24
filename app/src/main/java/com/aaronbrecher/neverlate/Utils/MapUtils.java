@@ -2,7 +2,9 @@ package com.aaronbrecher.neverlate.Utils;
 
 import android.util.Log;
 
+import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.database.Converters;
+import com.aaronbrecher.neverlate.models.Event;
 
 import org.threeten.bp.LocalDateTime;
 
@@ -12,13 +14,14 @@ public class MapUtils {
     /**
      * Get the fence Radius based on the time and the milesPerMinute Multiplier
      * Radius will be determined by roundtrip to point (hence divided by 2)
+     *
      * @param timeToEvent the time to the event either will be start or end
      * @return an integer value of the rounded radius in meters
      */
     public static int getFenceRadius(long timeToEvent, double milesPerMinute) {
         long millisToEvent = (timeToEvent - System.currentTimeMillis());
         long minutesToEvent = millisToEvent / 60000;
-        double milesRadius = (minutesToEvent * milesPerMinute)/2;
+        double milesRadius = (minutesToEvent * milesPerMinute);
         double meterRadius = (milesRadius * 1.609) * 1000;
         Log.i(TAG, "getFenceRadius: " + Math.round(meterRadius));
         int radius = (int) Math.round(meterRadius);
@@ -38,5 +41,14 @@ public class MapUtils {
         long st = Converters.unixFromDateTime(startTime);
         long et = Converters.unixFromDateTime(endTime);
         return currentTime > st ? et : st;
+    }
+
+    public static int getFenceRadius(long distance, long drivingTime, long eventTime) {
+        long minutesToevent = (eventTime - System.currentTimeMillis()) / 60000;
+        int drivingMinutes = (int) drivingTime / 60;
+        long kmDistance = distance/1000;
+        float kmPerMinute = (float) kmDistance / drivingMinutes;
+        int radius = (int) Math.round(kmPerMinute * minutesToevent) * 1000;
+        return radius > 100 ? radius :100;
     }
 }
