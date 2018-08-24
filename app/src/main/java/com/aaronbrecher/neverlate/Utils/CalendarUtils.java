@@ -77,9 +77,7 @@ public class CalendarUtils {
      * @return a pair where the first is today midnight and second is tommorow midnight
      */
     private static Pair<LocalDateTime, LocalDateTime> getDateTimes(){
-        LocalTime midnight = LocalTime.MIDNIGHT;
-        LocalDate today = LocalDate.now();
-        LocalDateTime todayMidnight = LocalDateTime.of(today, midnight);
+        LocalDateTime todayMidnight = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT);
         LocalDateTime tommorowMidnight = todayMidnight.plusDays(1);
         return new Pair<>(todayMidnight, tommorowMidnight);
     }

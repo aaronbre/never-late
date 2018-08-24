@@ -1,11 +1,14 @@
 package com.aaronbrecher.neverlate.ui.activities;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -28,8 +31,10 @@ import android.widget.ImageView;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
+import com.aaronbrecher.neverlate.Utils.BackgroundUtils;
 import com.aaronbrecher.neverlate.Utils.CalendarUtils;
 import com.aaronbrecher.neverlate.Utils.PermissionUtils;
+import com.aaronbrecher.neverlate.backgroundservices.CalendarAlarmService;
 import com.aaronbrecher.neverlate.geofencing.Geofencing;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
 import com.aaronbrecher.neverlate.models.Event;
@@ -41,6 +46,13 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import org.threeten.bp.LocalDate;
+import org.threeten.bp.LocalDateTime;
+import org.threeten.bp.LocalTime;
+import org.threeten.bp.ZoneId;
+import org.threeten.bp.ZonedDateTime;
+
+import java.util.Calendar;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -70,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setUpNotificationChannel();
+        setUpAlarmManager();
         ((NeverLateApp) getApplication())
                 .getAppComponent()
                 .inject(this);
@@ -89,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             public void onChanged(@Nullable List<Event> events) {
                 Log.i(TAG, "onChanged: was called");
                 locateDeviceAndLoadUi(events);
-                if(mViewModel.getEvent().getValue() == null
+                if (mViewModel.getEvent().getValue() == null
                         && events != null
                         && events.size() != 0) mViewModel.setEvent(events.get(0));
             }
@@ -115,7 +128,6 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             }
         });
     }
-
 
 
     private void loadFragment() {
@@ -164,6 +176,17 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         }
     }
 
+    private void setUpAlarmManager() {
+        boolean alarmSet = false;
+        if (mSharedPreferences.contains(Constants.ALARM_STATUS_KEY)) {
+            alarmSet = mSharedPreferences.getBoolean(Constants.ALARM_STATUS_KEY, true);
+        }
+        if (alarmSet) return;
+
+        boolean wasSet = BackgroundUtils.setAlarmManager(this);
+        if (wasSet) mSharedPreferences.edit().putBoolean(Constants.ALARM_STATUS_KEY, true).apply();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -193,7 +216,8 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     private void toggleListVisibility() {
         if (mListContainer.getVisibility() == View.VISIBLE) {
             mListContainer.setVisibility(View.GONE);
-            if(getResources().getBoolean(R.bool.is_tablet)) mDetailContainer.setVisibility(View.GONE);
+            if (getResources().getBoolean(R.bool.is_tablet))
+                mDetailContainer.setVisibility(View.GONE);
             Animation rotate = AnimationUtils.loadAnimation(this, R.anim.rotate);
             mProgressSpinner.setVisibility(View.VISIBLE);
             mProgressSpinner.startAnimation(rotate);
@@ -201,7 +225,8 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             mProgressSpinner.clearAnimation();
             mProgressSpinner.setVisibility(View.GONE);
             mListContainer.setVisibility(View.VISIBLE);
-            if(getResources().getBoolean(R.bool.is_tablet)) mDetailContainer.setVisibility(View.VISIBLE);
+            if (getResources().getBoolean(R.bool.is_tablet))
+                mDetailContainer.setVisibility(View.VISIBLE);
         }
     }
 
