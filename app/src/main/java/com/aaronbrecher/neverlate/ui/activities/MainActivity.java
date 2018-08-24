@@ -34,6 +34,7 @@ import com.aaronbrecher.neverlate.geofencing.Geofencing;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.models.GeofenceModel;
+import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
 import com.aaronbrecher.neverlate.ui.fragments.EventListFragment;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     private FrameLayout mListContainer;
     private ImageView mProgressSpinner;
     private Geofencing mGeofencing;
+    private FrameLayout mDetailContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                 .get(MainActivityViewModel.class);
         mFragmentManager = getSupportFragmentManager();
         mListContainer = findViewById(R.id.main_activity_list_fragment_container);
+        mDetailContainer = findViewById(R.id.main_activity_detail_fragment);
         mProgressSpinner = findViewById(R.id.progress_spinner);
 
         if (!PermissionUtils.hasPermissions(this)) {
@@ -86,6 +89,9 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             public void onChanged(@Nullable List<Event> events) {
                 Log.i(TAG, "onChanged: was called");
                 locateDeviceAndLoadUi(events);
+                if(mViewModel.getEvent().getValue() == null
+                        && events != null
+                        && events.size() != 0) mViewModel.setEvent(events.get(0));
             }
         });
     }
@@ -99,33 +105,31 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             public void onSuccess(Location location) {
                 //This currently works as expected TODO possibly change this to loader to deal with lifecycle events...
                 mViewModel.setEventsWithLocation(events, location);
-                updateGeofences(events);
                 loadFragment();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 mViewModel.setEventsWithLocation(events, null);
-                updateGeofences(events);
                 loadFragment();
             }
         });
     }
 
-    //TODO this is for testing only Geofencing will be handled by job service
-    private void updateGeofences(List<Event> events) {
-        //load the updated events with the location aware information to the VM
-        Geofencing geofencing = new Geofencing(MainActivity.this, events, mSharedPreferences);
-        List<GeofenceModel> geofenceModels = geofencing.setUpGeofences();
-        mViewModel.insertGeofences(geofenceModels);
-    }
+
 
     private void loadFragment() {
         toggleListVisibility();
-        if (getIntent().hasExtra(Constants.EVENT_DETAIL_INTENT_EXTRA)) {
-            //load the details fragment for phone or tablet...
+        EventListFragment listFragment = new EventListFragment();
+        if (getResources().getBoolean(R.bool.is_tablet)) {
+            EventDetailFragment eventDetailFragment = new EventDetailFragment();
+            mFragmentManager.beginTransaction().
+                    replace(R.id.main_activity_list_fragment_container,
+                            listFragment, Constants.EVENT_LIST_TAG).
+                    replace(R.id.main_activity_detail_fragment,
+                            eventDetailFragment, Constants.EVENT_DETAIL_FRAGMENT_TAG)
+                    .commit();
         } else {
-            EventListFragment listFragment = new EventListFragment();
             mFragmentManager.beginTransaction().replace(R.id.main_activity_list_fragment_container,
                     listFragment, Constants.EVENT_LIST_TAG)
                     .commit();
@@ -178,7 +182,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     @Override
     public void onListItemClick(Parcelable event) {
         if (getResources().getBoolean(R.bool.is_tablet)) {
-            //replace event in viewmodel to update the fragment
+            mViewModel.setEvent((Event) event);
         } else {
             Intent intent = new Intent(this, EventDetailActivity.class);
             intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, event);
@@ -187,15 +191,17 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     }
 
     private void toggleListVisibility() {
-        if(mListContainer.getVisibility() == View.VISIBLE){
+        if (mListContainer.getVisibility() == View.VISIBLE) {
             mListContainer.setVisibility(View.GONE);
+            if(getResources().getBoolean(R.bool.is_tablet)) mDetailContainer.setVisibility(View.GONE);
             Animation rotate = AnimationUtils.loadAnimation(this, R.anim.rotate);
             mProgressSpinner.setVisibility(View.VISIBLE);
             mProgressSpinner.startAnimation(rotate);
-        } else if(mListContainer.getVisibility() == View.GONE){
+        } else if (mListContainer.getVisibility() == View.GONE) {
             mProgressSpinner.clearAnimation();
             mProgressSpinner.setVisibility(View.GONE);
             mListContainer.setVisibility(View.VISIBLE);
+            if(getResources().getBoolean(R.bool.is_tablet)) mDetailContainer.setVisibility(View.VISIBLE);
         }
     }
 
