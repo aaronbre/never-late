@@ -43,6 +43,7 @@
 
 
         <service android:name=".geofencing.GeofenceTransitionsIntentService" />
+        <service android:name=".backgroundservices.CalendarAlarmService" />
 
         <receiver android:name=".backgroundservices.BootCompletedBroadcast"
             android:directBootAware="true"

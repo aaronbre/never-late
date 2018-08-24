@@ -28,6 +28,7 @@ public class BackgroundUtils {
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, CalendarAlarmService.class);
+        intent.setAction(Constants.ACTION_ADD_CALENDAR_EVENTS);
         PendingIntent pendingIntent = PendingIntent.getService(context, Constants.CALENDAR_ALARM_SERVICE_REQUEST_CODE, intent, 0);
         if (alarmManager != null) {
             alarmManager.setInexactRepeating(AlarmManager.RTC,
