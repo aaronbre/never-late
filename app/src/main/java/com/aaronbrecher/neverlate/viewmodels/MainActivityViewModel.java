@@ -3,11 +3,12 @@ package com.aaronbrecher.neverlate.viewmodels;
 import android.app.Application;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.ViewModel;
 import android.location.Location;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Pair;
 
+import com.aaronbrecher.neverlate.BuildConfig;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
 import com.aaronbrecher.neverlate.Utils.LocationUtils;
@@ -22,8 +23,12 @@ import com.firebase.jobdispatcher.Lifetime;
 import com.firebase.jobdispatcher.Trigger;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.DirectionsApiRequest;
+import com.google.maps.DistanceMatrixApiRequest;
+import com.google.maps.GeoApiContext;
 import com.google.maps.errors.ApiException;
 import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.DistanceMatrix;
+import com.google.maps.model.DistanceMatrixElement;
 
 import org.threeten.bp.LocalDate;
 import org.threeten.bp.LocalDateTime;
@@ -37,11 +42,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-public class MainActivityViewModel extends ViewModel {
-
-    private Application mApplication;
-    private EventsRepository mEventsRepository;
-    private GeofencesRepository mGeofencesRepository;
+public class MainActivityViewModel extends BaseViewModel {
     private MutableLiveData<Event> mEvent;
     //this field is to compare previous location so as not to do
     //additional api call on orientation change
@@ -50,13 +51,12 @@ public class MainActivityViewModel extends ViewModel {
     //this field differs from the getAllCurrentEvents as the db is not location aware
     //this field will contain the location info as well (distance and time to travel)
     private MutableLiveData<List<Event>> mEventsWithLocation;
+    private GeoApiContext mGeoApiContext = new GeoApiContext().setApiKey(BuildConfig.GOOGLE_API_KEY);
 
 
     @Inject
     public MainActivityViewModel(EventsRepository eventsRepository, GeofencesRepository geofencesRepository, Application application) {
-        this.mEventsRepository = eventsRepository;
-        this.mGeofencesRepository = geofencesRepository;
-        this.mApplication = application;
+        super(eventsRepository, geofencesRepository, application);
     }
 
     //insert the events async using a simple async task
@@ -71,8 +71,7 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     public LiveData<List<Event>> getAllCurrentEvents() {
-        LiveData<List<Event>> liveData = mEventsRepository.queryAllCurrentEvents();
-        return liveData;
+        return mEventsRepository.queryAllCurrentEvents();
     }
 
     public LiveData<List<Event>> getAllEvents() {
@@ -141,29 +140,30 @@ public class MainActivityViewModel extends ViewModel {
         return true;
     }
 
+    /**
+     * add the distance and duration to the Event using the Distance Matrix API
+     * @param events the list of events to get information about
+     * @param location the users current location
+     */
     private void addLocations(List<Event> events, Location location){
-        for (Event event : events) {
-            //set the distance to the event using the location
-            event.setDistance(getDistance(location, event.getLocation()));
-            //get the travel time to the event using the google directions api
-            //TODO this uses a LOT of API calls which cost $$$ possibly remove this feature and add to a paid version...
-            DirectionsApiRequest apiRequest = DirectionsUtils.getDirectionsApiRequest(
-                    LocationUtils.latlngFromAddress(mApplication.getApplicationContext(), event.getLocation()),
-                    LocationUtils.locationToLatLng(location));
-            try {
-                DirectionsResult result = apiRequest.await();
-                event.setTimeTo(result.routes[0].legs[0].duration.humanReadable);
-            } catch (ApiException | InterruptedException | IOException e) {
-                e.printStackTrace();
-            }
-
+        DistanceMatrixApiRequest dmRequest = DirectionsUtils.getDistanceMatrixApiRequest(mGeoApiContext, events, location);
+        DistanceMatrix distanceMatrix =  null;
+        try {
+             distanceMatrix = dmRequest.await();
+        } catch (InterruptedException | IOException | ApiException e) {
+            e.printStackTrace();
         }
-    }
-
-    private String getDistance(Location location, String destinationAddress) {
-        LatLng latLng = LocationUtils.latlngFromAddress(mApplication.getApplicationContext(), destinationAddress);
-        Location destination = LocationUtils.latlngToLocation(latLng);
-        return LocationUtils.getDistance(location, destination);
+        if (distanceMatrix != null) {
+            DistanceMatrixElement[] elements = distanceMatrix.rows[0].elements;
+            for (int i = 0, j = elements.length; i < j; i++){
+                DistanceMatrixElement element = elements[i];
+                Event event = events.get(i);
+                event.setDistance(element.distance.inMeters);
+                //if there is a relative traffic time rather use that
+                long timeTo = element.durationInTraffic != null ? element.durationInTraffic.inSeconds : element.duration.inSeconds;
+                event.setTimeTo(timeTo);
+            }
+        }
     }
 
     //insert the events async using a simple async task

@@ -6,6 +6,7 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -27,8 +28,10 @@ import com.aaronbrecher.neverlate.Utils.PermissionUtils;
 import com.aaronbrecher.neverlate.adapters.EventListAdapter;
 import com.aaronbrecher.neverlate.databinding.MainActivityListFragmentBinding;
 import com.aaronbrecher.neverlate.dependencyinjection.AppComponent;
+import com.aaronbrecher.neverlate.geofencing.Geofencing;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
 import com.aaronbrecher.neverlate.models.Event;
+import com.aaronbrecher.neverlate.models.GeofenceModel;
 import com.aaronbrecher.neverlate.ui.activities.MainActivity;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -49,6 +52,8 @@ public class EventListFragment extends Fragment {
     ViewModelProvider.Factory mViewModelFactory;
     @Inject
     FusedLocationProviderClient mLocationProviderClient;
+    @Inject
+    SharedPreferences mSharedPreferences;
 
     private MainActivityViewModel mViewModel;
     private EventListAdapter mListAdapter;
@@ -97,7 +102,16 @@ public class EventListFragment extends Fragment {
         @Override
         public void onChanged(@Nullable List<Event> events) {
             mListAdapter.swapLists(events);
+            updateGeofences(events);
         }
     };
+
+    //TODO this is for testing only Geofencing will be handled by job service
+    private void updateGeofences(List<Event> events) {
+        //load the updated events with the location aware information to the VM
+        Geofencing geofencing = new Geofencing(mActivity, events, mSharedPreferences);
+        List<GeofenceModel> geofenceModels = geofencing.setUpGeofences();
+        mViewModel.insertGeofences(geofenceModels);
+    }
 
 }
