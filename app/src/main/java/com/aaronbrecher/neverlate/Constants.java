@@ -1,5 +1,6 @@
 package com.aaronbrecher.neverlate;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.provider.CalendarContract.Events;
 
@@ -25,7 +26,7 @@ public class Constants {
     ;
 
     //Services Constants
-    public static final String CALENDAR_UPDATE_SERVICE_TAG = "update-calendar-service";
+    public static final String FIREBASE_JOB_SERVICE_UPDATE_GEOFENCES = "update-geofences";
     public static final int CALENDAR_ALARM_SERVICE_REQUEST_CODE = 101;
 
     //prefs key
@@ -37,5 +38,7 @@ public class Constants {
 
     public static final int UNIT_SYSTEM_METRIC = 1;
     public static final int UNIT_SYSTEM_IMPERIAL = 2;
+
+    public static final String ACTION_ADD_CALENDAR_EVENTS = "com.aaronbrecher.neverlate.action.RETRIEVE_CALENDAR_EVENTS";
 
 }
