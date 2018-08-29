@@ -1,44 +1,31 @@
 package com.aaronbrecher.neverlate.ui.fragments;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.aaronbrecher.neverlate.NeverLateApp;
-import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
-import com.aaronbrecher.neverlate.Utils.LocationUtils;
-import com.aaronbrecher.neverlate.Utils.PermissionUtils;
 import com.aaronbrecher.neverlate.adapters.EventListAdapter;
 import com.aaronbrecher.neverlate.databinding.MainActivityListFragmentBinding;
 import com.aaronbrecher.neverlate.dependencyinjection.AppComponent;
 import com.aaronbrecher.neverlate.geofencing.Geofencing;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
 import com.aaronbrecher.neverlate.models.Event;
-import com.aaronbrecher.neverlate.models.GeofenceModel;
 import com.aaronbrecher.neverlate.ui.activities.MainActivity;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.maps.DirectionsApiRequest;
-import com.google.maps.PendingResult;
-import com.google.maps.model.DirectionsResult;
 
 import java.util.List;
 
@@ -59,7 +46,6 @@ public class EventListFragment extends Fragment {
     private EventListAdapter mListAdapter;
     private MainActivityListFragmentBinding mBinding;
     private MainActivity mActivity;
-    private Location mLocation;
 
     @SuppressLint("MissingPermission")
     @Override
@@ -71,10 +57,10 @@ public class EventListFragment extends Fragment {
             throw new ClassCastException(context.toString() +
                     " must implement the ListItemClickListener interface");
         }
-        AppComponent appComponent = ((NeverLateApp) getActivity().getApplication()).getAppComponent();
+        AppComponent appComponent = NeverLateApp.getApp().getAppComponent();
         appComponent.inject(this);
-        mViewModel = ViewModelProviders.of(getActivity(), mViewModelFactory).get(MainActivityViewModel.class);
         mActivity = (MainActivity) getActivity();
+        mViewModel = ViewModelProviders.of(mActivity, mViewModelFactory).get(MainActivityViewModel.class);
         mListAdapter = new EventListAdapter(null, null, mActivity);
         mViewModel.getEventsWithLocation().observe(this, eventsObserver);
     }
@@ -109,9 +95,8 @@ public class EventListFragment extends Fragment {
     //TODO this is for testing only Geofencing will be handled by job service
     private void updateGeofences(List<Event> events) {
         //load the updated events with the location aware information to the VM
-        Geofencing geofencing = new Geofencing(mActivity, events, mSharedPreferences);
-        List<GeofenceModel> geofenceModels = geofencing.setUpGeofences();
-        mViewModel.insertGeofences(geofenceModels);
+        Geofencing geofencing = Geofencing.builder(events);
+        geofencing.createAndSaveGeofences();
     }
 
 }

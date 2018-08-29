@@ -30,7 +30,7 @@ public class Constants {
     public static final int CALENDAR_ALARM_SERVICE_REQUEST_CODE = 101;
 
     //prefs key
-    public static final String MILES_PER_MINUTE_PREFS_KEY = "miles-per-minute";
+    public static final String KM_PER_MINUTE_PREFS_KEY = "miles-per-minute";
     public static final String UNIT_SYSTEM_PREFS_KEY = "unit-system";
     public static final String ALARM_STATUS_KEY = "alarm-status";
 
@@ -41,4 +41,5 @@ public class Constants {
 
     public static final String ACTION_ADD_CALENDAR_EVENTS = "com.aaronbrecher.neverlate.action.RETRIEVE_CALENDAR_EVENTS";
 
+    public static final long ROOM_INVALID_LONG_VALUE = -1;
 }

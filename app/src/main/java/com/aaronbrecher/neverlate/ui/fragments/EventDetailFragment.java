@@ -46,6 +46,7 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback{
     private Event mEvent;
     private Marker mMapMarker;
     private Circle mMapCircle;
+
     private Observer<Event> mEventObserver = new Observer<Event>() {
         @Override
         public void onChanged(@Nullable Event event) {
@@ -85,7 +86,9 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback{
         mViewModel.getGeofenceForKey(mEvent.getId()).observe(this, new Observer<GeofenceModel>() {
             @Override
             public void onChanged(@Nullable GeofenceModel geofenceModel) {
-                addGeofenceToMap(googleMap, geofenceModel.getFenceRadius());
+                int radius = geofenceModel != null ? geofenceModel.getFenceRadius() : 100;
+                addGeofenceToMap(googleMap, radius
+                );
             }
         });
     }

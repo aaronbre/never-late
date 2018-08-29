@@ -15,47 +15,52 @@ public class EventsRepository {
     EventsDao mEventsDao;
 
     @Inject
-    public EventsRepository(EventsDao eventsDao){
+    public EventsRepository(EventsDao eventsDao) {
         this.mEventsDao = eventsDao;
     }
 
-    public void insertAll(List<Event> events){
+    public void insertAll(List<Event> events) {
         mEventsDao.insertAll(events);
     }
 
-    public void insertEvent(Event event){
+    public void insertEvent(Event event) {
         mEventsDao.insertEvent(event);
     }
 
     //query all events in the database
-    public LiveData<List<Event>> queryAllEvents(){
+    public LiveData<List<Event>> queryAllEvents() {
         return mEventsDao.queryAllEvents();
     }
 
-    public List<Event> queryAllEventsNotLive(){return mEventsDao.queryAllEvents().getValue();}
 
     //query all events in the database
-    public LiveData<List<Event>> queryAllCurrentEvents(){
+    public LiveData<List<Event>> queryAllCurrentEvents() {
         return mEventsDao.queryAllCurrentEvents(System.currentTimeMillis());
     }
 
+    public List<Event> queryAllCurrentEventsSync(){
+        return mEventsDao.queryAllCurrentEventsSync(System.currentTimeMillis());
+    }
+
     //query events for a specific calendar
-    public LiveData<List<Event>> queryEventForCalendar(long calId){
+    public LiveData<List<Event>> queryEventForCalendar(long calId) {
         return mEventsDao.queryEventForCalendar(calId);
     }
 
-    public Event queryEventById(int id){
+    public Event queryEventById(int id) {
         return mEventsDao.queryEventById(id);
     }
 
-    public void deleteEvents(Event... events){mEventsDao.deleteEvents(events);}
+    public void deleteEvents(Event... events) {
+        mEventsDao.deleteEvents(events);
+    }
 
-    public void deleteAllEvents(){
+    public void deleteAllEvents() {
         mEventsDao.deleteAllEvents();
     }
 
     //delete events for a specific calendar
-    public void deleteCalendar(long calId){
+    public void deleteCalendar(long calId) {
         mEventsDao.deleteCalendar(calId);
     }
 }

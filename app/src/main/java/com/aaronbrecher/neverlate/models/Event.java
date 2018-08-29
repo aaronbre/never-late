@@ -7,6 +7,7 @@ import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import org.threeten.bp.LocalDateTime;
 
@@ -44,11 +45,12 @@ public class Event implements Parcelable {
     @ColumnInfo
     private boolean watching;
 
-    //this will not be used by Room only in app once user location is found
-    @Ignore
+    @ColumnInfo
+    @Nullable
     private Long distance;
 
-    @Ignore
+    @ColumnInfo
+    @Nullable
     private Long timeTo;
 
     @Ignore
@@ -133,6 +135,7 @@ public class Event implements Parcelable {
         this.watching = watching;
     }
 
+    @Nullable
     public Long getDistance() {
         return distance;
     }
@@ -141,6 +144,7 @@ public class Event implements Parcelable {
         this.distance = distance;
     }
 
+    @Nullable
     public Long getTimeTo() {
         return timeTo;
     }
