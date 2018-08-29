@@ -19,7 +19,7 @@ public class NeverLateApp extends Application {
         AndroidThreeTen.init(this);
         mAppComponent = DaggerAppComponent.builder()
                 .appModule(new AppModule(this))
-                .roomModule(new RoomModule(this))
+                .roomModule(new RoomModule())
                 .build();
 
     }

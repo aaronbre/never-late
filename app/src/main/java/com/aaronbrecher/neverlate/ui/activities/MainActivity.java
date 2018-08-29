@@ -74,29 +74,29 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     private FragmentManager mFragmentManager;
     private FrameLayout mListContainer;
     private ImageView mProgressSpinner;
-    private Geofencing mGeofencing;
     private FrameLayout mDetailContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setUpNotificationChannel();
-        setUpAlarmManager();
         ((NeverLateApp) getApplication())
                 .getAppComponent()
                 .inject(this);
 
+        setUpNotificationChannel();
         mViewModel = ViewModelProviders.of(this, mViewModelFactory)
                 .get(MainActivityViewModel.class);
         mFragmentManager = getSupportFragmentManager();
         mListContainer = findViewById(R.id.main_activity_list_fragment_container);
         mDetailContainer = findViewById(R.id.main_activity_detail_fragment);
         mProgressSpinner = findViewById(R.id.progress_spinner);
-
         if (!PermissionUtils.hasPermissions(this)) {
             PermissionUtils.requestCalendarAndLocationPermissions(this, findViewById(R.id.main_container));
+        } else {
+            setUpAlarmManager();
         }
+
         mViewModel.getAllCurrentEvents().observe(this, new Observer<List<Event>>() {
             @Override
             public void onChanged(@Nullable List<Event> events) {
@@ -111,12 +111,10 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
     @SuppressLint("MissingPermission")
     private void locateDeviceAndLoadUi(final List<Event> events) {
-        //TODO add a progress spinner and show here - remove in loadFragment()
         toggleListVisibility();
         mLocationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
-                //This currently works as expected TODO possibly change this to loader to deal with lifecycle events...
                 mViewModel.setEventsWithLocation(events, location);
                 loadFragment();
             }
@@ -155,7 +153,8 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             //if permissions are granted for the first time, assume data was not loaded into room and
             //do so now...
             if (PermissionUtils.verifyPermissions(grantResults)) {
-                mViewModel.insertEvents(CalendarUtils.getCalendarEventsForToday(this));
+                setUpAlarmManager();
+//              mViewModel.insertEvents(CalendarUtils.getCalendarEventsForToday(this));
             } else {
                 PermissionUtils.requestCalendarAndLocationPermissions(this, findViewById(R.id.main_container));
                 // TODO change this to Show image showing error with button to rerequest permissions...

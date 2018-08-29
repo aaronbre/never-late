@@ -7,31 +7,25 @@ import android.support.annotation.Nullable;
 
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
+import com.aaronbrecher.neverlate.Utils.BackgroundUtils;
 import com.aaronbrecher.neverlate.Utils.CalendarUtils;
 import com.aaronbrecher.neverlate.database.EventsRepository;
-import com.aaronbrecher.neverlate.database.GeofencesRepository;
 import com.aaronbrecher.neverlate.geofencing.Geofencing;
 import com.aaronbrecher.neverlate.models.Event;
-import com.aaronbrecher.neverlate.models.GeofenceModel;
-import com.firebase.jobdispatcher.Constraint;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
 import com.firebase.jobdispatcher.Job;
-import com.firebase.jobdispatcher.RetryStrategy;
-import com.firebase.jobdispatcher.Trigger;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
+import static com.aaronbrecher.neverlate.Utils.BackgroundUtils.DEFAULT_JOB_TIMEFRAME;
+
 public class CalendarAlarmService extends IntentService {
-    /**
-     * Creates an IntentService.  Invoked by your subclass's constructor.
-     */
+
     @Inject
     EventsRepository mEventsRepository;
-    @Inject
-    GeofencesRepository mGeofencesRepository;
 
     @Inject
     SharedPreferences mSharedPreferences;
@@ -44,7 +38,7 @@ public class CalendarAlarmService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        ((NeverLateApp) getApplication()).getAppComponent()
+        NeverLateApp.getApp().getAppComponent()
                 .inject(this);
     }
 
@@ -58,34 +52,15 @@ public class CalendarAlarmService extends IntentService {
                 mEventsRepository.insertAll(eventList);
                 initializeGeofences(eventList);
                 FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
-                Job job = createJob(dispatcher);
+                //TODO use user provided timeframe from preferences rather then default
+                Job job = BackgroundUtils.createJob(dispatcher, DEFAULT_JOB_TIMEFRAME);
                 dispatcher.mustSchedule(job);
             }
         }
     }
 
-    /**
-     * Create a job to repeat every 15 minutes to update the geofences ultimately
-     * will either use the default 15 mins or user provided time from prefs
-     * TODO possibly move this to Utils to use multiple places...
-     * @param dispatcher a dipatcher to create the job
-     * @return a FirebaseJob to schedule via firebase dispatcher
-     */
-    private Job createJob(FirebaseJobDispatcher dispatcher) {
-        //TODO change trigger to check for user preference...
-        return dispatcher.newJobBuilder()
-                .setService(GeofenceJobService.class)
-                .setTag(Constants.FIREBASE_JOB_SERVICE_UPDATE_GEOFENCES)
-                .setTrigger(Trigger.executionWindow(15*60, 20*60))
-                .setRecurring(true)
-                .setReplaceCurrent(true)
-                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
-                .setConstraints(Constraint.ON_ANY_NETWORK)
-                .build();
-    }
-
     private void initializeGeofences(List<Event> eventList){
-        Geofencing geofencing = new Geofencing(this, eventList, mSharedPreferences);
-        List<GeofenceModel> geofenceModels = geofencing.setUpGeofences();
+        Geofencing geofencing = Geofencing.builder(eventList);
+        geofencing.createAndSaveGeofences();
     }
 }

@@ -21,15 +21,14 @@ import static com.aaronbrecher.neverlate.Constants.DATABASE_NAME;
 
 @Module
 public class RoomModule {
-    Application mApplication;
 
-    public RoomModule(Application application) {
-        mApplication = application;
+    public RoomModule() {
+
     }
 
     @Provides
     @Singleton
-    EventsDatabase provideEventDatabase(Application application){
+    EventsDatabase provideEventDatabase(Application application) {
         return Room.databaseBuilder(application,
                 EventsDatabase.class,
                 DATABASE_NAME)
@@ -38,31 +37,31 @@ public class RoomModule {
 
     @Provides
     @Singleton
-    EventsDao provideEventDao(EventsDatabase database){
+    EventsDao provideEventDao(EventsDatabase database) {
         return database.eventsDao();
     }
 
     @Provides
     @Singleton
-    EventsRepository provideEventsRepository(EventsDao eventsDao){
+    EventsRepository provideEventsRepository(EventsDao eventsDao) {
         return new EventsRepository(eventsDao);
     }
 
     @Provides
     @Singleton
-    GeofencesDao provideGeofenceDao(EventsDatabase database){
+    GeofencesDao provideGeofenceDao(EventsDatabase database) {
         return database.geofencesDao();
     }
 
     @Provides
     @Singleton
-    GeofencesRepository provideGeofenceRepository(GeofencesDao geofencesDao){
+    GeofencesRepository provideGeofenceRepository(GeofencesDao geofencesDao) {
         return new GeofencesRepository(geofencesDao);
     }
 
     @Provides
     @Singleton
-    ViewModelProvider.Factory provideViewModelFactory(EventsRepository eventsRepository, GeofencesRepository geofencesRepository, Application application){
+    ViewModelProvider.Factory provideViewModelFactory(EventsRepository eventsRepository, GeofencesRepository geofencesRepository, Application application) {
         return new CustomViewModelFactory(eventsRepository, geofencesRepository, application);
     }
 }

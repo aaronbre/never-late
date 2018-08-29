@@ -29,6 +29,9 @@ public interface EventsDao {
     @Query("SELECT * FROM events WHERE endTime > :currentTime ORDER BY startTime")
     LiveData<List<Event>> queryAllCurrentEvents(long currentTime);
 
+    @Query("SELECT * FROM events WHERE endTime > :currentTime ORDER BY startTime")
+    List<Event> queryAllCurrentEventsSync(long currentTime);
+
     @Query("SELECT * FROM events WHERE id = :id")
     Event queryEventById(int id);
 

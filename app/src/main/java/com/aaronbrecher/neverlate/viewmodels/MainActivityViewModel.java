@@ -85,79 +85,36 @@ public class MainActivityViewModel extends BaseViewModel {
      * this function will add all location information to the event list and create a new
      * LiveData object for the fragment to observe. API call is done in AsyncTask in viewModel
      * to prevent multiple calls in orientation change etc.
-     * @param events the list of updated events from the getAllCurrentEvents LiveData
+     *
+     * @param events   the list of updated events from the getAllCurrentEvents LiveData
      * @param location the current location of the user
      */
-    public void setEventsWithLocation(List<Event> events, Location location) {
-        if (mEventsWithLocation == null){
+    public void setEventsWithLocation(final List<Event> events, final Location location) {
+        if (mEventsWithLocation == null) {
             mEventsWithLocation = new MutableLiveData<>();
         }
         boolean isSameList = isSameList(events, mPreviousLocationList);
-        if(isSameList) return;
-        if(location != null){
-            new AsyncTask<Pair<List<Event>, Location>, Void, List<Event>>(){
+        if (isSameList) return;
+        if (location != null) {
+            new Thread(new Runnable() {
                 @Override
-                protected List<Event> doInBackground(Pair<List<Event>, Location>... pairs) {
-                    List<Event> eventList = pairs[0].first;
-                    Location location = pairs[0].second;
-                    addLocations(eventList, location);
-                    return eventList;
-                }
-
-                @Override
-                protected void onPostExecute(List<Event> events) {
+                public void run() {
+                    DirectionsUtils.addLocationToEventList(mGeoApiContext, events, location);
                     mEventsWithLocation.postValue(events);
                     mPreviousLocationList = events;
                 }
-            }.execute(new Pair<>(events, location));
-        }else{
+            }).start();
+        } else {
             mEventsWithLocation.postValue(events);
         }
     }
 
-    private boolean isSameList(List<Event> list1, List<Event> list2){
-        if(list1.size() != list2.size()) return false;
-        for(int i = 0; i < list1.size(); i++){
-            if(!list1.get(i).equals(list2.get(i))) return false;
+    private boolean isSameList(List<Event> list1, List<Event> list2) {
+        if (list1.size() != list2.size()) return false;
+        for (int i = 0; i < list1.size(); i++) {
+            if (!list1.get(i).equals(list2.get(i))) return false;
         }
         return true;
-    }
-
-    /**
-     * add the distance and duration to the Event using the Distance Matrix API
-     * @param events the list of events to get information about
-     * @param location the users current location
-     */
-    private void addLocations(List<Event> events, Location location){
-        DistanceMatrixApiRequest dmRequest = DirectionsUtils.getDistanceMatrixApiRequest(mGeoApiContext, events, location);
-        DistanceMatrix distanceMatrix =  null;
-        try {
-             distanceMatrix = dmRequest.await();
-        } catch (InterruptedException | IOException | ApiException e) {
-            e.printStackTrace();
-        }
-        if (distanceMatrix != null) {
-            DistanceMatrixElement[] elements = distanceMatrix.rows[0].elements;
-            for (int i = 0, j = elements.length; i < j; i++){
-                DistanceMatrixElement element = elements[i];
-                Event event = events.get(i);
-                event.setDistance(element.distance.inMeters);
-                //if there is a relative traffic time rather use that
-                long timeTo = element.durationInTraffic != null ? element.durationInTraffic.inSeconds : element.duration.inSeconds;
-                event.setTimeTo(timeTo);
-            }
-        }
-    }
-
-    //insert the events async using a simple async task
-    public void insertGeofences(List<GeofenceModel> geofences) {
-        new AsyncTask<List<GeofenceModel>, Void, Void>() {
-            @Override
-            protected Void doInBackground(List<GeofenceModel>... fences) {
-                mGeofencesRepository.insertAll(fences[0]);
-                return null;
-            }
-        }.execute(geofences);
     }
 
 }

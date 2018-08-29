@@ -115,6 +115,8 @@ public class CalendarUtils {
         event.setEndTime(Converters.dateTimeFromUnix(cursor.getLong(endIndex)));
         event.setCalendarId(cursor.getLong(calendarIdIndex));
         event.setWatching(true);
+        event.setDistance(Constants.ROOM_INVALID_LONG_VALUE);
+        event.setTimeTo(Constants.ROOM_INVALID_LONG_VALUE);
         return event;
     }
 }
