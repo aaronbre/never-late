@@ -97,7 +97,7 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback{
         if(mMapMarker != null) mMapMarker.remove();
         if(mMapCircle != null)mMapCircle.remove();
         LatLng latLng = mEvent.getLocationLatlng();
-        //TODO change the radius here to use the radius from the geofence DB for better fidelity
+        if(latLng == null) return;
         CircleOptions circleOptions = new CircleOptions()
                 .center(latLng)
                 .radius(fenceRadius);

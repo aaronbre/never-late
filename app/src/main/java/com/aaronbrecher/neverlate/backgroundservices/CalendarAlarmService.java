@@ -1,14 +1,10 @@
 package com.aaronbrecher.neverlate.backgroundservices;
 
-import android.Manifest;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.location.Location;
-import android.os.Debug;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.aaronbrecher.neverlate.BuildConfig;
@@ -87,7 +83,7 @@ public class CalendarAlarmService extends IntentService implements LocationCallb
         new Thread(new Runnable() {
             @Override
             public void run() {
-                DirectionsUtils.addLocationToEventList(mGeoApiContext, mEventList, location);
+                DirectionsUtils.addDistanceInfoToEventList(mGeoApiContext, mEventList, location);
                 mEventsRepository.insertAll(mEventList);
                 initializeGeofences(mEventList);
             }

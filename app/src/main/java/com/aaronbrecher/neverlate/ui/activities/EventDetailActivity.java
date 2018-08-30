@@ -25,6 +25,7 @@ public class EventDetailActivity extends AppCompatActivity{
     SharedPreferences mSharedPreferences;
     private DetailActivityViewModel mViewModel;
     private Event mEvent;
+    private Intent mIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,13 +36,13 @@ public class EventDetailActivity extends AppCompatActivity{
                 .getAppComponent()
                 .inject(this);
         mViewModel = ViewModelProviders.of(this, mViewModelFactory).get(DetailActivityViewModel.class);
-        Intent intent = getIntent();
+        mIntent = getIntent();
 
-        if (!intent.hasExtra(Constants.EVENT_DETAIL_INTENT_EXTRA)) {
+        if (!mIntent.hasExtra(Constants.EVENT_DETAIL_INTENT_EXTRA)) {
             Toast.makeText(this, "Unable to load event please try again", Toast.LENGTH_LONG).show();
             finish();
         }
-        mEvent = intent.getParcelableExtra(Constants.EVENT_DETAIL_INTENT_EXTRA);
+        mEvent = mIntent.getParcelableExtra(Constants.EVENT_DETAIL_INTENT_EXTRA);
         setTitle(mEvent.getTitle());
         mViewModel.setEvent(mEvent);
         EventDetailFragment eventDetailFragment = new EventDetailFragment();
@@ -49,5 +50,11 @@ public class EventDetailActivity extends AppCompatActivity{
         fragmentManager.beginTransaction()
                 .add(R.id.event_detail_fragment_container, eventDetailFragment, Constants.EVENT_DETAIL_FRAGMENT_TAG)
                 .commit();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        mIntent = intent;
     }
 }

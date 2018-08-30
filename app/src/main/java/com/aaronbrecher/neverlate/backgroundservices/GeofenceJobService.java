@@ -1,13 +1,8 @@
 package com.aaronbrecher.neverlate.backgroundservices;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Looper;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.aaronbrecher.neverlate.BuildConfig;
@@ -24,8 +19,6 @@ import com.aaronbrecher.neverlate.models.Event;
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.maps.GeoApiContext;
 
 import java.util.List;
@@ -110,7 +103,7 @@ public class GeofenceJobService extends JobService implements GeofencesUpdatedCa
 //                mHandler.post(new Runnable() {
 //                    @Override
 //                    public void run() {
-//                        DirectionsUtils.addLocationToEventList(mGeoApiContext, eventList, location);
+//                        DirectionsUtils.addDistanceInfoToEventList(mGeoApiContext, eventList, location);
 //                        mEventsRepository.insertAll(eventList);
 //                        addGeofences(eventList);
 //                    }
@@ -141,7 +134,7 @@ public class GeofenceJobService extends JobService implements GeofencesUpdatedCa
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                DirectionsUtils.addLocationToEventList(mGeoApiContext, mEventList, location);
+                DirectionsUtils.addDistanceInfoToEventList(mGeoApiContext, mEventList, location);
                 mEventsRepository.insertAll(mEventList);
                 addGeofences(mEventList);
             }
