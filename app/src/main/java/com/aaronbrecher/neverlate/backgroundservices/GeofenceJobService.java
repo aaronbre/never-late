@@ -98,31 +98,31 @@ public class GeofenceJobService extends JobService implements GeofencesUpdatedCa
         return false;
     }
 
-    private void addLocations(final List<Event> eventList) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        mLocationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(final Location location) {
-                //need to create a new thread as the callback will execute after the doWork thread is finished
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        DirectionsUtils.addLocationToEventList(mGeoApiContext, eventList, location);
-                        mEventsRepository.insertAll(eventList);
-                        addGeofences(eventList);
-                    }
-                });
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                addGeofences(eventList);
-            }
-        });
-    }
+//    private void addLocations(final List<Event> eventList) {
+//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+//                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//            return;
+//        }
+//        mLocationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+//            @Override
+//            public void onSuccess(final Location location) {
+//                //need to create a new thread as the callback will execute after the doWork thread is finished
+//                mHandler.post(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        DirectionsUtils.addLocationToEventList(mGeoApiContext, eventList, location);
+//                        mEventsRepository.insertAll(eventList);
+//                        addGeofences(eventList);
+//                    }
+//                });
+//            }
+//        }).addOnFailureListener(new OnFailureListener() {
+//            @Override
+//            public void onFailure(@NonNull Exception e) {
+//                addGeofences(eventList);
+//            }
+//        });
+//    }
 
     private void addGeofences(List<Event> eventList) {
         Geofencing geofencing = Geofencing.builder(eventList);
@@ -137,7 +137,7 @@ public class GeofenceJobService extends JobService implements GeofencesUpdatedCa
     }
 
     @Override
-    public void successCallback(final Location location) {
+    public void getLocationSuccessCallback(final Location location) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -149,7 +149,7 @@ public class GeofenceJobService extends JobService implements GeofencesUpdatedCa
     }
 
     @Override
-    public void failedCallback() {
+    public void getLocationFailedCallback() {
         mHandler.post(new Runnable() {
             @Override
             public void run() {

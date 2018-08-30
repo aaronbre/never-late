@@ -69,7 +69,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
     /**
      * This will create a notification for the geofence by getting the event data
      * from Room using the Id of the geofence
-     *
+     *TODO there is currently a bug when using notification to launch app parceable has issues no such issues when launching from intent in mainActivity...
      * @param geofence
      */
     private NotificationCompat.Builder createNotificationForFence(Geofence geofence, int transition) {

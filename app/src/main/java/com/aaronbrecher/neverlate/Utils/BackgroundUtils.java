@@ -84,12 +84,12 @@ public class BackgroundUtils {
         providerClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
-                callback.successCallback(location);
+                callback.getLocationSuccessCallback(location);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                callback.failedCallback();
+                callback.getLocationFailedCallback();
             }
         });
     }

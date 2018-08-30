@@ -146,8 +146,7 @@ public class Geofencing {
         int fenceRadius;
         long relevantTime = GeofenceUtils.determineRelevantTime(event.getStartTime(), event.getEndTime());
         fenceRadius = GeofenceUtils.getFenceRadius(relevantTime, mKmPerMinute);
-
-        LatLng latLng = LocationUtils.latlngFromAddress(mContext, event.getLocation());
+        LatLng latLng = event.getLocationLatlng();
         String requestId = Constants.GEOFENCE_REQUEST_ID + event.getId();
         Geofence geofence = new Geofence.Builder()
                 .setRequestId(requestId)

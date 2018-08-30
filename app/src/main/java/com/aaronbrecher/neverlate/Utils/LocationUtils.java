@@ -13,7 +13,13 @@ import java.text.DecimalFormat;
 import java.util.List;
 
 public class LocationUtils {
-
+    /**
+     * this code needs an internet connection and takes up time...
+     * TODO possibly change DB schema to hold a latlng and do this in the initial load to DB
+     * @param context
+     * @param address
+     * @return
+     */
     public static LatLng latlngFromAddress(Context context, String address) {
         Geocoder geocoder = new Geocoder(context);
         List<Address> addresses;

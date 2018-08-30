@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             @Override
             public void onChanged(@Nullable List<Event> events) {
                 Log.i(TAG, "onChanged: was called");
-                locateDeviceAndLoadUi(events);
+                loadFragment();
                 if (mViewModel.getEvent().getValue() == null
                         && events != null
                         && events.size() != 0) mViewModel.setEvent(events.get(0));
@@ -109,27 +109,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         });
     }
 
-    @SuppressLint("MissingPermission")
-    private void locateDeviceAndLoadUi(final List<Event> events) {
-        toggleListVisibility();
-        mLocationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                mViewModel.setEventsWithLocation(events, location);
-                loadFragment();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                mViewModel.setEventsWithLocation(events, null);
-                loadFragment();
-            }
-        });
-    }
-
-
     private void loadFragment() {
-        toggleListVisibility();
         EventListFragment listFragment = new EventListFragment();
         if (getResources().getBoolean(R.bool.is_tablet)) {
             EventDetailFragment eventDetailFragment = new EventDetailFragment();
@@ -199,6 +179,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             new Thread(new Runnable() {
                 @Override
                 public void run() {
+                    //TODO need to insert the location data here just like in alarm service...
                     mViewModel.insertEvents(CalendarUtils.getCalendarEventsForToday(MainActivity.this));
                 }
             }).start();

@@ -73,48 +73,4 @@ public class MainActivityViewModel extends BaseViewModel {
         }
         mEvent.postValue(event);
     }
-
-    public MutableLiveData<List<Event>> getEventsWithLocation() {
-        if (mEventsWithLocation == null)
-            mEventsWithLocation = new MutableLiveData<>();
-        return mEventsWithLocation;
-    }
-
-    /**
-     * function to set an additional list with updated location based info
-     * this function will add all location information to the event list and create a new
-     * LiveData object for the fragment to observe. API call is done in AsyncTask in viewModel
-     * to prevent multiple calls in orientation change etc.
-     *
-     * @param events   the list of updated events from the getAllCurrentEvents LiveData
-     * @param location the current location of the user
-     */
-    public void setEventsWithLocation(final List<Event> events, final Location location) {
-        if (mEventsWithLocation == null) {
-            mEventsWithLocation = new MutableLiveData<>();
-        }
-        boolean isSameList = isSameList(events, mPreviousLocationList);
-        if (isSameList) return;
-        if (location != null) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    DirectionsUtils.addLocationToEventList(mGeoApiContext, events, location);
-                    mEventsWithLocation.postValue(events);
-                    mPreviousLocationList = events;
-                }
-            }).start();
-        } else {
-            mEventsWithLocation.postValue(events);
-        }
-    }
-
-    private boolean isSameList(List<Event> list1, List<Event> list2) {
-        if (list1.size() != list2.size()) return false;
-        for (int i = 0; i < list1.size(); i++) {
-            if (!list1.get(i).equals(list2.get(i))) return false;
-        }
-        return true;
-    }
-
 }
