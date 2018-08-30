@@ -1,14 +1,10 @@
 package com.aaronbrecher.neverlate.ui.activities;
 
-import android.annotation.SuppressLint;
-import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -22,44 +18,34 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.aaronbrecher.neverlate.BuildConfig;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.BackgroundUtils;
 import com.aaronbrecher.neverlate.Utils.CalendarUtils;
-import com.aaronbrecher.neverlate.Utils.PermissionUtils;
-import com.aaronbrecher.neverlate.backgroundservices.CalendarAlarmService;
+import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
+import com.aaronbrecher.neverlate.Utils.SystemUtils;
 import com.aaronbrecher.neverlate.geofencing.Geofencing;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
+import com.aaronbrecher.neverlate.interfaces.LocationCallback;
 import com.aaronbrecher.neverlate.models.Event;
-import com.aaronbrecher.neverlate.models.GeofenceModel;
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
 import com.aaronbrecher.neverlate.ui.fragments.EventListFragment;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.maps.GeoApiContext;
 
-import org.threeten.bp.LocalDate;
-import org.threeten.bp.LocalDateTime;
-import org.threeten.bp.LocalTime;
-import org.threeten.bp.ZoneId;
-import org.threeten.bp.ZonedDateTime;
-
-import java.util.Calendar;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import static com.aaronbrecher.neverlate.Constants.PERMISSIONS_REQUEST_CODE;
 
-public class MainActivity extends AppCompatActivity implements ListItemClickListener {
+public class MainActivity extends AppCompatActivity implements ListItemClickListener, LocationCallback {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -70,6 +56,8 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     @Inject
     FusedLocationProviderClient mLocationProviderClient;
 
+    private GeoApiContext mGeoApiContext = new GeoApiContext().setApiKey(BuildConfig.GOOGLE_API_KEY);
+    private List<Event> mEventList;
     MainActivityViewModel mViewModel;
     private FragmentManager mFragmentManager;
     private FrameLayout mListContainer;
@@ -91,8 +79,8 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         mListContainer = findViewById(R.id.main_activity_list_fragment_container);
         mDetailContainer = findViewById(R.id.main_activity_detail_fragment);
         mProgressSpinner = findViewById(R.id.progress_spinner);
-        if (!PermissionUtils.hasPermissions(this)) {
-            PermissionUtils.requestCalendarAndLocationPermissions(this, findViewById(R.id.main_container));
+        if (!SystemUtils.hasPermissions(this)) {
+            SystemUtils.requestCalendarAndLocationPermissions(this, findViewById(R.id.main_container));
         } else {
             setUpAlarmManager();
         }
@@ -132,11 +120,11 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         if (requestCode == PERMISSIONS_REQUEST_CODE) {
             //if permissions are granted for the first time, assume data was not loaded into room and
             //do so now...
-            if (PermissionUtils.verifyPermissions(grantResults)) {
+            if (SystemUtils.verifyPermissions(grantResults)) {
                 setUpAlarmManager();
 //              mViewModel.insertEvents(CalendarUtils.getCalendarEventsForToday(this));
             } else {
-                PermissionUtils.requestCalendarAndLocationPermissions(this, findViewById(R.id.main_container));
+                SystemUtils.requestCalendarAndLocationPermissions(this, findViewById(R.id.main_container));
                 // TODO change this to Show image showing error with button to rerequest permissions...
             }
         } else
@@ -155,6 +143,8 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         }
     }
 
+    //This will only set the alarm if it wasn't already set there will be a
+    //seperate broadcast reciever to schedule alarm after boot...
     private void setUpAlarmManager() {
         boolean alarmSet = false;
         if (mSharedPreferences.contains(Constants.ALARM_STATUS_KEY)) {
@@ -175,12 +165,15 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        //TODO maybe only run this if there is network...
         if (item.getItemId() == R.id.main_activity_menu_sync) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    //TODO need to insert the location data here just like in alarm service...
-                    mViewModel.insertEvents(CalendarUtils.getCalendarEventsForToday(MainActivity.this));
+                    mViewModel.deleteAllEvents();
+                    mEventList = CalendarUtils.getCalendarEventsForToday(MainActivity.this);
+                    mViewModel.insertEvents(mEventList);
+                    BackgroundUtils.getLocation(MainActivity.this, MainActivity.this, mLocationProviderClient);
                 }
             }).start();
 
@@ -199,24 +192,48 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         }
     }
 
-    /**
-     * handle showing a loader image while loading data
-     */
-    private void toggleListVisibility() {
-        if (mListContainer.getVisibility() == View.VISIBLE) {
-            mListContainer.setVisibility(View.GONE);
-            if (getResources().getBoolean(R.bool.is_tablet))
-                mDetailContainer.setVisibility(View.GONE);
-            Animation rotate = AnimationUtils.loadAnimation(this, R.anim.rotate);
-            mProgressSpinner.setVisibility(View.VISIBLE);
-            mProgressSpinner.startAnimation(rotate);
-        } else if (mListContainer.getVisibility() == View.GONE) {
-            mProgressSpinner.clearAnimation();
-            mProgressSpinner.setVisibility(View.GONE);
-            mListContainer.setVisibility(View.VISIBLE);
-            if (getResources().getBoolean(R.bool.is_tablet))
-                mDetailContainer.setVisibility(View.VISIBLE);
-        }
+    @Override
+    public void getLocationSuccessCallback(final Location location) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if(SystemUtils.isConnected(MainActivity.this))
+                    DirectionsUtils.addDistanceInfoToEventList(mGeoApiContext, mEventList, location);
+                mViewModel.insertEvents(mEventList);
+                Geofencing geofencing = Geofencing.builder(mEventList);
+                geofencing.createAndSaveGeofences();
+            }
+        }).start();
     }
 
+    @Override
+    public void getLocationFailedCallback() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Geofencing geofencing = Geofencing.builder(mEventList);
+                geofencing.createAndSaveGeofences();
+            }
+        }).start();
+    }
+
+//    /**
+//     * handle showing a loader image while loading data
+//     */
+//    private void toggleListVisibility() {
+//        if (mListContainer.getVisibility() == View.VISIBLE) {
+//            mListContainer.setVisibility(View.GONE);
+//            if (getResources().getBoolean(R.bool.is_tablet))
+//                mDetailContainer.setVisibility(View.GONE);
+//            Animation rotate = AnimationUtils.loadAnimation(this, R.anim.rotate);
+//            mProgressSpinner.setVisibility(View.VISIBLE);
+//            mProgressSpinner.startAnimation(rotate);
+//        } else if (mListContainer.getVisibility() == View.GONE) {
+//            mProgressSpinner.clearAnimation();
+//            mProgressSpinner.setVisibility(View.GONE);
+//            mListContainer.setVisibility(View.VISIBLE);
+//            if (getResources().getBoolean(R.bool.is_tablet))
+//                mDetailContainer.setVisibility(View.VISIBLE);
+//        }
+//    }
 }

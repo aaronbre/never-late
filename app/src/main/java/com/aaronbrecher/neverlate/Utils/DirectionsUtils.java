@@ -26,7 +26,7 @@ public class DirectionsUtils {
      * @param events the list of events to get information about
      * @param location the users current location
      */
-    public static void addLocationToEventList(GeoApiContext apiContext, List<Event> events, Location location){
+    public static void addDistanceInfoToEventList(GeoApiContext apiContext, List<Event> events, Location location){
         DistanceMatrixApiRequest dmRequest = DirectionsUtils.getDistanceMatrixApiRequest(apiContext, events, location);
         DistanceMatrix distanceMatrix =  null;
         try {
@@ -51,11 +51,11 @@ public class DirectionsUtils {
     private static DistanceMatrixApiRequest getDistanceMatrixApiRequest(GeoApiContext apiContext, List<Event> events, Location location){
         DistanceMatrixApiRequest req = new DistanceMatrixApiRequest(apiContext);
 
-        ArrayList<LatLng> dest = new ArrayList<>();
+        ArrayList<String> dest = new ArrayList<>();
         for(Event event : events){
-            dest.add(new LatLng(event.getLocationLatlng().latitude, event.getLocationLatlng().longitude));
+            dest.add(event.getLocation());
         }
-        LatLng [] destinationList = dest.toArray(new LatLng[dest.size()]);
+        String [] destinationList = dest.toArray(new String[dest.size()]);
         return req.origins(new LatLng(location.getLatitude(), location.getLongitude()))
                 .mode(TravelMode.DRIVING)
                 .destinations(destinationList)

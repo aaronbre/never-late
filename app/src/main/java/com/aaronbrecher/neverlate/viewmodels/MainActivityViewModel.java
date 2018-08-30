@@ -73,4 +73,8 @@ public class MainActivityViewModel extends BaseViewModel {
         }
         mEvent.postValue(event);
     }
+
+    public void deleteAllEvents(){
+        mEventsRepository.deleteAllEvents();
+    }
 }

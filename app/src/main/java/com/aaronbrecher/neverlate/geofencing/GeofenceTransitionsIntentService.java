@@ -88,7 +88,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID);
         builder.setContentIntent(pendingIntent)
-                .setAutoCancel(true)
+//                .setAutoCancel(true)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
 

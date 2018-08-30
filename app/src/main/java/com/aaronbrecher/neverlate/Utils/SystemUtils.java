@@ -4,6 +4,8 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -14,7 +16,7 @@ import com.aaronbrecher.neverlate.R;
 import static com.aaronbrecher.neverlate.Constants.PERMISSIONS_REQUEST_CODE;
 
 
-public class PermissionUtils {
+public class SystemUtils {
 
     public static final String[] permissions = new String[]{
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -65,5 +67,11 @@ public class PermissionUtils {
             if (result != PackageManager.PERMISSION_GRANTED) return false;
         }
         return true;
+    }
+
+    public static boolean isConnected(Context context){
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 }

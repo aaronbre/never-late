@@ -25,6 +25,7 @@ public class Converters {
 
     @TypeConverter
     public static LatLng latlngFromString(String string){
+        if(string == null) return null;
         String[] strings = string.split(",");
         double lat = Double.parseDouble(strings[0]);
         double lon = Double.parseDouble(strings[1]);
