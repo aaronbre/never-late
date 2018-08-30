@@ -51,11 +51,11 @@ public class DirectionsUtils {
     private static DistanceMatrixApiRequest getDistanceMatrixApiRequest(GeoApiContext apiContext, List<Event> events, Location location){
         DistanceMatrixApiRequest req = new DistanceMatrixApiRequest(apiContext);
 
-        ArrayList<String> dest = new ArrayList<>();
+        ArrayList<LatLng> dest = new ArrayList<>();
         for(Event event : events){
-            dest.add(event.getLocation());
+            dest.add(new LatLng(event.getLocationLatlng().latitude, event.getLocationLatlng().longitude));
         }
-        String [] destinationList = dest.toArray(new String[dest.size()]);
+        LatLng [] destinationList = dest.toArray(new LatLng[dest.size()]);
         return req.origins(new LatLng(location.getLatitude(), location.getLongitude()))
                 .mode(TravelMode.DRIVING)
                 .destinations(destinationList)
