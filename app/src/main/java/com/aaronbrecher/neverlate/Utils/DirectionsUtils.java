@@ -26,7 +26,7 @@ public class DirectionsUtils {
      * @param events the list of events to get information about
      * @param location the users current location
      */
-    public static void addLocationToEventList(GeoApiContext apiContext, List<Event> events, Location location){
+    public static void addDistanceInfoToEventList(GeoApiContext apiContext, List<Event> events, Location location){
         DistanceMatrixApiRequest dmRequest = DirectionsUtils.getDistanceMatrixApiRequest(apiContext, events, location);
         DistanceMatrix distanceMatrix =  null;
         try {

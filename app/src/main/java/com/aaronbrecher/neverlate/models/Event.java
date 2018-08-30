@@ -9,6 +9,8 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import org.threeten.bp.LocalDateTime;
 
 /**
@@ -40,6 +42,9 @@ public class Event implements Parcelable {
     private LocalDateTime endTime;
 
     @ColumnInfo
+    private LatLng locationLatlng;
+
+    @ColumnInfo
     private String location;
 
     @ColumnInfo
@@ -55,7 +60,7 @@ public class Event implements Parcelable {
 
     @Ignore
     public Event(@NonNull int id, @NonNull long calendarId, String title, String description,
-                 LocalDateTime startTime, LocalDateTime endTime, String location, boolean watching) {
+                 LocalDateTime startTime, LocalDateTime endTime, String location, LatLng locationLatlng, boolean watching) {
         this.id = id;
         this.calendarId = calendarId;
         this.title = title;
@@ -63,6 +68,7 @@ public class Event implements Parcelable {
         this.startTime = startTime;
         this.endTime = endTime;
         this.location = location;
+        this.locationLatlng = locationLatlng;
         this.watching = watching;
     }
 
@@ -119,12 +125,20 @@ public class Event implements Parcelable {
         this.endTime = endTime;
     }
 
-    public String getLocation() {
-        return location;
-    }
-
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public String getLocation() {
+        return this.location;
+    }
+
+    public LatLng getLocationLatlng() {
+        return locationLatlng;
+    }
+
+    public void setLocationLatlng(LatLng location) {
+        this.locationLatlng = location;
     }
 
     public boolean isWatching() {
@@ -168,7 +182,11 @@ public class Event implements Parcelable {
         dest.writeString(this.description);
         dest.writeSerializable(this.startTime);
         dest.writeSerializable(this.endTime);
+        dest.writeParcelable(this.locationLatlng, flags);
         dest.writeString(this.location);
+        dest.writeByte(this.watching ? (byte) 1 : (byte) 0);
+        dest.writeValue(this.distance);
+        dest.writeValue(this.timeTo);
     }
 
     @Ignore
@@ -179,7 +197,11 @@ public class Event implements Parcelable {
         this.description = in.readString();
         this.startTime = (LocalDateTime) in.readSerializable();
         this.endTime = (LocalDateTime) in.readSerializable();
+        this.locationLatlng = in.readParcelable(LatLng.class.getClassLoader());
         this.location = in.readString();
+        this.watching = in.readByte() != 0;
+        this.distance = (Long) in.readValue(Long.class.getClassLoader());
+        this.timeTo = (Long) in.readValue(Long.class.getClassLoader());
     }
 
     @Ignore
@@ -194,23 +216,4 @@ public class Event implements Parcelable {
             return new Event[size];
         }
     };
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        else if (obj == null) return false;
-        else if (obj instanceof Event) {
-            Event event = (Event) obj;
-            if (event.getId() == this.getId()
-                    && event.getLocation().equals(this.getLocation())
-                    && event.getStartTime() == this.getStartTime()
-                    && event.getEndTime() == this.getEndTime()
-                    && event.getTitle().equals(this.getTitle())
-                    && event.getDescription().equals(this.getDescription())
-                    && event.getCalendarId() == this.getCalendarId()
-                    && event.watching == this.watching
-                    ) return true;
-        }
-        return false;
-    }
 }

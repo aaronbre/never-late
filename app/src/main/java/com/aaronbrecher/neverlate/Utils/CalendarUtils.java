@@ -10,8 +10,10 @@ import android.support.v4.content.ContextCompat;
 import android.util.Pair;
 
 import com.aaronbrecher.neverlate.Constants;
+import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.database.Converters;
 import com.aaronbrecher.neverlate.models.Event;
+import com.google.android.gms.maps.model.LatLng;
 
 import org.threeten.bp.LocalDate;
 import org.threeten.bp.LocalDateTime;
@@ -26,9 +28,7 @@ import java.util.TimeZone;
 
 public class CalendarUtils {
 
-//    @Inject
-//    SharedPreferences mSharedPreferences;
-
+    //only run this on a background thread access dbs as well as other work will block UI
     public static List<Event> getCalendarEventsForToday(Context context){
         String[] projection = new String[]{BaseColumns._ID,
                 Constants.CALENDAR_EVENTS_TITLE,
@@ -111,6 +111,8 @@ public class CalendarUtils {
         event.setTitle(cursor.getString(titleIndex));
         event.setDescription(cursor.getString(descriptionIndex));
         event.setLocation(cursor.getString(locationIndex));
+        LatLng latLng = convertLocationToLatLng(cursor.getString(locationIndex));
+        event.setLocationLatlng(latLng);
         event.setStartTime(Converters.dateTimeFromUnix(cursor.getLong(startIndex)));
         event.setEndTime(Converters.dateTimeFromUnix(cursor.getLong(endIndex)));
         event.setCalendarId(cursor.getLong(calendarIdIndex));
@@ -118,5 +120,9 @@ public class CalendarUtils {
         event.setDistance(Constants.ROOM_INVALID_LONG_VALUE);
         event.setTimeTo(Constants.ROOM_INVALID_LONG_VALUE);
         return event;
+    }
+
+    private static LatLng convertLocationToLatLng(String location){
+        return LocationUtils.latlngFromAddress(NeverLateApp.getApp(), location);
     }
 }

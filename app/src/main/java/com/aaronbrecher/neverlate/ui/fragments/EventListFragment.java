@@ -63,7 +63,7 @@ public class EventListFragment extends Fragment {
         mActivity = (MainActivity) getActivity();
         mViewModel = ViewModelProviders.of(mActivity, mViewModelFactory).get(MainActivityViewModel.class);
         mListAdapter = new EventListAdapter(null, null, mActivity);
-        mViewModel.getEventsWithLocation().observe(this, eventsObserver);
+        mViewModel.getAllCurrentEvents().observe(this, eventsObserver);
     }
 
     @Nullable
@@ -89,20 +89,6 @@ public class EventListFragment extends Fragment {
         @Override
         public void onChanged(@Nullable List<Event> events) {
             mListAdapter.swapLists(events);
-            updateGeofences(events);
-
         }
     };
-
-    //TODO this is for testing only Geofencing will be handled by job service
-    private void updateGeofences(final List<Event> events) {
-        //load the updated events with the location aware information to the VM
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Geofencing geofencing = Geofencing.builder(events);
-                geofencing.createAndSaveGeofences();
-            }
-        }).start();
-    }
 }
