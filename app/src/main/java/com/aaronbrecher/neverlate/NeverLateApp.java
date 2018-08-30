@@ -1,6 +1,7 @@
 package com.aaronbrecher.neverlate;
 
 import android.app.Application;
+import android.os.Debug;
 
 import com.aaronbrecher.neverlate.dependencyinjection.AppComponent;
 import com.aaronbrecher.neverlate.dependencyinjection.AppModule;
@@ -21,7 +22,6 @@ public class NeverLateApp extends Application {
                 .appModule(new AppModule(this))
                 .roomModule(new RoomModule())
                 .build();
-
     }
 
     public static NeverLateApp getApp(){
@@ -31,4 +31,5 @@ public class NeverLateApp extends Application {
     public AppComponent getAppComponent() {
         return mAppComponent;
     }
+
 }

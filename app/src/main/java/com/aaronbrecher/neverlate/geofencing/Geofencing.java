@@ -67,6 +67,7 @@ public class Geofencing {
     private GeofencesUpdatedCallback mCallback;
 
 
+
     @Inject
     public Geofencing() {
         mContext = NeverLateApp.getApp();
