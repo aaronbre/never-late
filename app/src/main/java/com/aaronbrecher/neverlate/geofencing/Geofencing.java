@@ -42,10 +42,7 @@ import javax.inject.Inject;
 /**
  * Utility class used to set up geofences, for now the distance of the fence is set up
  * in a naive way assuming a set amount of time to travel a mile. The user can change
- * the preferred amount of time per mile.
- * TODO create a paid version which will get the time per mile in a more ideal way,
- * possibly using Google Directions API to get distances from numerous points and
- * average out the time
+ * the preferred default amount of time per mile.
  */
 public class Geofencing {
     private static final String TAG = Geofencing.class.getSimpleName();
@@ -146,8 +143,8 @@ public class Geofencing {
         int fenceRadius;
         long relevantTime = GeofenceUtils.determineRelevantTime(event.getStartTime(), event.getEndTime());
         fenceRadius = GeofenceUtils.getFenceRadius(relevantTime, mKmPerMinute);
-
-        LatLng latLng = LocationUtils.latlngFromAddress(mContext, event.getLocation());
+        LatLng latLng = event.getLocationLatlng();
+        if(latLng == null) return;
         String requestId = Constants.GEOFENCE_REQUEST_ID + event.getId();
         Geofence geofence = new Geofence.Builder()
                 .setRequestId(requestId)

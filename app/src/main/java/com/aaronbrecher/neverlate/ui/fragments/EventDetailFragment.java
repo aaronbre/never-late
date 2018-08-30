@@ -96,8 +96,8 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback{
     private void addGeofenceToMap(GoogleMap googleMap, int fenceRadius) {
         if(mMapMarker != null) mMapMarker.remove();
         if(mMapCircle != null)mMapCircle.remove();
-        LatLng latLng = LocationUtils.latlngFromAddress(getActivity(), mEvent.getLocation());
-        //TODO change the radius here to use the radius from the geofence DB for better fidelity
+        LatLng latLng = mEvent.getLocationLatlng();
+        if(latLng == null) return;
         CircleOptions circleOptions = new CircleOptions()
                 .center(latLng)
                 .radius(fenceRadius);
