@@ -196,7 +196,13 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.main_activity_menu_sync) {
-            mViewModel.insertEvents(CalendarUtils.getCalendarEventsForToday(this));
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    mViewModel.insertEvents(CalendarUtils.getCalendarEventsForToday(MainActivity.this));
+                }
+            }).start();
+
         }
         return super.onOptionsItemSelected(item);
     }
@@ -212,6 +218,9 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         }
     }
 
+    /**
+     * handle showing a loader image while loading data
+     */
     private void toggleListVisibility() {
         if (mListContainer.getVisibility() == View.VISIBLE) {
             mListContainer.setVisibility(View.GONE);

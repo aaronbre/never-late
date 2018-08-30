@@ -4,4 +4,5 @@ import android.location.Location;
 
 public interface LocationCallback {
     void successCallback(Location location);
+    void failedCallback();
 }

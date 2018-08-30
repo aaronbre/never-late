@@ -7,6 +7,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Debug;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -89,14 +90,19 @@ public class EventListFragment extends Fragment {
         public void onChanged(@Nullable List<Event> events) {
             mListAdapter.swapLists(events);
             updateGeofences(events);
+
         }
     };
 
     //TODO this is for testing only Geofencing will be handled by job service
-    private void updateGeofences(List<Event> events) {
+    private void updateGeofences(final List<Event> events) {
         //load the updated events with the location aware information to the VM
-        Geofencing geofencing = Geofencing.builder(events);
-        geofencing.createAndSaveGeofences();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Geofencing geofencing = Geofencing.builder(events);
+                geofencing.createAndSaveGeofences();
+            }
+        }).start();
     }
-
 }

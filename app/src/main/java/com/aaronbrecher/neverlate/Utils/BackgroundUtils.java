@@ -1,18 +1,27 @@
 package com.aaronbrecher.neverlate.Utils;
 
+import android.Manifest;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.backgroundservices.CalendarAlarmService;
 import com.aaronbrecher.neverlate.backgroundservices.GeofenceJobService;
+import com.aaronbrecher.neverlate.interfaces.LocationCallback;
 import com.firebase.jobdispatcher.Constraint;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.Job;
 import com.firebase.jobdispatcher.RetryStrategy;
 import com.firebase.jobdispatcher.Trigger;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.threeten.bp.LocalDate;
 import org.threeten.bp.LocalDateTime;
@@ -49,8 +58,9 @@ public class BackgroundUtils {
     /**
      * Create a job to repeat every 15 minutes to update the geofences ultimately
      * will either use the default 15 mins or user provided time from prefs
+     *
      * @param dispatcher a dispatcher to create the job
-     * @param timeframe the timeframe to schedule job, end will be +5
+     * @param timeframe  the timeframe to schedule job, end will be +5
      * @return a FirebaseJob to schedule via firebase dispatcher
      */
     public static Job createJob(FirebaseJobDispatcher dispatcher, int timeframe) {
@@ -64,5 +74,23 @@ public class BackgroundUtils {
                 .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
                 .setConstraints(Constraint.ON_ANY_NETWORK)
                 .build();
+    }
+
+    public static void getLocation(final LocationCallback callback, Context context, FusedLocationProviderClient providerClient) {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        providerClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                callback.successCallback(location);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                callback.failedCallback();
+            }
+        });
     }
 }
