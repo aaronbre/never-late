@@ -33,7 +33,9 @@ import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.BackgroundUtils;
 import com.aaronbrecher.neverlate.Utils.CalendarUtils;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
+import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.Utils.SystemUtils;
+import com.aaronbrecher.neverlate.geofencing.AwarenessFencesCreator;
 import com.aaronbrecher.neverlate.geofencing.Geofencing;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
 import com.aaronbrecher.neverlate.interfaces.LocationCallback;
@@ -221,23 +223,19 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         new Thread(new Runnable() {
             @Override
             public void run() {
+                if(mEventList == null || mEventList.size() < 1) return;
                 DirectionsUtils.addDistanceInfoToEventList(mGeoApiContext, mEventList, location);
                 mViewModel.insertEvents(mEventList);
-                Geofencing geofencing = Geofencing.builder(mEventList);
-                geofencing.createAndSaveGeofences();
+                mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToGsonString(location)).apply();
+                AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(mEventList).build();
+                creator.buildAndSaveFences();
             }
         }).start();
     }
 
     @Override
     public void getLocationFailedCallback() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Geofencing geofencing = Geofencing.builder(mEventList);
-                geofencing.createAndSaveGeofences();
-            }
-        }).start();
+        //TODO find out why it failed? Location is needed for the app to operate...
     }
 
 //    /**

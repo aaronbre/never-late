@@ -3,6 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/main_activity_menu_sync"
-        android:title="Sync Calendar"
+        android:title="@string/menu_item_refresh"
         app:showAsAction="never"/>
 </menu>
