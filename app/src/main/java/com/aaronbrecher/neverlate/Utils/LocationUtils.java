@@ -7,6 +7,7 @@ import android.location.Location;
 import android.location.LocationManager;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -40,4 +41,11 @@ public class LocationUtils {
         return kilometers * .621;
     }
 
+    public static String locationToGsonString(Location location){
+        return new Gson().toJson(location);
+    }
+
+    public static Location locationJsonToLocation(String location){
+        return new Gson().fromJson(location, Location.class);
+    }
 }

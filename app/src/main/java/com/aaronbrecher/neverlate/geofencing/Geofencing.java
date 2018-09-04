@@ -170,7 +170,7 @@ public class Geofencing {
         if (mGeofencePendingIntent != null) {
             return mGeofencePendingIntent;
         }
-        Intent intent = new Intent(mContext, GeofenceTransitionsIntentService.class);
+        Intent intent = new Intent(mContext, null);
         mGeofencePendingIntent = PendingIntent.getService(mContext,
                 Constants.GEOFENCE_TRANSITION_PENDING_INTENT_CODE,
                 intent,

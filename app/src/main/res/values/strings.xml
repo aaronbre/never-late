@@ -15,5 +15,6 @@
     <string name="entering_geofence_notification_content">Great you now will be have enough time to make your calendar appointment : </string>
     <string name="refresh_error_no_connection">Internet connection is required. Check your settings and try again</string>
     <string name="launch_data_settings_button">Settings</string>
+    <string name="menu_item_refresh">Refresh</string>
 
 </resources>

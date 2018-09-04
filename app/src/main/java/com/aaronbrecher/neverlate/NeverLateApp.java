@@ -1,6 +1,7 @@
 package com.aaronbrecher.neverlate;
 
 import android.app.Application;
+import android.location.Location;
 import android.os.Debug;
 
 import com.aaronbrecher.neverlate.dependencyinjection.AppComponent;

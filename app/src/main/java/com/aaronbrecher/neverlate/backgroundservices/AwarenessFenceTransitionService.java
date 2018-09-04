@@ -1,12 +1,11 @@
-package com.aaronbrecher.neverlate.geofencing;
+package com.aaronbrecher.neverlate.backgroundservices;
 
-import android.app.IntentService;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
+import android.support.v4.app.JobIntentService;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
-import android.util.Log;
 
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
@@ -16,60 +15,35 @@ import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.ui.activities.EventDetailActivity;
 import com.aaronbrecher.neverlate.ui.activities.MainActivity;
 import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.GeofenceStatusCodes;
-import com.google.android.gms.location.GeofencingEvent;
-
-import java.util.List;
 
 import javax.inject.Inject;
 
-public class GeofenceTransitionsIntentService extends IntentService {
-    private static final String TAG = GeofenceTransitionsIntentService.class.getSimpleName();
-    private int mNotificationId = 0;
-
+public class AwarenessFenceTransitionService extends JobIntentService {
     @Inject
     EventsRepository mEventsRepository;
 
-    /**
-     * Creates an IntentService.  Invoked by your subclass's constructor.
-     * <p>
-     * Name Used to name the worker thread, important only for debugging.
-     */
-    public GeofenceTransitionsIntentService() {
-        super(GeofenceTransitionsIntentService.class.getSimpleName());
+    public static final int JOB_ID = 1002;
+
+    static void enqueueWork(Context context, Intent work) {
+        enqueueWork(context, AwarenessFenceTransitionService.class, JOB_ID, work);
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        ((NeverLateApp) getApplication())
-                .getAppComponent()
+        NeverLateApp.getApp().getAppComponent()
                 .inject(this);
     }
 
     @Override
-    protected void onHandleIntent(@Nullable Intent intent) {
-        GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
-        if (geofencingEvent.hasError()) {
-            String errorMessage = GeofenceStatusCodes.getStatusCodeString(geofencingEvent.getErrorCode());
-            Log.e(TAG, "onHandleIntent: " + errorMessage);
-        }
+    protected void onHandleWork(@NonNull Intent intent) {
 
-        int geofenceTransition = geofencingEvent.getGeofenceTransition();
-
-        List<Geofence> tiggeringGeofences = geofencingEvent.getTriggeringGeofences();
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        for (Geofence geofence : tiggeringGeofences) {
-            NotificationCompat.Builder builder = createNotificationForFence(geofence, geofenceTransition);
-            notificationManager.notify(mNotificationId, builder.build());
-            mNotificationId++;
-        }
     }
 
     /**
      * This will create a notification for the geofence by getting the event data
      * from Room using the Id of the geofence
-     *TODO there is currently a bug when using notification to launch app parceable has issues no such issues when launching from intent in mainActivity...
+     * TODO there is currently a bug when using notification to launch app parceable has issues no such issues when launching from intent in mainActivity...
      * @param geofence
      */
     private NotificationCompat.Builder createNotificationForFence(Geofence geofence, int transition) {
