@@ -179,10 +179,9 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                     public void run() {
                         mViewModel.deleteAllEvents();
                         mEventList = CalendarUtils.getCalendarEventsForToday(MainActivity.this);
-                        mViewModel.insertEvents(mEventList);
                         BackgroundUtils.getLocation(MainActivity.this, MainActivity.this, mLocationProviderClient);
                     }
-                }).start();
+                }, "MainActivityRefreshThread").start();
             } else {
                 showNoConnectionSnackbar();
             }
@@ -230,11 +229,17 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                 AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(mEventList).build();
                 creator.buildAndSaveFences();
             }
-        }).start();
+        }, "MainActivitylocationThread").start();
     }
 
     @Override
     public void getLocationFailedCallback() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mViewModel.insertEvents(mEventList);
+            }
+        }).start();
         //TODO find out why it failed? Location is needed for the app to operate...
     }
 

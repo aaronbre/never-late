@@ -13,12 +13,7 @@ public class BootCompletedBroadcast extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if(intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED) ||
                 intent.getAction().equals(Intent.ACTION_LOCKED_BOOT_COMPLETED)){
-            boolean wasSet = BackgroundUtils.setAlarmManager(context);
-            if(wasSet){
-                PreferenceManager.getDefaultSharedPreferences(context)
-                        .edit().putBoolean(Constants.ALARM_STATUS_KEY, true)
-                        .apply();
-            }
+            BootCompletedJobService.enqueueWork(context, intent);
         }
     }
 }

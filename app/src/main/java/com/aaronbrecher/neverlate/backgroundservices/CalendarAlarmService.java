@@ -89,16 +89,13 @@ public class CalendarAlarmService extends JobIntentService implements LocationCa
                 mEventsRepository.insertAll(mEventList);
                 initializeGeofences(mEventList);
             }
-        }).start();
+        }, "CASlocationThread").start();
     }
 
     @Override
     public void getLocationFailedCallback() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                initializeGeofences(mEventList);
-            }
-        }).start();
+        //TODO Remove this with find a different way to handle no location
     }
+
+
 }

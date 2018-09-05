@@ -60,14 +60,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
         holder.binding.eventTitle.setText(event.getTitle());
         holder.binding.eventLocation.setText(event.getLocation());
         if (event.getDistance() != null) holder.binding.eventDistance.setText(getHumanReadableDistance(event.getDistance()));
-        if (event.getTimeTo() != null) holder.binding.eventTimeTo.setText(getHumanReadableTime(event.getTimeTo()));
-    }
-
-    private String getHumanReadableTime(Long time){
-        int totalMinutes = (int) (time/60);
-        int hours = totalMinutes/60;
-        int minutes = totalMinutes%60;
-        return hours + ":" + minutes;
+        if (event.getTimeTo() != null) holder.binding.eventTimeTo.setText(DirectionsUtils.readableTravelTime(event.getTimeTo()));
     }
 
     private String getHumanReadableDistance(Long distance){

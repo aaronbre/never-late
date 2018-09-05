@@ -61,4 +61,11 @@ public class DirectionsUtils {
                 .destinations(destinationList)
                 .departureTime(Instant.now());
     }
+
+    public static String readableTravelTime(long travelTime){
+        int totalMinutes = (int) (travelTime/60);
+        int hours = totalMinutes/60;
+        int minutes = totalMinutes%60;
+        return hours + ":" + minutes;
+    }
 }
