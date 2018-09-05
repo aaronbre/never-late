@@ -56,15 +56,10 @@ public class BackgroundUtils {
     }
 
     /**
-     * Create a job to repeat every 15 minutes to update the geofences ultimately
-     * will either use the default 15 mins or user provided time from prefs
-     *
-     * @param dispatcher a dispatcher to create the job
-     * @param timeframe  the timeframe to schedule job, end will be +5
-     * @return a FirebaseJob to schedule via firebase dispatcher
+     * Job to Setup the app to listen to activity changes this is done as a job to allow
+     * for rescheduling in the event of the request failing
      */
-    public static Job setUpActivityRecognitionJob(FirebaseJobDispatcher dispatcher, int timeframe) {
-        //TODO change trigger to check for user preference...
+    public static Job setUpActivityRecognitionJob(FirebaseJobDispatcher dispatcher) {
         return dispatcher.newJobBuilder()
                 .setService(SetupActivityRecognitionJobService.class)
                 .setTag(Constants.FIREBASE_JOB_SERVICE_SETUP_ACTIVITY_RECOG)
@@ -84,7 +79,8 @@ public class BackgroundUtils {
         providerClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
-                callback.getLocationSuccessCallback(location);
+                if (location == null) callback.getLocationFailedCallback();
+                else callback.getLocationSuccessCallback(location);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override

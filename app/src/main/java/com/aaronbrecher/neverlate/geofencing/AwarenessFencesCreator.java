@@ -57,6 +57,14 @@ public class AwarenessFencesCreator implements LocationCallback {
     private Location mLocation = null;
     private PendingIntent mPendingIntent;
 
+    public List<Event> getEventList() {
+        return mEventList;
+    }
+
+    public void setEventList(List<Event> eventList) {
+        mEventList = eventList;
+    }
+
     private AwarenessFencesCreator(List<Event> eventList) {
         DaggerGeofencingComponent.builder()
                 .appModule(new AppModule(NeverLateApp.getApp()))
@@ -71,17 +79,6 @@ public class AwarenessFencesCreator implements LocationCallback {
         }
         mFenceClient = Awareness.getFenceClient(mApp);
         mEventList = eventList;
-    }
-
-    private PendingIntent getPendingIntent() {
-        if (mPendingIntent != null) return mPendingIntent;
-        Intent intent = new Intent(mApp, StartJobIntentServiceBroadcastReceiver.class);
-        intent.setAction(Constants.ACTION_START_AWARENESS_FENCE_SERVICE);
-        mPendingIntent = PendingIntent.getBroadcast(mApp,
-                Constants.AWARENESS_TRANSITION_PENDING_INTENT_CODE,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-        return mPendingIntent;
     }
 
     /**
@@ -139,6 +136,17 @@ public class AwarenessFencesCreator implements LocationCallback {
         return builder.build();
     }
 
+    private PendingIntent getPendingIntent() {
+        if (mPendingIntent != null) return mPendingIntent;
+        Intent intent = new Intent(mApp, StartJobIntentServiceBroadcastReceiver.class);
+        intent.setAction(Constants.ACTION_START_AWARENESS_FENCE_SERVICE);
+        mPendingIntent = PendingIntent.getBroadcast(mApp,
+                Constants.AWARENESS_TRANSITION_PENDING_INTENT_CODE,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        return mPendingIntent;
+    }
+
     private void updateFences() {
         new Thread(new Runnable() {
             @Override
@@ -158,7 +166,7 @@ public class AwarenessFencesCreator implements LocationCallback {
                     }
                 });
             }
-        }).start();
+        }, "updateFencesThread").start();
     }
 
     @Override
@@ -172,7 +180,7 @@ public class AwarenessFencesCreator implements LocationCallback {
                 mEventsRepository.insertAll(mEventList);
                 updateFences();
             }
-        }).start();
+        }, "AFClocationThread").start();
 
     }
 

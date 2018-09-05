@@ -10,7 +10,7 @@ public class StartJobIntentServiceBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
-        if(action == null) return;
+        if (action == null) return;
         switch (action) {
             case Constants.ACTION_ADD_CALENDAR_EVENTS:
                 CalendarAlarmService.enqueueWork(context, intent);
@@ -22,6 +22,5 @@ public class StartJobIntentServiceBroadcastReceiver extends BroadcastReceiver {
                 ActivityTransitionService.enqueueWork(context, intent);
                 break;
         }
-        CalendarAlarmService.enqueueWork(context, intent);
     }
 }

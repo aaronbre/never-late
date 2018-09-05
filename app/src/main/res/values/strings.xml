@@ -6,13 +6,14 @@
     <string name="ok">Ok</string>
     <string name="geofence_added_success">Geofences were successfully updated, notifications will be sent if you will not make it to your event</string>
     <string name="geofence_added_failed">failed to load the geofences, will try again on the next scheduled update</string>
-    <string name="exiting_geofence_notification_content">You are leaving the maximum distance to able to make your calendar appointment : </string>
-    <string name="exiting_geofence_notification_title">Leaving drivable distance to - </string>
+    <string name="exiting_geofence_notification_content_1">In order to make it in time for your event you need to start driving now to </string>
+    <string name="exiting_geofence_notification_content_2">Estimated time to arrival is </string>
+    <string name="exiting_geofence_notification_title">Time to leave to scheduled event - </string>
     <string name="start_time">Start Time</string>
     <string name="end_time">End Time</string>
     <string name="title_activity_maps">Map</string>
     <string name="entering_geofence_notification_title">Entering divable distance to - </string>
-    <string name="entering_geofence_notification_content">Great you now will be have enough time to make your calendar appointment : </string>
+    <string name="entering_geofence_notification_content">Entering divable distance to - </string>
     <string name="refresh_error_no_connection">Internet connection is required. Check your settings and try again</string>
     <string name="launch_data_settings_button">Settings</string>
     <string name="menu_item_refresh">Refresh</string>
