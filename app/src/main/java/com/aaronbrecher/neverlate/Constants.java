@@ -55,4 +55,5 @@ public class Constants {
     public static final String ACTION_START_ACTIVITY_TRANSITION_SERVICE = "com.aaronbrecher.neverlate.action.START_ACTIVITY_TRANSITION_SERVICE";
 
     public static final long ROOM_INVALID_LONG_VALUE = -1;
+    public static final String ACTION_CANCEL_DRIVING_SERVICE = "com.aaronbrecher.neverlate.action.CANCEL_DRIVING_SERVICE";
 }

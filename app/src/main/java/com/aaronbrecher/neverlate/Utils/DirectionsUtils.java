@@ -22,6 +22,7 @@ public class DirectionsUtils {
 
     /**
      * add the distance and duration to the Event using the Distance Matrix API
+     * TODO got error here from DistanceMatrixApi resopnse.getError InvalidRequestException
      * @param apiContext The GeoApiContext
      * @param events the list of events to get information about
      * @param location the users current location

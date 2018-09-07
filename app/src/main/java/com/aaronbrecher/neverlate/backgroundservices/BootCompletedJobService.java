@@ -26,8 +26,5 @@ public class BootCompletedJobService extends JobIntentService {
                     .edit().putBoolean(Constants.ALARM_STATUS_KEY, true)
                     .apply();
         }
-        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
-        Job job = BackgroundUtils.setUpActivityRecognitionJob(dispatcher);
-        dispatcher.mustSchedule(job);
     }
 }
