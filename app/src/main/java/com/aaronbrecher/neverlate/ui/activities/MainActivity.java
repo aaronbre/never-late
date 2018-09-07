@@ -7,6 +7,7 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Build;
@@ -35,6 +36,7 @@ import com.aaronbrecher.neverlate.Utils.CalendarUtils;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
 import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.Utils.SystemUtils;
+import com.aaronbrecher.neverlate.backgroundservices.DrivingForegroundService;
 import com.aaronbrecher.neverlate.geofencing.AwarenessFencesCreator;
 import com.aaronbrecher.neverlate.geofencing.Geofencing;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
@@ -43,7 +45,16 @@ import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
 import com.aaronbrecher.neverlate.ui.fragments.EventListFragment;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
+import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.maps.GeoApiContext;
 
 import java.util.List;
@@ -91,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         } else {
             setUpAlarmManager();
         }
-
+        checkLocationSettings();
         mViewModel.getAllCurrentEvents().observe(this, new Observer<List<Event>>() {
             @Override
             public void onChanged(@Nullable List<Event> events) {
@@ -241,6 +252,33 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             }
         }).start();
         //TODO find out why it failed? Location is needed for the app to operate...
+    }
+
+    private void checkLocationSettings(){
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(new LocationRequest().setExpirationDuration(Constants.TIME_TEN_MINUTES)
+                        .setFastestInterval(Constants.TIME_TEN_MINUTES)
+                        .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY));
+        SettingsClient settingsClient = LocationServices.getSettingsClient(this);
+        Task<LocationSettingsResponse> task = settingsClient.checkLocationSettings(builder.build());
+        task.addOnSuccessListener(new OnSuccessListener<LocationSettingsResponse>() {
+            @Override
+            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                if(e instanceof ResolvableApiException){
+                    try{
+                        ResolvableApiException resolvable = (ResolvableApiException) e;
+                        resolvable.startResolutionForResult(MainActivity.this,1);
+                    }catch (IntentSender.SendIntentException sendEx){
+                        Log.e(TAG, "onFailure: " + sendEx );
+                    }
+                }
+            }
+        });
     }
 
 //    /**

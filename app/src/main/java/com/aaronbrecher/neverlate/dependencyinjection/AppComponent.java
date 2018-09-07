@@ -3,6 +3,7 @@ package com.aaronbrecher.neverlate.dependencyinjection;
 import com.aaronbrecher.neverlate.backgroundservices.ActivityTransitionService;
 import com.aaronbrecher.neverlate.backgroundservices.CalendarAlarmService;
 import com.aaronbrecher.neverlate.backgroundservices.AwarenessFenceTransitionService;
+import com.aaronbrecher.neverlate.backgroundservices.DrivingForegroundService;
 import com.aaronbrecher.neverlate.ui.activities.EventDetailActivity;
 import com.aaronbrecher.neverlate.ui.activities.MainActivity;
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
@@ -22,4 +23,5 @@ public interface AppComponent {
     void inject(CalendarAlarmService service);
     void inject(AwarenessFenceTransitionService service);
     void inject(ActivityTransitionService service);
+    void inject(DrivingForegroundService service);
 }

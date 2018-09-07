@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -62,6 +63,7 @@ public class ActivityTransitionService extends JobIntentService {
             List<ActivityTransitionEvent> events = result.getTransitionEvents();
             ActivityTransitionEvent event = events.get(events.size() - 1);
             if (event.getTransitionType() == ActivityTransition.ACTIVITY_TRANSITION_EXIT) {
+                stopDrivingForegroundService();
                 setUpFences();
             } else if (event.getTransitionType() == ActivityTransition.ACTIVITY_TRANSITION_ENTER) {
                 setUpDrivingService();
@@ -70,7 +72,17 @@ public class ActivityTransitionService extends JobIntentService {
     }
 
     private void setUpDrivingService() {
-        //TODO either set up a jobservice for a specified amount of time or locationUpdateRequest
+        Intent intent = new Intent(this, DrivingForegroundService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent);
+        } else {
+            startService(intent);
+        }
+    }
+
+    private void stopDrivingForegroundService(){
+        Intent intent = new Intent(this, DrivingForegroundService.class);
+        stopService(intent);
     }
 
     /**

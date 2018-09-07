@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 
 import com.aaronbrecher.neverlate.Constants;
+import com.aaronbrecher.neverlate.NeverLateApp;
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
 import com.google.android.gms.location.ActivityRecognition;
@@ -42,16 +43,17 @@ public class SetupActivityRecognitionJobService extends JobService {
     /**
      * The job to be run on a separate thread this will set up the app to monitor if the user
      * has begun driving or if they have stopped driving
+     * set at walking for debug TODO switch to inVehicle
      * @param job
      */
     public void doWork(final JobParameters job) {
         List<ActivityTransition> transitions = new ArrayList<>();
         transitions.add(new ActivityTransition.Builder()
-                .setActivityType(DetectedActivity.IN_VEHICLE)
+                .setActivityType(DetectedActivity.WALKING)
                 .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
                 .build());
         transitions.add(new ActivityTransition.Builder()
-                .setActivityType(DetectedActivity.IN_VEHICLE)
+                .setActivityType(DetectedActivity.WALKING)
                 .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
                 .build());
         ActivityTransitionRequest request = new ActivityTransitionRequest(transitions);
@@ -71,8 +73,10 @@ public class SetupActivityRecognitionJobService extends JobService {
         });
     }
 
+    // this pending intent uses the app context so a different pending intent will have the same context
+    // this will be useful for removing the ActivityReccognition in a different class...
     private PendingIntent getPendingIntent() {
-        Intent intent = new Intent(this, StartJobIntentServiceBroadcastReceiver.class);
+        Intent intent = new Intent(NeverLateApp.getApp(), StartJobIntentServiceBroadcastReceiver.class);
         intent.setAction(Constants.ACTION_START_ACTIVITY_TRANSITION_SERVICE);
         return PendingIntent.getBroadcast(this, Constants.ACTIVITY_TRANSITION_PENDING_INTENT_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }

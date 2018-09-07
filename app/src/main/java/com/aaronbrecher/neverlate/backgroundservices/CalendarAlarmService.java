@@ -34,7 +34,7 @@ import javax.inject.Inject;
 import static com.aaronbrecher.neverlate.Utils.BackgroundUtils.DEFAULT_JOB_TIMEFRAME;
 
 public class CalendarAlarmService extends JobIntentService implements LocationCallback {
-
+    //TODO alarm service was not triggered at midnight... investigate
     public static final String TAG = CalendarAlarmService.class.getSimpleName();
     @Inject
     EventsRepository mEventsRepository;
@@ -83,13 +83,23 @@ public class CalendarAlarmService extends JobIntentService implements LocationCa
         new Thread(new Runnable() {
             @Override
             public void run() {
-                DirectionsUtils.addDistanceInfoToEventList(mGeoApiContext, mEventList, location);
-                Gson gson = new Gson();
-                mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, gson.toJson(location)).apply();
-                mEventsRepository.insertAll(mEventList);
-                initializeGeofences(mEventList);
+                if(location != null){
+                    Gson gson = new Gson();
+                    mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, gson.toJson(location)).apply();
+                    if(mEventList == null || mEventList.size() == 0) return;
+                    DirectionsUtils.addDistanceInfoToEventList(mGeoApiContext, mEventList, location);
+                    mEventsRepository.insertAll(mEventList);
+                    initializeGeofences(mEventList);
+                    initializeActivityRecognition();
+                }
             }
         }, "CASlocationThread").start();
+    }
+
+    private void initializeActivityRecognition() {
+        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
+        Job job = BackgroundUtils.setUpActivityRecognitionJob(dispatcher);
+        dispatcher.mustSchedule(job);
     }
 
     @Override
