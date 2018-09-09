@@ -36,6 +36,7 @@ import org.threeten.bp.format.DateTimeFormatter;
 
 import javax.inject.Inject;
 
+//TODO need to rethink this with the new AwarenessFence idea...
 public class EventDetailFragment extends Fragment implements OnMapReadyCallback{
 
     @Inject

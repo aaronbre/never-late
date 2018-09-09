@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
+import com.aaronbrecher.neverlate.Utils.GeofenceUtils;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
 import com.aaronbrecher.neverlate.viewmodels.DetailActivityViewModel;
@@ -45,11 +46,16 @@ public class EventDetailActivity extends AppCompatActivity{
         mEvent = mIntent.getParcelableExtra(Constants.EVENT_DETAIL_INTENT_EXTRA);
         setTitle(mEvent.getTitle());
         mViewModel.setEvent(mEvent);
-        EventDetailFragment eventDetailFragment = new EventDetailFragment();
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .add(R.id.event_detail_fragment_container, eventDetailFragment, Constants.EVENT_DETAIL_FRAGMENT_TAG)
-                .commit();
+        if(GeofenceUtils.eventIsPassedCurrentTime(mEvent.getEndTime())){
+            //show message that event has already passed.
+        }
+        else {
+            EventDetailFragment eventDetailFragment = new EventDetailFragment();
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .add(R.id.event_detail_fragment_container, eventDetailFragment, Constants.EVENT_DETAIL_FRAGMENT_TAG)
+                    .commit();
+        }
     }
 
     @Override

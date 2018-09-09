@@ -5,6 +5,7 @@ import android.util.Log;
 import com.aaronbrecher.neverlate.database.Converters;
 import com.aaronbrecher.neverlate.models.Event;
 
+import org.threeten.bp.Instant;
 import org.threeten.bp.LocalDateTime;
 
 import java.util.List;
@@ -45,6 +46,11 @@ public class GeofenceUtils {
         long st = Converters.unixFromDateTime(startTime);
         long et = Converters.unixFromDateTime(endTime);
         return currentTime > st ? et : st;
+    }
+
+    public static boolean eventIsPassedCurrentTime(LocalDateTime eventTime){
+        LocalDateTime now = Converters.dateTimeFromUnix(System.currentTimeMillis());
+        return now.isBefore(eventTime);
     }
 
     public static int getFenceRadius(long distance, long drivingTime, long eventTime) {
