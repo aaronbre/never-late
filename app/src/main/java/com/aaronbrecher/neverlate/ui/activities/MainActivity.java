@@ -13,7 +13,6 @@ import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -25,7 +24,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.aaronbrecher.neverlate.BuildConfig;
 import com.aaronbrecher.neverlate.Constants;
@@ -36,14 +34,13 @@ import com.aaronbrecher.neverlate.Utils.CalendarUtils;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
 import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.Utils.SystemUtils;
-import com.aaronbrecher.neverlate.backgroundservices.DrivingForegroundService;
 import com.aaronbrecher.neverlate.geofencing.AwarenessFencesCreator;
-import com.aaronbrecher.neverlate.geofencing.Geofencing;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
 import com.aaronbrecher.neverlate.interfaces.LocationCallback;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
 import com.aaronbrecher.neverlate.ui.fragments.EventListFragment;
+import com.aaronbrecher.neverlate.ui.fragments.NoEventsFragment;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -106,16 +103,24 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         mViewModel.getAllCurrentEvents().observe(this, new Observer<List<Event>>() {
             @Override
             public void onChanged(@Nullable List<Event> events) {
-                Log.i(TAG, "onChanged: was called");
-                loadFragment();
-                if (mViewModel.getEvent().getValue() == null
-                        && events != null
-                        && events.size() != 0) mViewModel.setEvent(events.get(0));
+                if(events == null || events.size() < 1){
+                    loadNoEventsFragment();
+                }
+                else {
+                    Log.i(TAG, "onChanged: was called");
+                    loadListFragment();
+                    if (mViewModel.getEvent().getValue() == null) mViewModel.setEvent(events.get(0));
+                }
             }
         });
     }
 
-    private void loadFragment() {
+    private void loadNoEventsFragment() {
+        NoEventsFragment fragment = new NoEventsFragment();
+        mFragmentManager.beginTransaction().replace(R.id.main_activity_list_fragment_container, fragment).commit();
+    }
+
+    private void loadListFragment() {
         EventListFragment listFragment = new EventListFragment();
         if (getResources().getBoolean(R.bool.is_tablet)) {
             EventDetailFragment eventDetailFragment = new EventDetailFragment();
@@ -188,7 +193,6 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        mViewModel.deleteAllEvents();
                         mEventList = CalendarUtils.getCalendarEventsForToday(MainActivity.this);
                         BackgroundUtils.getLocation(MainActivity.this, MainActivity.this, mLocationProviderClient);
                     }
@@ -235,6 +239,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             public void run() {
                 if(mEventList == null || mEventList.size() < 1) return;
                 DirectionsUtils.addDistanceInfoToEventList(mGeoApiContext, mEventList, location);
+                mViewModel.deleteAllEvents();
                 mViewModel.insertEvents(mEventList);
                 mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToGsonString(location)).apply();
                 AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(mEventList).build();
@@ -248,6 +253,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         new Thread(new Runnable() {
             @Override
             public void run() {
+                //mViewModel.deleteAllEvents();
                 mViewModel.insertEvents(mEventList);
             }
         }).start();

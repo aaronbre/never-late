@@ -50,7 +50,7 @@ public class GeofenceUtils {
 
     public static boolean eventIsPassedCurrentTime(LocalDateTime eventTime){
         LocalDateTime now = Converters.dateTimeFromUnix(System.currentTimeMillis());
-        return now.isBefore(eventTime);
+        return eventTime.isBefore(now);
     }
 
     public static int getFenceRadius(long distance, long drivingTime, long eventTime) {

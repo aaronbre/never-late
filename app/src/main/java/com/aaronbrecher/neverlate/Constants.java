@@ -19,6 +19,7 @@ public class Constants {
     public static final int AWARENESS_TRANSITION_PENDING_INTENT_CODE = 1;
     public static final String AWARENESS_FENCE_NAME_PREFIX = "never-late-awareness";
     public static final long TIME_TEN_MINUTES = 10 * 60 * 1000;
+    public static final long TIME_FIFTEEN_MINUTES = 15 * 60 * 1000;
     public static final long ONE_HOUR = TIME_TEN_MINUTES * 6;
     public static final long LOCATION_FENCE_RADIUS = 2000;
     public static final long LOCATION_FENCE_DWELL_TIME = 10 * 1000;

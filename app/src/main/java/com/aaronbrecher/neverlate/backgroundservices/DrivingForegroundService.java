@@ -125,7 +125,7 @@ public class DrivingForegroundService extends Service {
                         //deterimine time of arrival to location
                         long arrivalTime = System.currentTimeMillis() + drivingTimeToEventMillis;
                         long eventTime = GeofenceUtils.determineRelevantTime(event.getStartTime(), event.getEndTime());
-                        long bufferTime = eventTime - Constants.TIME_TEN_MINUTES;
+                        long bufferTime = eventTime - Constants.TIME_FIFTEEN_MINUTES;
                         if (arrivalTime >= eventTime) {
                             Boolean pastEndTime = eventTime == Converters.unixFromDateTime(event.getEndTime());
                             showEventNotification(event, EVENT_TIME, pastEndTime);
@@ -140,10 +140,11 @@ public class DrivingForegroundService extends Service {
     }
 
     private int determineDistanceToEvent(Event event, Location location) {
+        // first check if user is still within the previous fence. If so no need to do extra work
         String jsonLocation = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");
         if (!jsonLocation.equals("")) {
             Location previousLocation = LocationUtils.locationJsonToLocation(jsonLocation);
-            if (previousLocation.distanceTo(location) < Constants.LOCATION_FENCE_RADIUS)
+            if (previousLocation.distanceTo(location) < Constants.LOCATION_FENCE_RADIUS/2)
                 return -1;
         }
 
@@ -156,7 +157,7 @@ public class DrivingForegroundService extends Service {
     private void showEventNotification(Event event, int type, Boolean pastEndTime) {
         Intent intent = new Intent(this, EventDetailActivity.class);
         intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, event);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_geofence_car)
                 .setAutoCancel(true)

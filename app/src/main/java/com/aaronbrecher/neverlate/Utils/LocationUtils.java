@@ -27,7 +27,7 @@ public class LocationUtils {
         LatLng latLng = null;
         try {
             addresses = geocoder.getFromLocationName(address, 1);
-            if (addresses == null) return null;
+            if (addresses == null) return null ;
             Address location = addresses.get(0);
             latLng = new LatLng(location.getLatitude(), location.getLongitude());
 

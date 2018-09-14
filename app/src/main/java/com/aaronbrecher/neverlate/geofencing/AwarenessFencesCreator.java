@@ -96,7 +96,7 @@ public class AwarenessFencesCreator implements LocationCallback {
     private List<AwarenessFenceWithName> createFences() {
         List<AwarenessFenceWithName> fenceList = new ArrayList<>();
         for (Event event : mEventList) {
-            if(event.getTimeTo() == null) continue;
+            if(event.getTimeTo() == Constants.ROOM_INVALID_LONG_VALUE) continue;
             String name = Constants.AWARENESS_FENCE_NAME_PREFIX + event.getId();
             long relevantTime = GeofenceUtils.determineRelevantTime(event.getStartTime(), event.getEndTime());
             long triggerTime = relevantTime - (event.getTimeTo() * 1000);
@@ -152,6 +152,7 @@ public class AwarenessFencesCreator implements LocationCallback {
             @Override
             public void run() {
                 final List<AwarenessFenceWithName> fencelist = createFences();
+                if(fencelist.size() == 0) return;
                 FenceUpdateRequest request = getUpdateRequest(fencelist);
                 mFenceClient.updateFences(request).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override

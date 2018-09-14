@@ -44,8 +44,8 @@ public class CalendarUtils {
         //add the location in app..
         String selection = Constants.CALENDAR_EVENTS_DTSTART + " >= ? AND "
                 + Constants.CALENDAR_EVENTS_DTSTART + " <= ? AND "
-                + Constants.CALENDAR_EVENTS_EVENT_LOCATION + " IS NOT NULL AND " + Constants.CALENDAR_EVENTS_EVENT_LOCATION + " != '' "
-                + "AND (deleted != 1)";
+                //+ Constants.CALENDAR_EVENTS_EVENT_LOCATION + " IS NOT NULL AND " + Constants.CALENDAR_EVENTS_EVENT_LOCATION + " != '' AND "
+                + "(deleted != 1)";
         String[] args = getSelectionArgs();
         if(ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) ==
                 PackageManager.PERMISSION_GRANTED){
@@ -123,6 +123,7 @@ public class CalendarUtils {
     }
 
     private static LatLng convertLocationToLatLng(String location){
+        if(location == null || location.equals("")) return null;
         return LocationUtils.latlngFromAddress(NeverLateApp.getApp(), location);
     }
 }

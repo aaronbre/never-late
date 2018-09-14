@@ -16,6 +16,7 @@ import org.joda.time.Instant;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 //TODO this class will be used to get direction information time etc.
 //for now it uses the google API's may change that to a Mapbox or Mapquest
 public class DirectionsUtils {
@@ -23,13 +24,16 @@ public class DirectionsUtils {
     /**
      * add the distance and duration to the Event using the Distance Matrix API
      * TODO got error here from DistanceMatrixApi resopnse.getError InvalidRequestException
+     *
      * @param apiContext The GeoApiContext
-     * @param events the list of events to get information about
-     * @param location the users current location
+     * @param events     the list of events to get information about
+     * @param location   the users current location
      */
-    public static void addDistanceInfoToEventList(GeoApiContext apiContext, List<Event> events, Location location){
+    public static void addDistanceInfoToEventList(GeoApiContext apiContext, List<Event> events, Location location) {
+        events = removeEventsMissingLocation(events);
         DistanceMatrixApiRequest dmRequest = DirectionsUtils.getDistanceMatrixApiRequest(apiContext, events, location);
-        DistanceMatrix distanceMatrix =  null;
+        if (dmRequest == null) return;
+        DistanceMatrix distanceMatrix = null;
         try {
             distanceMatrix = dmRequest.await();
         } catch (InterruptedException | IOException | ApiException e) {
@@ -37,7 +41,7 @@ public class DirectionsUtils {
         }
         if (distanceMatrix != null) {
             DistanceMatrixElement[] elements = distanceMatrix.rows[0].elements;
-            for (int i = 0, j = elements.length; i < j; i++){
+            for (int i = 0, j = elements.length; i < j; i++) {
                 DistanceMatrixElement element = elements[i];
                 Event event = events.get(i);
                 event.setDistance(element.distance.inMeters);
@@ -48,25 +52,36 @@ public class DirectionsUtils {
         }
     }
 
+    private static List<Event> removeEventsMissingLocation(List<Event> eventList) {
+        List<Event> filtered = new ArrayList<>();
+        for (Event event : eventList) {
+            if (event.getLocation() != null && !event.getLocation().equals("")) {
+                filtered.add(event);
+            }
+        }
+        return filtered;
+    }
 
-    private static DistanceMatrixApiRequest getDistanceMatrixApiRequest(GeoApiContext apiContext, List<Event> events, Location location){
+
+    private static DistanceMatrixApiRequest getDistanceMatrixApiRequest(GeoApiContext apiContext, List<Event> events, Location location) {
         DistanceMatrixApiRequest req = new DistanceMatrixApiRequest(apiContext);
 
         ArrayList<String> dest = new ArrayList<>();
-        for(Event event : events){
+        for (Event event : events) {
             dest.add(event.getLocation());
         }
-        String [] destinationList = dest.toArray(new String[dest.size()]);
+        String[] destinationList = dest.toArray(new String[dest.size()]);
+        if (destinationList.length == 0) return null;
         return req.origins(new LatLng(location.getLatitude(), location.getLongitude()))
                 .mode(TravelMode.DRIVING)
                 .destinations(destinationList)
                 .departureTime(Instant.now());
     }
 
-    public static String readableTravelTime(long travelTime){
-        int totalMinutes = (int) (travelTime/60);
-        int hours = totalMinutes/60;
-        int minutes = totalMinutes%60;
+    public static String readableTravelTime(long travelTime) {
+        int totalMinutes = (int) (travelTime / 60);
+        int hours = totalMinutes / 60;
+        int minutes = totalMinutes % 60;
         return hours + ":" + minutes;
     }
 }
