@@ -5,4 +5,12 @@
         android:id="@+id/main_activity_menu_sync"
         android:title="@string/menu_item_refresh"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/main_activity_menu_show_all"
+        android:title="@string/menu_item_show_all"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/main_activity_menu_show_location_only"
+        android:title="@string/menu_item_show_loc_only"
+        app:showAsAction="never"/>
 </menu>

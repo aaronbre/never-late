@@ -63,7 +63,7 @@ public class EventListFragment extends Fragment {
         mActivity = (MainActivity) getActivity();
         mViewModel = ViewModelProviders.of(mActivity, mViewModelFactory).get(MainActivityViewModel.class);
         mListAdapter = new EventListAdapter(null, null, mActivity);
-        mViewModel.getAllCurrentEvents().observe(this, eventsObserver);
+        mViewModel.getShouldShowAllEvents().observe(this, showAllEventsObserver);
     }
 
     @Nullable
@@ -89,6 +89,19 @@ public class EventListFragment extends Fragment {
         @Override
         public void onChanged(@Nullable List<Event> events) {
             mListAdapter.swapLists(events);
+        }
+    };
+
+    private final Observer<Boolean> showAllEventsObserver = new Observer<Boolean>() {
+        @Override
+        public void onChanged(@Nullable Boolean shouldShow) {
+            if(shouldShow != null && shouldShow){
+                mViewModel.getAllCurrentEvents().removeObserver(eventsObserver);
+                mViewModel.getAllEvents().observe(EventListFragment.this, eventsObserver);
+            }else {
+                mViewModel.getAllEvents().removeObserver(eventsObserver);
+                mViewModel.getAllCurrentEvents().observe(EventListFragment.this, eventsObserver);
+            }
         }
     };
 }

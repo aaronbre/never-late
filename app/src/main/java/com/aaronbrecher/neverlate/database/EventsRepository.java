@@ -1,7 +1,6 @@
 package com.aaronbrecher.neverlate.database;
 
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
 
 import com.aaronbrecher.neverlate.models.Event;
 
@@ -28,8 +27,8 @@ public class EventsRepository {
     }
 
     //query all events in the database
-    public LiveData<List<Event>> queryAllEvents() {
-        return mEventsDao.queryAllEvents();
+    public LiveData<List<Event>> queryEventsNoLocation() {
+        return mEventsDao.queryEventsNoLocation(System.currentTimeMillis());
     }
 
 

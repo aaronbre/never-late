@@ -49,11 +49,11 @@ public class SetupActivityRecognitionJobService extends JobService {
     public void doWork(final JobParameters job) {
         List<ActivityTransition> transitions = new ArrayList<>();
         transitions.add(new ActivityTransition.Builder()
-                .setActivityType(DetectedActivity.WALKING)
+                .setActivityType(DetectedActivity.IN_VEHICLE)
                 .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
                 .build());
         transitions.add(new ActivityTransition.Builder()
-                .setActivityType(DetectedActivity.WALKING)
+                .setActivityType(DetectedActivity.IN_VEHICLE)
                 .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
                 .build());
         ActivityTransitionRequest request = new ActivityTransitionRequest(transitions);

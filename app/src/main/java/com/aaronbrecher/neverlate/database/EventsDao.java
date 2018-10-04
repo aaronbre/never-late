@@ -33,7 +33,7 @@ public interface EventsDao {
     List<Event> queryAllCurrentEventsSync(long currentTime);
 
     @Query("SELECT * FROM events WHERE endTime > :currentTime ORDER BY startTime")
-    List<Event> queryEventsNoLocationSync(long currentTime);
+    LiveData<List<Event>> queryEventsNoLocation(long currentTime);
 
     @Query("SELECT * FROM events WHERE id = :id")
     Event queryEventById(int id);
