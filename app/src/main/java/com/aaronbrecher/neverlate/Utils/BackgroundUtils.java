@@ -47,10 +47,9 @@ public class BackgroundUtils {
         Intent intent = new Intent(context, StartJobIntentServiceBroadcastReceiver.class);
         intent.setAction(Constants.ACTION_ADD_CALENDAR_EVENTS);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, Constants.CALENDAR_ALARM_SERVICE_REQUEST_CODE, intent, 0);
-        //TODO set to 15 for testing change interval to day
         if (alarmManager != null) {
             alarmManager.setRepeating(AlarmManager.RTC,
-                    zdt.toInstant().toEpochMilli(), AlarmManager.INTERVAL_FIFTEEN_MINUTES, pendingIntent);
+                    zdt.toInstant().toEpochMilli(), AlarmManager.INTERVAL_DAY, pendingIntent);
             return true;
         }
         return false;

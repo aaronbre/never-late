@@ -1,8 +1,10 @@
 package com.aaronbrecher.neverlate.adapters;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -10,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
 import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.databinding.EventsListItemBinding;
@@ -65,10 +68,19 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
 
     private String getHumanReadableDistance(Long distance){
         //TODO add a shared prefs to miles or km and fix this accordingly
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        boolean useMetric = false;
+        if(sharedPreferences.contains(Constants.UNIT_SYSTEM_PREFS_KEY)){
+            useMetric = sharedPreferences.getBoolean(Constants.UNIT_SYSTEM_PREFS_KEY, false);
+        }
         float km = distance.floatValue()/1000;
-        double miles = LocationUtils.kmToMiles(km);
         DecimalFormat df = new DecimalFormat("#.#");
-        return df.format(miles) + " MILES";
+        if(useMetric){
+            return df.format(km) + " KM";
+        }else {
+            double miles = LocationUtils.kmToMiles(km);
+            return df.format(miles) + " MILES";
+        }
     }
 
     @Override

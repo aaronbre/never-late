@@ -63,6 +63,7 @@ import static com.aaronbrecher.neverlate.Constants.PERMISSIONS_REQUEST_CODE;
 public class MainActivity extends AppCompatActivity implements ListItemClickListener, LocationCallback {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String SHOW_ALL_EVENTS_KEY = "should-show-all-events";
 
     @Inject
     ViewModelProvider.Factory mViewModelFactory;
@@ -76,8 +77,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     MainActivityViewModel mViewModel;
     private FragmentManager mFragmentManager;
     private FrameLayout mListContainer;
-    private ImageView mProgressSpinner;
-    private FrameLayout mDetailContainer;
+    private boolean shouldShowAllEvents = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,10 +90,15 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         setUpNotificationChannel();
         mViewModel = ViewModelProviders.of(this, mViewModelFactory)
                 .get(MainActivityViewModel.class);
+        if(savedInstanceState != null && savedInstanceState.containsKey(SHOW_ALL_EVENTS_KEY)){
+            shouldShowAllEvents = savedInstanceState.getBoolean(SHOW_ALL_EVENTS_KEY, false);
+            mViewModel.setShouldShowAllEvents(shouldShowAllEvents);
+        } else {
+            shouldShowAllEvents = false;
+            mViewModel.setShouldShowAllEvents(false);
+        }
         mFragmentManager = getSupportFragmentManager();
         mListContainer = findViewById(R.id.main_activity_list_fragment_container);
-        mDetailContainer = findViewById(R.id.main_activity_detail_fragment);
-        mProgressSpinner = findViewById(R.id.progress_spinner);
         if (!SystemUtils.hasPermissions(this)) {
             SystemUtils.requestCalendarAndLocationPermissions(this, findViewById(R.id.main_container));
         } else {
@@ -103,13 +108,13 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         mViewModel.getAllCurrentEvents().observe(this, new Observer<List<Event>>() {
             @Override
             public void onChanged(@Nullable List<Event> events) {
-                if(events == null || events.size() < 1){
+                if (events == null || events.size() < 1) {
                     loadNoEventsFragment();
-                }
-                else {
+                } else {
                     Log.i(TAG, "onChanged: was called");
                     loadListFragment();
-                    if (mViewModel.getEvent().getValue() == null) mViewModel.setEvent(events.get(0));
+                    if (mViewModel.getEvent().getValue() == null)
+                        mViewModel.setEvent(events.get(0));
                 }
             }
         });
@@ -188,18 +193,29 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.main_activity_menu_sync) {
-            if (SystemUtils.isConnected(this)) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mEventList = CalendarUtils.getCalendarEventsForToday(MainActivity.this);
-                        BackgroundUtils.getLocation(MainActivity.this, MainActivity.this, mLocationProviderClient);
-                    }
-                }, "MainActivityRefreshThread").start();
-            } else {
-                showNoConnectionSnackbar();
-            }
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.main_activity_menu_sync:
+                if (SystemUtils.isConnected(this)) {
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mEventList = CalendarUtils.getCalendarEventsForToday(MainActivity.this);
+                            BackgroundUtils.getLocation(MainActivity.this, MainActivity.this, mLocationProviderClient);
+                        }
+                    }, "MainActivityRefreshThread").start();
+                } else {
+                    showNoConnectionSnackbar();
+                }
+                break;
+            case R.id.main_activity_menu_show_all:
+                shouldShowAllEvents = true;
+                mViewModel.setShouldShowAllEvents(true);
+                return true;
+            case R.id.main_activity_menu_show_location_only:
+                shouldShowAllEvents = false;
+                mViewModel.setShouldShowAllEvents(false);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -237,7 +253,11 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if(mEventList == null || mEventList.size() < 1) return;
+                if (mEventList == null || mEventList.size() < 1){
+                    mViewModel.deleteAllEvents();
+                    mViewModel.insertEvents(null);
+                    return;
+                }
                 DirectionsUtils.addDistanceInfoToEventList(mGeoApiContext, mEventList, location);
                 mViewModel.deleteAllEvents();
                 mViewModel.insertEvents(mEventList);
@@ -253,14 +273,14 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         new Thread(new Runnable() {
             @Override
             public void run() {
-                //mViewModel.deleteAllEvents();
+                mViewModel.deleteAllEvents();
                 mViewModel.insertEvents(mEventList);
             }
         }).start();
         //TODO find out why it failed? Location is needed for the app to operate...
     }
 
-    private void checkLocationSettings(){
+    private void checkLocationSettings() {
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(new LocationRequest().setExpirationDuration(Constants.TIME_TEN_MINUTES)
                         .setFastestInterval(Constants.TIME_TEN_MINUTES)
@@ -275,19 +295,25 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                if(e instanceof ResolvableApiException){
-                    try{
+                if (e instanceof ResolvableApiException) {
+                    try {
                         ResolvableApiException resolvable = (ResolvableApiException) e;
-                        resolvable.startResolutionForResult(MainActivity.this,1);
-                    }catch (IntentSender.SendIntentException sendEx){
-                        Log.e(TAG, "onFailure: " + sendEx );
+                        resolvable.startResolutionForResult(MainActivity.this, 1);
+                    } catch (IntentSender.SendIntentException sendEx) {
+                        Log.e(TAG, "onFailure: " + sendEx);
                     }
                 }
             }
         });
     }
 
-//    /**
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(SHOW_ALL_EVENTS_KEY, shouldShowAllEvents);
+    }
+
+    //    /**
 //     * handle showing a loader image while loading data
 //     */
 //    private void toggleListVisibility() {
