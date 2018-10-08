@@ -2,11 +2,11 @@ apply plugin: 'com.android.application'
 
 android {
     signingConfigs {
-        config {
-            keyAlias 'neverLate'
+        release {
+            keyAlias 'neverLateKey'
             keyPassword 'Tvritrhv1'
-            storeFile file('/Users/aaronbrecher/Documents/keystores')
-            storePassword 'TvriTrhv1'
+            storeFile file('/Users/aaronbrecher/Documents/Android_Keystores/keystores-original')
+            storePassword 'Tvritrhv1'
         }
     }
     compileSdkVersion 27
@@ -31,6 +31,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     dataBinding {

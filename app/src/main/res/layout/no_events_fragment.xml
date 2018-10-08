@@ -2,15 +2,15 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#FCFCFC">
 
     <ImageView
         android:id="@+id/no_events_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/vertical_content_spacing_x_2"
+        android:layout_width="481dp"
+        android:layout_height="353dp"
         android:contentDescription="@string/no_events_error_image"
-        android:src="@drawable/no_tasks_image"
+        android:src="@drawable/ic_searching"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -20,6 +20,7 @@
         style="@style/headline"
         android:layout_marginTop="@dimen/vertical_content_spacing_x_2"
         android:text="@string/no_events_heading"
+        android:textColor="@android:color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/no_events_image" />
