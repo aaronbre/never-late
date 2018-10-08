@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'neverLate'
+            keyPassword 'Tvritrhv1'
+            storeFile file('/Users/aaronbrecher/Documents/keystores')
+            storePassword 'TvriTrhv1'
+        }
+    }
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.aaronbrecher.neverlate"
@@ -25,9 +33,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
     dataBinding {
         enabled = true
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
@@ -36,40 +47,32 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
     implementation 'com.android.support:design:27.1.1'
-
     //need to manually add to fix transient libraries of play-services
     implementation 'com.android.support:animated-vector-drawable:27.1.1'
     implementation 'com.android.support:mediarouter-v7:27.1.1'
     implementation 'com.android.support:support-v4:27.1.1'
-
     //play services dependencies
     implementation 'com.google.android.gms:play-services-location:15.0.1'
     implementation 'com.google.android.gms:play-services-maps:15.0.1'
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
     implementation 'com.google.android.gms:play-services-awareness:15.0.1'
-
     //web Maps Service
     implementation 'com.google.maps:google-maps-services:0.1.20'
-
     //Room live Data and view model
     def room_version = "1.1.1"
     def lifecycle_version = "1.1.1"
     implementation "android.arch.lifecycle:extensions:$lifecycle_version"
     implementation "android.arch.persistence.room:runtime:$room_version"
     annotationProcessor "android.arch.persistence.room:compiler:$room_version"
-    implementation "android.arch.work:work-runtime:1.0.0-alpha06"
-
+    implementation 'android.arch.work:work-runtime:1.0.0-alpha06'
     //Helper for time functions
     implementation 'com.jakewharton.threetenabp:threetenabp:1.1.0'
-
     //dagger 2 dependency injection
     implementation 'com.google.dagger:dagger:2.13'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.13'
     implementation 'com.google.dagger:dagger-android-support:2.13'
-
     //material dimensions
     implementation 'com.dmitrymalkovich.android:material-design-dimens:1.4'
-
     //testing dependencies
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'

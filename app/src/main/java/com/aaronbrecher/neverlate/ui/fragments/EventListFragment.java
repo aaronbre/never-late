@@ -7,7 +7,6 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Debug;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -21,7 +20,6 @@ import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.adapters.EventListAdapter;
 import com.aaronbrecher.neverlate.databinding.MainActivityListFragmentBinding;
 import com.aaronbrecher.neverlate.dependencyinjection.AppComponent;
-import com.aaronbrecher.neverlate.geofencing.Geofencing;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.ui.activities.MainActivity;
@@ -104,4 +102,8 @@ public class EventListFragment extends Fragment {
             }
         }
     };
+
+    public void filter(CharSequence query){
+        mListAdapter.getFilter().filter(query);
+    }
 }

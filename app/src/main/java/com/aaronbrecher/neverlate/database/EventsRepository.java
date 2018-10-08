@@ -19,7 +19,7 @@ public class EventsRepository {
     }
 
     public void insertAll(List<Event> events) {
-        mEventsDao.insertAll(events);
+        if(events.size() > 0) mEventsDao.insertAll(events);
     }
 
     public void insertEvent(Event event) {

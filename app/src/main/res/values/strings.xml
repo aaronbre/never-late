@@ -25,10 +25,12 @@
     <string name="driving_foreground_notification_text">Never late is tracking your location while you drive. This is being done to make sure you will make your events on time. To cancel the tracking just click cancel.</string>
     <string name="driving_foreground_notification_title">Tracking Location</string>
     <string name="no_events_error_image">No events error image</string>
-    <string name="no_events_text">Whoops looks like you don\'t have any events with a location saved, make sure your events have a location in order for it to be tracked</string>
+    <string name="no_events_text">Whoops looks like you don\'t have any events with a location saved, make sure your events have a location in order for it to be tracked.
+        If you would like to see events without locations and add a location please select so from the menu.</string>
     <string name="no_events_heading">No tracked events!</string>
     <string name="no_events_button">view events without location</string>
     <string name="menu_item_show_all">Show all Events</string>
     <string name="menu_item_show_loc_only">Show only events with location</string>
+    <string name="search">Search</string>
 
 </resources>

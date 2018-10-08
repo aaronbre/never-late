@@ -11,6 +11,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
@@ -24,11 +26,13 @@ import com.google.maps.PendingResult;
 import com.google.maps.model.DirectionsResult;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 
-public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.EventViewHolder> {
+public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.EventViewHolder> implements Filterable {
     private static final String TAG = EventListAdapter.class.getSimpleName();
     private List<Event> mEvents;
+    private List<Event> mFilteredEvents;
     private ListItemClickListener mClickListener;
     private Location mLocation;
     private Context mContext;
@@ -43,6 +47,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
      */
     public EventListAdapter(List<Event> events, Location location, ListItemClickListener clickListener) {
         mEvents = events;
+        mFilteredEvents = events;
         mLocation = location;
         mClickListener = clickListener;
         mContext = (Context) mClickListener;
@@ -59,7 +64,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
 
     @Override
     public void onBindViewHolder(@NonNull final EventViewHolder holder, final int position) {
-        Event event = mEvents.get(position);
+        Event event = mFilteredEvents.get(position);
         holder.binding.eventTitle.setText(event.getTitle());
         holder.binding.eventLocation.setText(event.getLocation());
         if (event.getDistance() != null) holder.binding.eventDistance.setText(getHumanReadableDistance(event.getDistance()));
@@ -85,16 +90,16 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
 
     @Override
     public int getItemCount() {
-        if (mEvents == null) return 0;
-        return mEvents.size();
+        if (mFilteredEvents == null) return 0;
+        return mFilteredEvents.size();
     }
 
 
     public void swapLists(List<Event> events) {
         this.mEvents = events;
+        this.mFilteredEvents = mEvents;
         notifyDataSetChanged();
     }
-
 
     public class EventViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private EventsListItemBinding binding;
@@ -110,5 +115,35 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
             Event event = mEvents.get(getAdapterPosition());
             mClickListener.onListItemClick(event);
         }
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                String query = constraint.toString();
+                List<Event> filtered = new ArrayList<>();
+                if(query.isEmpty()){
+                    filtered = mEvents;
+                }else{
+                    for(Event event : mEvents){
+                        if(event.getTitle().toLowerCase().contains(query.toLowerCase())){
+                            filtered.add(event);
+                        }
+                    }
+                }
+                FilterResults results = new FilterResults();
+                results.count = filtered.size();
+                results.values = filtered;
+                return results;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                mFilteredEvents = (ArrayList<Event>)results.values;
+                notifyDataSetChanged();
+            }
+        };
     }
 }
