@@ -2,10 +2,11 @@ package com.aaronbrecher.neverlate.ui.activities;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.arch.lifecycle.Observer;
+import android.app.SearchManager;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
@@ -13,17 +14,17 @@ import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.provider.CalendarContract;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 
 import com.aaronbrecher.neverlate.BuildConfig;
 import com.aaronbrecher.neverlate.Constants;
@@ -49,8 +50,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.maps.GeoApiContext;
 
@@ -77,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     MainActivityViewModel mViewModel;
     private FragmentManager mFragmentManager;
     private FrameLayout mListContainer;
+    private SearchView mSearchView;
     private boolean shouldShowAllEvents = false;
 
     @Override
@@ -99,24 +99,28 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         }
         mFragmentManager = getSupportFragmentManager();
         mListContainer = findViewById(R.id.main_activity_list_fragment_container);
+        FloatingActionButton fab = findViewById(R.id.event_list_fab);
+
         if (!SystemUtils.hasPermissions(this)) {
             SystemUtils.requestCalendarAndLocationPermissions(this, findViewById(R.id.main_container));
         } else {
             setUpAlarmManager();
         }
         checkLocationSettings();
-        mViewModel.getAllCurrentEvents().observe(this, new Observer<List<Event>>() {
-            @Override
-            public void onChanged(@Nullable List<Event> events) {
-                if (events == null || events.size() < 1) {
-                    loadNoEventsFragment();
-                } else {
-                    Log.i(TAG, "onChanged: was called");
-                    loadListFragment();
-                    if (mViewModel.getEvent().getValue() == null)
-                        mViewModel.setEvent(events.get(0));
-                }
+        mViewModel.getAllCurrentEvents().observe(this, events -> {
+            if (events == null || events.size() < 1) {
+                loadNoEventsFragment();
+            } else {
+                Log.i(TAG, "onChanged: was called");
+                loadListFragment();
+                if (mViewModel.getEvent().getValue() == null)
+                    mViewModel.setEvent(events.get(0));
             }
+        });
+        fab.setOnClickListener(v -> {
+            Intent calIntent = new Intent(Intent.ACTION_INSERT);
+            calIntent.setData(CalendarContract.Events.CONTENT_URI);
+            startActivity(calIntent);
         });
     }
 
@@ -188,6 +192,28 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.main_activity_menu, menu);
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        mSearchView = (SearchView) menu.findItem(R.id.main_activity_menu_search).getActionView();
+        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        mSearchView.setMaxWidth(Integer.MAX_VALUE);
+
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                EventListFragment fragment = (EventListFragment) mFragmentManager.findFragmentByTag(Constants.EVENT_LIST_TAG);
+                if(fragment == null) return false;
+                fragment.filter(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                EventListFragment fragment = (EventListFragment) mFragmentManager.findFragmentByTag(Constants.EVENT_LIST_TAG);
+                if(fragment == null) return false;
+                fragment.filter(newText);
+                return false;
+            }
+        });
         return true;
     }
 
@@ -197,12 +223,9 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         switch (id) {
             case R.id.main_activity_menu_sync:
                 if (SystemUtils.isConnected(this)) {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mEventList = CalendarUtils.getCalendarEventsForToday(MainActivity.this);
-                            BackgroundUtils.getLocation(MainActivity.this, MainActivity.this, mLocationProviderClient);
-                        }
+                    new Thread(() -> {
+                        mEventList = CalendarUtils.getCalendarEventsForToday(MainActivity.this);
+                        BackgroundUtils.getLocation(MainActivity.this, MainActivity.this, mLocationProviderClient);
                     }, "MainActivityRefreshThread").start();
                 } else {
                     showNoConnectionSnackbar();
@@ -222,17 +245,14 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
     private void showNoConnectionSnackbar() {
         Snackbar.make(mListContainer, R.string.refresh_error_no_connection, Snackbar.LENGTH_INDEFINITE)
-                .setAction(getString(R.string.launch_data_settings_button), new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(Intent.ACTION_MAIN);
-                        intent.setComponent(
-                                new ComponentName(
-                                        "com.android.settings",
-                                        "com.android.settings.Settings$DataUsageSummaryActivity"
-                                ));
-                        startActivity(intent);
-                    }
+                .setAction(getString(R.string.launch_data_settings_button), v -> {
+                    Intent intent = new Intent(Intent.ACTION_MAIN);
+                    intent.setComponent(
+                            new ComponentName(
+                                    "com.android.settings",
+                                    "com.android.settings.Settings$DataUsageSummaryActivity"
+                            ));
+                    startActivity(intent);
                 })
                 .show();
     }
@@ -250,32 +270,25 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
     @Override
     public void getLocationSuccessCallback(final Location location) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (mEventList == null || mEventList.size() < 1){
-                    mViewModel.deleteAllEvents();
-                    mViewModel.insertEvents(null);
-                    return;
-                }
-                DirectionsUtils.addDistanceInfoToEventList(mGeoApiContext, mEventList, location);
+        new Thread(() -> {
+            if (mEventList == null || mEventList.size() < 1){
                 mViewModel.deleteAllEvents();
-                mViewModel.insertEvents(mEventList);
-                mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToGsonString(location)).apply();
-                AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(mEventList).build();
-                creator.buildAndSaveFences();
+                return;
             }
+            DirectionsUtils.addDistanceInfoToEventList(mGeoApiContext, mEventList, location);
+            mViewModel.deleteAllEvents();
+            mViewModel.insertEvents(mEventList);
+            mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToGsonString(location)).apply();
+            AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(mEventList).build();
+            creator.buildAndSaveFences();
         }, "MainActivitylocationThread").start();
     }
 
     @Override
     public void getLocationFailedCallback() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                mViewModel.deleteAllEvents();
-                mViewModel.insertEvents(mEventList);
-            }
+        new Thread(() -> {
+            mViewModel.deleteAllEvents();
+            mViewModel.insertEvents(mEventList);
         }).start();
         //TODO find out why it failed? Location is needed for the app to operate...
     }
@@ -287,21 +300,15 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                         .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY));
         SettingsClient settingsClient = LocationServices.getSettingsClient(this);
         Task<LocationSettingsResponse> task = settingsClient.checkLocationSettings(builder.build());
-        task.addOnSuccessListener(new OnSuccessListener<LocationSettingsResponse>() {
-            @Override
-            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+        task.addOnSuccessListener(locationSettingsResponse -> {
 
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                if (e instanceof ResolvableApiException) {
-                    try {
-                        ResolvableApiException resolvable = (ResolvableApiException) e;
-                        resolvable.startResolutionForResult(MainActivity.this, 1);
-                    } catch (IntentSender.SendIntentException sendEx) {
-                        Log.e(TAG, "onFailure: " + sendEx);
-                    }
+        }).addOnFailureListener(e -> {
+            if (e instanceof ResolvableApiException) {
+                try {
+                    ResolvableApiException resolvable = (ResolvableApiException) e;
+                    resolvable.startResolutionForResult(MainActivity.this, 1);
+                } catch (IntentSender.SendIntentException sendEx) {
+                    Log.e(TAG, "onFailure: " + sendEx);
                 }
             }
         });

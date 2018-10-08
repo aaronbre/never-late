@@ -17,20 +17,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-//TODO this class will be used to get direction information time etc.
+//this class will be used to get direction information time etc.
 //for now it uses the google API's may change that to a Mapbox or Mapquest
 public class DirectionsUtils {
 
     /**
      * add the distance and duration to the Event using the Distance Matrix API
-     * TODO got error here from DistanceMatrixApi resopnse.getError InvalidRequestException
      *
      * @param apiContext The GeoApiContext
      * @param events     the list of events to get information about
      * @param location   the users current location
      */
     public static void addDistanceInfoToEventList(GeoApiContext apiContext, List<Event> events, Location location) {
-        events = removeEventsMissingLocation(events);
+        events = removeEventsWithoutLocation(events);
         DistanceMatrixApiRequest dmRequest = DirectionsUtils.getDistanceMatrixApiRequest(apiContext, events, location);
         if (dmRequest == null) return;
         DistanceMatrix distanceMatrix = null;
@@ -52,7 +51,7 @@ public class DirectionsUtils {
         }
     }
 
-    private static List<Event> removeEventsMissingLocation(List<Event> eventList) {
+    private static List<Event> removeEventsWithoutLocation(List<Event> eventList) {
         List<Event> filtered = new ArrayList<>();
         for (Event event : eventList) {
             if (event.getLocation() != null && !event.getLocation().equals("")) {

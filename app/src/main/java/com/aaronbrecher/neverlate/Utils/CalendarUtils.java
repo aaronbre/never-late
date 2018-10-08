@@ -39,9 +39,6 @@ public class CalendarUtils {
                 Constants.CALENDAR_EVENTS_EVENT_LOCATION};
         //TODO change this to only query calendars user has selected {NOT_MVP}
         //as of now filters for only events starting at midnight of that day until 11:59PM
-        //TODO currently filters out events without a location here possibly retrieve even events
-        //without a location and have the Room query filter, (this will allow more flexability to
-        //add the location in app..
         String selection = Constants.CALENDAR_EVENTS_DTSTART + " >= ? AND "
                 + Constants.CALENDAR_EVENTS_DTSTART + " <= ? AND "
                 //+ Constants.CALENDAR_EVENTS_EVENT_LOCATION + " IS NOT NULL AND " + Constants.CALENDAR_EVENTS_EVENT_LOCATION + " != '' AND "

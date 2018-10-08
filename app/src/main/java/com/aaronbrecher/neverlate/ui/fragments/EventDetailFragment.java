@@ -4,6 +4,8 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.LocationUtils;
@@ -22,13 +25,13 @@ import com.aaronbrecher.neverlate.models.GeofenceModel;
 import com.aaronbrecher.neverlate.viewmodels.BaseViewModel;
 import com.aaronbrecher.neverlate.viewmodels.DetailActivityViewModel;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -36,17 +39,18 @@ import org.threeten.bp.format.DateTimeFormatter;
 
 import javax.inject.Inject;
 
-//TODO need to rethink this with the new AwarenessFence idea...
-public class EventDetailFragment extends Fragment implements OnMapReadyCallback{
+public class EventDetailFragment extends Fragment implements OnMapReadyCallback {
 
     @Inject
     ViewModelProvider.Factory mViewModelFactory;
+    @Inject
+    SharedPreferences mSharedPreferences;
     private BaseViewModel mViewModel;
     private EventDetailFragmentBinding mBinding;
     private SupportMapFragment mMapFragment;
     private Event mEvent;
-    private Marker mMapMarker;
-    private Circle mMapCircle;
+    private Marker mEventMarker;
+    private Marker mLocationMarker;
 
     private Observer<Event> mEventObserver = new Observer<Event>() {
         @Override
@@ -60,11 +64,11 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback{
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        AppComponent appComponent = ((NeverLateApp)getActivity().getApplication()).getAppComponent();
+        AppComponent appComponent = ((NeverLateApp) getActivity().getApplication()).getAppComponent();
         appComponent.inject(this);
-        if(getResources().getBoolean(R.bool.is_tablet)){
+        if (getResources().getBoolean(R.bool.is_tablet)) {
             mViewModel = ViewModelProviders.of(getActivity(), mViewModelFactory).get(MainActivityViewModel.class);
-        }else{
+        } else {
             mViewModel = ViewModelProviders.of(getActivity(), mViewModelFactory).get(DetailActivityViewModel.class);
         }
 
@@ -88,30 +92,44 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback{
             @Override
             public void onChanged(@Nullable GeofenceModel geofenceModel) {
                 int radius = geofenceModel != null ? geofenceModel.getFenceRadius() : 100;
-                addGeofenceToMap(googleMap, radius
-                );
+                addGeofenceToMap(googleMap, radius);
             }
         });
     }
 
     private void addGeofenceToMap(GoogleMap googleMap, int fenceRadius) {
-        if(mMapMarker != null) mMapMarker.remove();
-        if(mMapCircle != null)mMapCircle.remove();
-        LatLng latLng = mEvent.getLocationLatlng();
-        if(latLng == null) return;
-        CircleOptions circleOptions = new CircleOptions()
-                .center(latLng)
-                .radius(fenceRadius);
-        mMapMarker = googleMap.addMarker(new MarkerOptions().position(latLng)
-                .title(mEvent.getTitle()));
-        mMapCircle = googleMap.addCircle(circleOptions);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,10.0f));
+        //TODO NOT Working fix this
+        if (mEventMarker != null) mEventMarker.remove();
+        if (mLocationMarker != null) mLocationMarker.remove();
+//        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+//
+//        LatLng latLng = mEvent.getLocationLatlng();
+//        LatLng locLatLng = null;
+//        String location = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");
+//        if (!location.equals("")) {
+//            Location loc = LocationUtils.locationJsonToLocation(location);
+//            locLatLng = new LatLng(loc.getLatitude(), loc.getLongitude());
+//        }
+//        if (latLng != null) {
+//            mEventMarker = googleMap.addMarker(new MarkerOptions().position(latLng)
+//                    .title(mEvent.getTitle()));
+//            builder.include(mEventMarker.getPosition());
+//        }
+//        if (locLatLng != null) {
+//            mLocationMarker = googleMap.addMarker(new MarkerOptions().position(locLatLng)
+//                    .title("Your Location"));
+//            builder.include(mLocationMarker.getPosition());
+//        }
+//
+//        LatLngBounds bounds = builder.build();
+//        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 0);
+//        googleMap.moveCamera(cu);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if(mEvent != null){
+        if (mEvent != null) {
             mViewModel.getGeofenceForKey(mEvent.getId()).removeObservers(this);
         }
     }

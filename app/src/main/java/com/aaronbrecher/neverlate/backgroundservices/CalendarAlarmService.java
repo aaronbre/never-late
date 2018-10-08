@@ -34,7 +34,6 @@ import javax.inject.Inject;
 import static com.aaronbrecher.neverlate.Utils.BackgroundUtils.DEFAULT_JOB_TIMEFRAME;
 
 public class CalendarAlarmService extends JobIntentService implements LocationCallback {
-    //TODO alarm service was not triggered at midnight... investigate
     public static final String TAG = CalendarAlarmService.class.getSimpleName();
     @Inject
     EventsRepository mEventsRepository;
