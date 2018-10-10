@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.Gson;
 
 import org.threeten.bp.LocalDateTime;
 
@@ -216,4 +217,14 @@ public class Event implements Parcelable {
             return new Event[size];
         }
     };
+
+    @Ignore
+    public static String convertEventToJson(Event event){
+        return new Gson().toJson(event);
+    }
+
+    @Ignore
+    public static Event convertJsonToEvent(String json){
+        return new Gson().fromJson(json, Event.class);
+    }
 }

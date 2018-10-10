@@ -1,0 +1,74 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/widget_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFF"
+    android:orientation="vertical">
+
+    <TextView
+        style="@style/headline"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimaryDark"
+        android:padding="10dp"
+        android:text="Your next event"
+        android:textAlignment="center"
+        android:textColor="@android:color/white" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/widget_margin"
+        android:background="@color/colorPrimaryLight"
+        android:padding="@dimen/material_layout_vertical_spacing_between_content_areas">
+
+        <TextView
+            android:id="@+id/widget_event_title"
+            style="@style/headline"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:textColor="@android:color/white"
+            tools:text="Doctors Appointment" />
+
+        <TextView
+            android:id="@+id/widget_event_location"
+            style="@style/smallSubHeading"
+            android:layout_below="@+id/widget_event_title"
+            android:layout_alignStart="@id/widget_event_title"
+            android:layout_marginTop="@dimen/material_layout_vertical_spacing_between_content_areas"
+            android:layout_toStartOf="@+id/widget_event_distance"
+            android:textColor="@android:color/white"
+            tools:text="52 Gordon st. Elsternwick VIC yadda yadda yadda yadda yadda" />
+
+        <TextView
+            android:id="@+id/widget_event_time_to"
+            style="@style/headline"
+            android:layout_alignParentEnd="true"
+            android:textColor="@android:color/white"
+            tools:text="45 Min" />
+
+        <TextView
+            android:id="@+id/widget_event_distance"
+            style="@style/smallSubHeading"
+            android:layout_below="@id/widget_event_time_to"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="@dimen/material_layout_vertical_spacing_between_content_areas"
+            android:textColor="@android:color/white"
+            tools:text="22 Miles" />
+
+        <TextView
+            android:id="@+id/widget_leave_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/widget_event_location"
+            android:textAlignment="center"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/material_typography_subheading"
+            android:textStyle="bold"
+            android:layout_marginTop="@dimen/material_layout_vertical_spacing_between_content_areas"
+            tools:text="You should leave at about - 5:45PM" />
+    </RelativeLayout>
+
+</LinearLayout>

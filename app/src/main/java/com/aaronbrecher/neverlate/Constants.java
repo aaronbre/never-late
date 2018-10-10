@@ -45,6 +45,7 @@ public class Constants {
     public static final String KM_PER_MINUTE_PREFS_KEY = "miles-per-minute";
     public static final String UNIT_SYSTEM_PREFS_KEY = "unit-system";
     public static final String ALARM_STATUS_KEY = "alarm-status";
+    public static final String NEXT_EVENT_KEY = "next-event";
 
 
 

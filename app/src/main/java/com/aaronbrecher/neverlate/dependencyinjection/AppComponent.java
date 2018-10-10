@@ -8,6 +8,7 @@ import com.aaronbrecher.neverlate.ui.activities.EventDetailActivity;
 import com.aaronbrecher.neverlate.ui.activities.MainActivity;
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
 import com.aaronbrecher.neverlate.ui.fragments.EventListFragment;
+import com.aaronbrecher.neverlate.ui.widget.NeverLateWidget;
 
 import javax.inject.Singleton;
 
@@ -24,4 +25,5 @@ public interface AppComponent {
     void inject(AwarenessFenceTransitionService service);
     void inject(ActivityTransitionService service);
     void inject(DrivingForegroundService service);
+    void inject(NeverLateWidget widget);
 }

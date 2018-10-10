@@ -101,29 +101,29 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
         //TODO NOT Working fix this
         if (mEventMarker != null) mEventMarker.remove();
         if (mLocationMarker != null) mLocationMarker.remove();
-//        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-//
-//        LatLng latLng = mEvent.getLocationLatlng();
-//        LatLng locLatLng = null;
-//        String location = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");
-//        if (!location.equals("")) {
-//            Location loc = LocationUtils.locationJsonToLocation(location);
-//            locLatLng = new LatLng(loc.getLatitude(), loc.getLongitude());
-//        }
-//        if (latLng != null) {
-//            mEventMarker = googleMap.addMarker(new MarkerOptions().position(latLng)
-//                    .title(mEvent.getTitle()));
-//            builder.include(mEventMarker.getPosition());
-//        }
-//        if (locLatLng != null) {
-//            mLocationMarker = googleMap.addMarker(new MarkerOptions().position(locLatLng)
-//                    .title("Your Location"));
-//            builder.include(mLocationMarker.getPosition());
-//        }
-//
-//        LatLngBounds bounds = builder.build();
-//        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 0);
-//        googleMap.moveCamera(cu);
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+        LatLng latLng = mEvent.getLocationLatlng();
+        LatLng locLatLng = null;
+        String location = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");
+        if (!location.equals("")) {
+            Location loc = LocationUtils.locationJsonToLocation(location);
+            locLatLng = new LatLng(loc.getLatitude(), loc.getLongitude());
+        }
+        if (latLng != null) {
+            mEventMarker = googleMap.addMarker(new MarkerOptions().position(latLng)
+                    .title(mEvent.getTitle()));
+            builder.include(mEventMarker.getPosition());
+        }
+        if (locLatLng != null) {
+            mLocationMarker = googleMap.addMarker(new MarkerOptions().position(locLatLng)
+                    .title("Your Location"));
+            builder.include(mLocationMarker.getPosition());
+        }
+
+        LatLngBounds bounds = builder.build();
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 200);
+        googleMap.moveCamera(cu);
     }
 
     @Override

@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.JobIntentService;
 
+import com.aaronbrecher.neverlate.AppExecutors;
 import com.aaronbrecher.neverlate.BuildConfig;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
@@ -43,6 +44,8 @@ public class ActivityTransitionService extends JobIntentService {
     SharedPreferences mSharedPreferences;
     @Inject
     EventsRepository mEventsRepository;
+    @Inject
+    AppExecutors mAppExecutors;
 
     @Override
     public void onCreate() {
@@ -99,23 +102,20 @@ public class ActivityTransitionService extends JobIntentService {
         mLocationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(final Location location) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        List<Event> eventList = mEventsRepository.queryAllCurrentEventsSync();
-                        DirectionsUtils.addDistanceInfoToEventList(
-                                new GeoApiContext().setApiKey(BuildConfig.GOOGLE_API_KEY),
-                                eventList,
-                                location);
-                        AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(eventList).build();
-                        creator.setEventList(eventList);
-                        creator.buildAndSaveFences();
-                        //save the new location to shared prefs
-                        mSharedPreferences.edit()
-                                .putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToGsonString(location))
-                                .apply();
-                    }
-                }, "ActivityTransitionLocationThread").start();
+                mAppExecutors.diskIO().execute(() -> {
+                    List<Event> eventList = mEventsRepository.queryAllCurrentEventsSync();
+                    DirectionsUtils.addDistanceInfoToEventList(
+                            new GeoApiContext().setApiKey(BuildConfig.GOOGLE_API_KEY),
+                            eventList,
+                            location);
+                    AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(eventList).build();
+                    creator.setEventList(eventList);
+                    creator.buildAndSaveFences();
+                    //save the new location to shared prefs
+                    mSharedPreferences.edit()
+                            .putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToGsonString(location))
+                            .apply();
+                });
             }
         });
     }

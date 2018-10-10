@@ -26,6 +26,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
 
+import com.aaronbrecher.neverlate.AppExecutors;
 import com.aaronbrecher.neverlate.BuildConfig;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
@@ -70,6 +71,8 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     SharedPreferences mSharedPreferences;
     @Inject
     FusedLocationProviderClient mLocationProviderClient;
+    @Inject
+    AppExecutors mAppExecutors;
 
     private GeoApiContext mGeoApiContext = new GeoApiContext().setApiKey(BuildConfig.GOOGLE_API_KEY);
     private List<Event> mEventList;
@@ -223,10 +226,10 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         switch (id) {
             case R.id.main_activity_menu_sync:
                 if (SystemUtils.isConnected(this)) {
-                    new Thread(() -> {
+                    mAppExecutors.diskIO().execute(() -> {
                         mEventList = CalendarUtils.getCalendarEventsForToday(MainActivity.this);
                         BackgroundUtils.getLocation(MainActivity.this, MainActivity.this, mLocationProviderClient);
-                    }, "MainActivityRefreshThread").start();
+                    });
                 } else {
                     showNoConnectionSnackbar();
                 }
@@ -270,7 +273,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
     @Override
     public void getLocationSuccessCallback(final Location location) {
-        new Thread(() -> {
+        mAppExecutors.networkIO().execute(() -> {
             if (mEventList == null || mEventList.size() < 1){
                 mViewModel.deleteAllEvents();
                 return;
@@ -281,15 +284,15 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToGsonString(location)).apply();
             AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(mEventList).build();
             creator.buildAndSaveFences();
-        }, "MainActivitylocationThread").start();
+        });
     }
 
     @Override
     public void getLocationFailedCallback() {
-        new Thread(() -> {
+        mAppExecutors.diskIO().execute(() -> {
             mViewModel.deleteAllEvents();
             mViewModel.insertEvents(mEventList);
-        }).start();
+        });
         //TODO find out why it failed? Location is needed for the app to operate...
     }
 

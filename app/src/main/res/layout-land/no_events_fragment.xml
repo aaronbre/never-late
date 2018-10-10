@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FCFCFC">
+
+    <ImageView
+        android:id="@+id/no_events_image"
+        android:layout_width="479dp"
+        android:layout_height="353dp"
+        android:contentDescription="@string/no_events_error_image"
+        android:src="@drawable/ic_searching"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/guideline2" />
+
+    <TextView
+        android:id="@+id/no_events_heading"
+        style="@style/headline"
+        android:layout_marginTop="50dp"
+        android:text="@string/no_events_heading"
+        android:textColor="@android:color/black"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="@id/guideline2" />
+
+    <TextView
+        android:id="@+id/no_events_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/material_layout_vertical_spacing_between_content_areas"
+        android:lineSpacingExtra="2dp"
+        android:paddingEnd="@dimen/material_layout_keylines_screen_edge_margin"
+        android:text="@string/no_events_text"
+        android:textColor="#344B67"
+        android:textSize="@dimen/material_component_lists_two_line_text_size"
+        app:layout_constraintStart_toStartOf="@id/guideline2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/no_events_heading" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5"/>
+
+
+</android.support.constraint.ConstraintLayout>

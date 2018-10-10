@@ -32,5 +32,7 @@
     <string name="menu_item_show_all">Show all Events</string>
     <string name="menu_item_show_loc_only">Show only events with location</string>
     <string name="search">Search</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 
 </resources>
