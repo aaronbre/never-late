@@ -1,7 +1,9 @@
 package com.aaronbrecher.neverlate.Utils;
 
+import android.content.SharedPreferences;
 import android.location.Location;
 
+import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.models.Event;
 import com.google.maps.DistanceMatrixApiRequest;
 import com.google.maps.GeoApiContext;
@@ -12,8 +14,10 @@ import com.google.maps.model.LatLng;
 import com.google.maps.model.TravelMode;
 
 import org.joda.time.Instant;
+import org.joda.time.LocalDateTime;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,5 +86,37 @@ public class DirectionsUtils {
         int hours = totalMinutes / 60;
         int minutes = totalMinutes % 60;
         return hours + ":" + minutes;
+    }
+
+    public static String getHumanReadableDistance(Long distance, SharedPreferences sharedPreferences){
+        //TODO add a shared prefs to miles or km and fix this accordingly
+        boolean useMetric = false;
+        if(sharedPreferences.contains(Constants.UNIT_SYSTEM_PREFS_KEY)){
+            useMetric = sharedPreferences.getBoolean(Constants.UNIT_SYSTEM_PREFS_KEY, false);
+        }
+        float km = distance.floatValue()/1000;
+        DecimalFormat df = new DecimalFormat("#.#");
+        if(useMetric){
+            return df.format(km) + " KM";
+        }else {
+            double miles = LocationUtils.kmToMiles(km);
+            return df.format(miles) + " MILES";
+        }
+    }
+
+    public static String getTimeToLeaveHumanReadable(long timeTo, long eventTime){
+        timeTo = timeTo * 1000;
+        long leaveTime = eventTime - timeTo;
+        LocalDateTime localDateTime = new LocalDateTime(leaveTime);
+        String amPm;
+        int hour;
+        if(localDateTime.getHourOfDay() < 12){
+            hour = localDateTime.getHourOfDay();
+            amPm = "AM";
+        } else {
+            hour = localDateTime.getHourOfDay() - 12;
+            amPm = "PM";
+        }
+        return hour + ":" + localDateTime.getMinuteOfHour() + amPm;
     }
 }

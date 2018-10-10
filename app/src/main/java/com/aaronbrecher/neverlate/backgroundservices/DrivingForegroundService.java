@@ -14,6 +14,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
+import com.aaronbrecher.neverlate.AppExecutors;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
@@ -43,6 +44,8 @@ public class DrivingForegroundService extends Service {
     FusedLocationProviderClient mLocationProviderClient;
     @Inject
     SharedPreferences mSharedPreferences;
+    @Inject
+    AppExecutors mAppExecutors;
 
     private PendingIntent mCancelIntent;
     private LocationRequest mLocationRequest;
@@ -68,20 +71,16 @@ public class DrivingForegroundService extends Service {
             intent.setAction(Constants.ACTION_CANCEL_DRIVING_SERVICE);
             mCancelIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             startForeground(SERVICE_ID, getForegroundNotification());
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    mEventList = mEventsRepository.queryAllCurrentEventsSync();
-                    createLocationRequest();
-                    createLocationCallback();
-                    if (ActivityCompat.checkSelfPermission(DrivingForegroundService.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                            ActivityCompat.checkSelfPermission(DrivingForegroundService.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        return;
-                    }
-                    mLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
+            mAppExecutors.diskIO().execute(() -> {
+                mEventList = mEventsRepository.queryAllCurrentEventsSync();
+                createLocationRequest();
+                createLocationCallback();
+                if (ActivityCompat.checkSelfPermission(DrivingForegroundService.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                        ActivityCompat.checkSelfPermission(DrivingForegroundService.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    return;
                 }
-            }, "DrivingServiceThread").start();
-
+                mLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
+            });
         }
         return START_STICKY;
     }

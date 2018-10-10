@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.widget.Toast;
 
+import com.aaronbrecher.neverlate.AppExecutors;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
@@ -51,6 +52,8 @@ public class AwarenessFencesCreator implements LocationCallback {
     GeoApiContext mGeoApiContext;
     @Inject
     EventsRepository mEventsRepository;
+    @Inject
+    AppExecutors mAppExecutors;
 
     private FenceClient mFenceClient;
     private List<Event> mEventList;
@@ -148,41 +151,31 @@ public class AwarenessFencesCreator implements LocationCallback {
     }
 
     private void updateFences() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final List<AwarenessFenceWithName> fencelist = createFences();
-                if(fencelist.size() == 0) return;
-                FenceUpdateRequest request = getUpdateRequest(fencelist);
-                mFenceClient.updateFences(request).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(mApp, R.string.geofence_added_success, Toast.LENGTH_SHORT).show();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(mApp, R.string.geofence_added_failed, Toast.LENGTH_SHORT).show();
-                        //reschedule job
-                    }
-                });
-            }
-        }, "updateFencesThread").start();
+        mAppExecutors.networkIO().execute(()->{
+            final List<AwarenessFenceWithName> fencelist = createFences();
+            if(fencelist.size() == 0) return;
+            FenceUpdateRequest request = getUpdateRequest(fencelist);
+            mFenceClient.updateFences(request).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Toast.makeText(mApp, R.string.geofence_added_success, Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(e -> {
+                Toast.makeText(mApp, R.string.geofence_added_failed, Toast.LENGTH_SHORT).show();
+                //reschedule job
+            });
+        });
     }
 
     @Override
     public void getLocationSuccessCallback(final Location location) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                //if location was not saved need to update distance and time to event
-                mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY,new Gson().toJson(location)).apply();
-                DirectionsUtils.addDistanceInfoToEventList(mGeoApiContext, mEventList, location);
-                mEventsRepository.insertAll(mEventList);
-                updateFences();
-            }
-        }, "AFClocationThread").start();
-
+        mAppExecutors.diskIO().execute(() -> {
+            //if location was not saved need to update distance and time to event
+            mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY,new Gson().toJson(location)).apply();
+            DirectionsUtils.addDistanceInfoToEventList(mGeoApiContext, mEventList, location);
+            mEventsRepository.insertAll(mEventList);
+            updateFences();
+        });
     }
 
     @Override

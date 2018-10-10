@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.JobIntentService;
 import android.util.Log;
 
+import com.aaronbrecher.neverlate.AppExecutors;
 import com.aaronbrecher.neverlate.BuildConfig;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
@@ -43,6 +44,8 @@ public class CalendarAlarmService extends JobIntentService implements LocationCa
     FusedLocationProviderClient mLocationProviderClient;
     @Inject
     NeverLateApp mApp;
+    @Inject
+    AppExecutors mAppExecutors;
 
     private List<Event> mEventList;
     private GeoApiContext mGeoApiContext = new GeoApiContext().setApiKey(BuildConfig.GOOGLE_API_KEY);
@@ -79,20 +82,17 @@ public class CalendarAlarmService extends JobIntentService implements LocationCa
 
     @Override
     public void getLocationSuccessCallback(final Location location) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if(location != null){
-                    Gson gson = new Gson();
-                    mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, gson.toJson(location)).apply();
-                    if(mEventList == null || mEventList.size() == 0) return;
-                    DirectionsUtils.addDistanceInfoToEventList(mGeoApiContext, mEventList, location);
-                    mEventsRepository.insertAll(mEventList);
-                    initializeGeofences(mEventList);
-                    initializeActivityRecognition();
-                }
+        mAppExecutors.diskIO().execute(() -> {
+            if(location != null){
+                Gson gson = new Gson();
+                mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, gson.toJson(location)).apply();
+                if(mEventList == null || mEventList.size() == 0) return;
+                DirectionsUtils.addDistanceInfoToEventList(mGeoApiContext, mEventList, location);
+                mEventsRepository.insertAll(mEventList);
+                initializeGeofences(mEventList);
+                initializeActivityRecognition();
             }
-        }, "CASlocationThread").start();
+        });
     }
 
     private void initializeActivityRecognition() {
