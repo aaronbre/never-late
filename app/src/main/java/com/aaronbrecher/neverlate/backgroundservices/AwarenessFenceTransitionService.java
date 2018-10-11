@@ -48,7 +48,7 @@ public class AwarenessFenceTransitionService extends JobIntentService {
                 int id = Integer.valueOf(fenceState.getFenceKey().replaceAll("\\D+", ""));
                 mEvent = mEventsRepository.queryEventById(id);
                 NotificationCompat.Builder notificationBuilder = createNotificationForFence(mEvent);
-                NotificationManagerCompat.from(this).notify(0, notificationBuilder.build());
+                NotificationManagerCompat.from(this).notify(mEvent.getId(), notificationBuilder.build());
             }
         }
     }
@@ -71,15 +71,17 @@ public class AwarenessFenceTransitionService extends JobIntentService {
         intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, event);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        String notificationText = getString(R.string.exiting_geofence_notification_content_1) + event.getTitle();
+        String notificationText;
         if (event.getTimeTo() != null) {
-            notificationText += " " + getString(R.string.exiting_geofence_notification_content_2)
-                    + DirectionsUtils.readableTravelTime(event.getTimeTo());
+            notificationText = getString(R.string.exiting_geofence_notification_content_with_time,
+                    event.getTitle(), DirectionsUtils.readableTravelTime(event.getTimeTo()));
+        }else {
+            notificationText = getString(R.string.exiting_geofence_notification_content, event.getTitle());
         }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID);
         builder.setContentIntent(pendingIntent)
-//TODO only here for testing uncomment after                .setAutoCancel(true)
+                .setAutoCancel(true)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setPriority(NotificationCompat.PRIORITY_HIGH).setSmallIcon(R.drawable.ic_geofence_car)
                 .setContentTitle(getString(R.string.exiting_geofence_notification_title) + event.getLocation())

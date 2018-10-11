@@ -38,11 +38,11 @@
         <TextView
             android:id="@+id/event_detail_description"
             style="@style/eventDetailText"
-            android:layout_marginTop="@dimen/margin_very_small"
             android:text="@{event.description}"
             android:visibility="@{event.description == null ? View.VISIBLE : View.GONE}"
-            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/event_detail_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             tools:text="Check up appointment for susan with Doctor Gittelman and some additonal text goes here" />
 
         <ImageView
@@ -117,7 +117,21 @@
         <ImageView
             android:id="@+id/location_map_divider"
             style="@style/eventDetailDivder"
-            app:layout_constraintTop_toBottomOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/event_detail_location" />
+
+        <ImageView
+            android:id="@+id/event_detail_leave_image"
+            style="@style/eventDetailImage"
+            android:layout_marginTop="@dimen/vertical_content_spacing_x_2"
+            android:src="@drawable/ic_directions_car_gray_24dp"
+            app:layout_constraintTop_toBottomOf="@id/location_map_divider"
+            android:contentDescription="@string/driving_time_icon" />
+
+        <TextView
+            android:id="@+id/event_detail_leave_time"
+            style="@style/eventDetailText"
+            app:layout_constraintTop_toTopOf="@id/event_detail_leave_image"
+            tools:text="Leave at about 12:25PM"/>
 
         <android.support.constraint.Guideline
             android:id="@+id/guideline"
@@ -126,14 +140,15 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent=".4" />
+            app:layout_constraintGuide_percent=".45" />
 
         <fragment xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/event_detail_map"
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintTop_toTopOf="@+id/guideline"
+            android:layout_marginTop="@dimen/vertical_content_spacing_x_2"
+            app:layout_constraintTop_toBottomOf="@+id/event_detail_leave_time"
             app:layout_constraintBottom_toBottomOf="parent" />
     </android.support.constraint.ConstraintLayout>
 </layout>

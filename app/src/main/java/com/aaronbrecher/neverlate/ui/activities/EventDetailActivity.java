@@ -48,7 +48,8 @@ public class EventDetailActivity extends AppCompatActivity{
             Toast.makeText(this, "Unable to load event please try again", Toast.LENGTH_LONG).show();
             finish();
         }
-        mEvent = mIntent.getParcelableExtra(Constants.EVENT_DETAIL_INTENT_EXTRA);
+        //Samsung devices throw error when parsing this line fixes it
+        mEvent = Event.convertJsonToEvent(mIntent.getStringExtra(Constants.EVENT_DETAIL_INTENT_EXTRA));
         mFab = findViewById(R.id.detail_edit_fab);
         setTitle(mEvent.getTitle());
         mViewModel.setEvent(mEvent);

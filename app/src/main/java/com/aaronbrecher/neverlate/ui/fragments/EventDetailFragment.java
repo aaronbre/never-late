@@ -17,6 +17,8 @@ import android.view.ViewGroup;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
+import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
+import com.aaronbrecher.neverlate.Utils.GeofenceUtils;
 import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.databinding.EventDetailFragmentBinding;
 import com.aaronbrecher.neverlate.dependencyinjection.AppComponent;
@@ -58,6 +60,10 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
             mBinding.setEvent(event);
             mMapFragment.getMapAsync(EventDetailFragment.this);
             mEvent = event;
+            String timeToLeave = DirectionsUtils.getTimeToLeaveHumanReadable(mEvent.getTimeTo(),
+                    GeofenceUtils.determineRelevantTime(mEvent.getStartTime(), mEvent.getEndTime()));
+            String formatted = getString(R.string.event_detail_leave_time, timeToLeave);
+            mBinding.eventDetailLeaveTime.setText(formatted);
         }
     };
 
@@ -91,13 +97,12 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
         mViewModel.getGeofenceForKey(mEvent.getId()).observe(this, new Observer<GeofenceModel>() {
             @Override
             public void onChanged(@Nullable GeofenceModel geofenceModel) {
-                int radius = geofenceModel != null ? geofenceModel.getFenceRadius() : 100;
-                addGeofenceToMap(googleMap, radius);
+                addGeofenceToMap(googleMap);
             }
         });
     }
 
-    private void addGeofenceToMap(GoogleMap googleMap, int fenceRadius) {
+    private void addGeofenceToMap(GoogleMap googleMap) {
         //TODO NOT Working fix this
         if (mEventMarker != null) mEventMarker.remove();
         if (mLocationMarker != null) mLocationMarker.remove();
@@ -120,7 +125,9 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
                     .title("Your Location"));
             builder.include(mLocationMarker.getPosition());
         }
+        if(latLng != null && locLatLng != null){
 
+        }
         LatLngBounds bounds = builder.build();
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 200);
         googleMap.moveCamera(cu);

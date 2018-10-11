@@ -47,6 +47,7 @@
     </style>
 
     <style name="eventDetailDivder.Land" parent="eventDetailDivder">
+        <item name="android:layout_marginTop">@dimen/small_margin</item>
         <item name="layout_constraintEnd_toEndOf">@id/guideline</item>
     </style>
 

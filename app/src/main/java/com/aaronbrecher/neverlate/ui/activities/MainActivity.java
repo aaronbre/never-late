@@ -261,12 +261,12 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     }
 
     @Override
-    public void onListItemClick(Parcelable event) {
+    public void onListItemClick(Event event) {
         if (getResources().getBoolean(R.bool.is_tablet)) {
-            mViewModel.setEvent((Event) event);
+            mViewModel.setEvent(event);
         } else {
             Intent intent = new Intent(this, EventDetailActivity.class);
-            intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, event);
+            intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, Event.convertEventToJson(event));
             startActivity(intent);
         }
     }

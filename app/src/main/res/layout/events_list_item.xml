@@ -23,11 +23,11 @@
         <TextView
             android:id="@+id/event_location"
             style="@style/smallSubHeading"
+            android:maxWidth="@dimen/address_max_width"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/event_title"
-            android:layout_marginEnd="100dp"
-            tools:text="52 Gordon st. Elsternwick VIC" />
+            tools:text="665 Princeton ave lakewood NJ, Ocean county USA 08701-12943" />
 
         <TextView
             android:id="@+id/event_time_to"
