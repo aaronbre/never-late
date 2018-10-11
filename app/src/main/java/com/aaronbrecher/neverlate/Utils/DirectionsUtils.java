@@ -117,6 +117,6 @@ public class DirectionsUtils {
             hour = localDateTime.getHourOfDay() - 12;
             amPm = "PM";
         }
-        return hour + ":" + localDateTime.getMinuteOfHour() + amPm;
+        return hour + ":" + localDateTime.getMinuteOfHour() + " " + amPm;
     }
 }

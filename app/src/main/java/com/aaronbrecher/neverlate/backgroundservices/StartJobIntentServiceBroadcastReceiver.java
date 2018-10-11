@@ -3,12 +3,16 @@ package com.aaronbrecher.neverlate.backgroundservices;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import com.aaronbrecher.neverlate.Constants;
 
 public class StartJobIntentServiceBroadcastReceiver extends BroadcastReceiver {
+    private static final String TAG = "NeverLateBroadcast";
+
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.d(TAG, "onReceive: was called");
         String action = intent.getAction();
         if (action == null) return;
         switch (action) {

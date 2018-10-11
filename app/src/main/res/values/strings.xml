@@ -6,8 +6,8 @@
     <string name="ok">OK</string>
     <string name="geofence_added_success">Geofences were successfully updated, notifications will be sent if you will not make it to your event</string>
     <string name="geofence_added_failed">failed to load the geofences, will try again on the next scheduled update</string>
-    <string name="exiting_geofence_notification_content_1">In order to make it in time for your event you need to start driving now to </string>
-    <string name="exiting_geofence_notification_content_2">Estimated time to arrival is </string>
+    <string name="exiting_geofence_notification_content_with_time">In order to make it in time for your event you need to start driving now to %1$s, Estimated time to arrival is %2$s</string>
+    <string name="exiting_geofence_notification_content">In order to make it in time for your event you need to start driving now to %1$s.</string>
     <string name="exiting_geofence_notification_title">Time to leave to scheduled event - </string>
     <string name="driving_notification_title_missed">Missed Event </string>
     <string name="driving_notification_content_missed_end">Oops looks like you left the drivable distance to your event. Maybe if you drive fast you can still make it :) </string>
@@ -34,5 +34,11 @@
     <string name="search">Search</string>
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
+    <string name="event_detail_leave_time">You should leave at about %1$s</string>
+    <string name="time_icon">Time icon</string>
+    <string name="title_icon">Title icon</string>
+    <string name="content_divider">Content divider</string>
+    <string name="location_icon">Location icon</string>
+    <string name="driving_time_icon">Driving time icon</string>
 
 </resources>
