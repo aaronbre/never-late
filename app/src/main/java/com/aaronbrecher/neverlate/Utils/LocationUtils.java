@@ -44,11 +44,17 @@ public class LocationUtils {
         return kilometers * .621;
     }
 
-    public static String locationToGsonString(Location location){
-        return new Gson().toJson(location);
+    public static String locationToLatLngString(Location location){
+        return location.getLatitude() + "," + location.getLongitude();
     }
 
-    public static Location locationJsonToLocation(String location){
-        return new Gson().fromJson(location, Location.class);
+    public static Location locationFromLatLngString(String latLng){
+        String[] l = latLng.split(",");
+        double latitude = Double.valueOf(l[0]);
+        double longitude = Double.valueOf(l[1]);
+        Location location = new Location("neverlate");
+        location.setLatitude(latitude);
+        location.setLongitude(longitude);
+        return location;
     }
 }

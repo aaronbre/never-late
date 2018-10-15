@@ -113,7 +113,7 @@ public class ActivityTransitionService extends JobIntentService {
                     creator.buildAndSaveFences();
                     //save the new location to shared prefs
                     mSharedPreferences.edit()
-                            .putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToGsonString(location))
+                            .putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location))
                             .apply();
                 });
             }

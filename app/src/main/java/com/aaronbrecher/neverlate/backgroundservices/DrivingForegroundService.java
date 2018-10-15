@@ -140,9 +140,9 @@ public class DrivingForegroundService extends Service {
 
     private int determineDistanceToEvent(Event event, Location location) {
         // first check if user is still within the previous fence. If so no need to do extra work
-        String jsonLocation = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");
-        if (!jsonLocation.equals("")) {
-            Location previousLocation = LocationUtils.locationJsonToLocation(jsonLocation);
+        String latLngString = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");
+        if (!latLngString.equals("")) {
+            Location previousLocation = LocationUtils.locationFromLatLngString(latLngString);
             if (previousLocation.distanceTo(location) < Constants.LOCATION_FENCE_RADIUS/2)
                 return -1;
         }

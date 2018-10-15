@@ -23,7 +23,6 @@ import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.databinding.EventDetailFragmentBinding;
 import com.aaronbrecher.neverlate.dependencyinjection.AppComponent;
 import com.aaronbrecher.neverlate.models.Event;
-import com.aaronbrecher.neverlate.models.GeofenceModel;
 import com.aaronbrecher.neverlate.viewmodels.BaseViewModel;
 import com.aaronbrecher.neverlate.viewmodels.DetailActivityViewModel;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
@@ -53,6 +52,7 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
     private Event mEvent;
     private Marker mEventMarker;
     private Marker mLocationMarker;
+    private LatLng mUserLocationLatLng;
 
     private Observer<Event> mEventObserver = new Observer<Event>() {
         @Override
@@ -89,48 +89,44 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
         mMapFragment = (SupportMapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.event_detail_map);
         mViewModel.getEvent().observe(this, mEventObserver);
+
+        if(mSharedPreferences.contains(Constants.USER_LOCATION_PREFS_KEY)){
+            String latLngString = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");
+            if(!latLngString.isEmpty()){
+                Location location = LocationUtils.locationFromLatLngString(latLngString);
+                mUserLocationLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+            }
+        }
         return mBinding.getRoot();
     }
 
     @Override
     public void onMapReady(final GoogleMap googleMap) {
-        mViewModel.getGeofenceForKey(mEvent.getId()).observe(this, new Observer<GeofenceModel>() {
-            @Override
-            public void onChanged(@Nullable GeofenceModel geofenceModel) {
-                addGeofenceToMap(googleMap);
-            }
-        });
+        setUpMap(googleMap);
     }
 
-    private void addGeofenceToMap(GoogleMap googleMap) {
+    private void setUpMap(GoogleMap googleMap) {
         //TODO NOT Working fix this
         if (mEventMarker != null) mEventMarker.remove();
         if (mLocationMarker != null) mLocationMarker.remove();
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-
         LatLng latLng = mEvent.getLocationLatlng();
-        LatLng locLatLng = null;
-        String location = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");
-        if (!location.equals("")) {
-            Location loc = LocationUtils.locationJsonToLocation(location);
-            locLatLng = new LatLng(loc.getLatitude(), loc.getLongitude());
-        }
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
+
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
         if (latLng != null) {
             mEventMarker = googleMap.addMarker(new MarkerOptions().position(latLng)
                     .title(mEvent.getTitle()));
-            builder.include(mEventMarker.getPosition());
+            builder.include(latLng);
         }
-        if (locLatLng != null) {
-            mLocationMarker = googleMap.addMarker(new MarkerOptions().position(locLatLng)
+        if (mUserLocationLatLng != null) {
+            mLocationMarker = googleMap.addMarker(new MarkerOptions().position(mUserLocationLatLng)
                     .title("Your Location"));
-            builder.include(mLocationMarker.getPosition());
+            builder.include(mUserLocationLatLng);
         }
-        if(latLng != null && locLatLng != null){
-
-        }
-        LatLngBounds bounds = builder.build();
-        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 200);
-        googleMap.moveCamera(cu);
+        googleMap.setOnMapLoadedCallback(() -> {
+            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(builder.build(), 200);
+            googleMap.animateCamera(cu);
+        });
     }
 
     @Override

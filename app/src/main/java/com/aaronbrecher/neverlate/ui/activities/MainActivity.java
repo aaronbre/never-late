@@ -281,7 +281,9 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             DirectionsUtils.addDistanceInfoToEventList(mGeoApiContext, mEventList, location);
             mViewModel.deleteAllEvents();
             mViewModel.insertEvents(mEventList);
-            mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToGsonString(location)).apply();
+            mSharedPreferences.edit().
+                    putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location))
+                    .apply();
             AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(mEventList).build();
             creator.buildAndSaveFences();
         });
