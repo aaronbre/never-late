@@ -17,6 +17,7 @@ import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.BackgroundUtils;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
 import com.aaronbrecher.neverlate.Utils.GeofenceUtils;
+import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.backgroundservices.StartJobIntentServiceBroadcastReceiver;
 import com.aaronbrecher.neverlate.database.EventsRepository;
 import com.aaronbrecher.neverlate.dependencyinjection.AppModule;
@@ -77,8 +78,7 @@ public class AwarenessFencesCreator implements LocationCallback {
 
         if (mSharedPreferences.contains(Constants.USER_LOCATION_PREFS_KEY)) {
             String loc = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");
-            Gson gson = new Gson();
-            mLocation = gson.fromJson(loc, Location.class);
+            mLocation = LocationUtils.locationFromLatLngString(loc);
         }
         mFenceClient = Awareness.getFenceClient(mApp);
         mEventList = eventList;
@@ -171,7 +171,9 @@ public class AwarenessFencesCreator implements LocationCallback {
     public void getLocationSuccessCallback(final Location location) {
         mAppExecutors.diskIO().execute(() -> {
             //if location was not saved need to update distance and time to event
-            mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY,new Gson().toJson(location)).apply();
+            mSharedPreferences.edit()
+                    .putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location))
+                    .apply();
             DirectionsUtils.addDistanceInfoToEventList(mGeoApiContext, mEventList, location);
             mEventsRepository.insertAll(mEventList);
             updateFences();

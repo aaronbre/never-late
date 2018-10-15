@@ -30,6 +30,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+//TODO when the list becomes empty need to close the fragment and load the no-events-fragment, probably needs to be done in mainActivity via a interface
 public class EventListFragment extends Fragment {
 
     ListItemClickListener mListItemClickListener;

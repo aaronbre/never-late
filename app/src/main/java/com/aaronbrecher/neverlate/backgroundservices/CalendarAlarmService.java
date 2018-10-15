@@ -17,6 +17,7 @@ import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.Utils.BackgroundUtils;
 import com.aaronbrecher.neverlate.Utils.CalendarUtils;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
+import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.database.EventsRepository;
 import com.aaronbrecher.neverlate.geofencing.AwarenessFencesCreator;
 import com.aaronbrecher.neverlate.interfaces.LocationCallback;
@@ -85,7 +86,7 @@ public class CalendarAlarmService extends JobIntentService implements LocationCa
         mAppExecutors.diskIO().execute(() -> {
             if(location != null){
                 Gson gson = new Gson();
-                mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, gson.toJson(location)).apply();
+                mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location)).apply();
                 if(mEventList == null || mEventList.size() == 0) return;
                 DirectionsUtils.addDistanceInfoToEventList(mGeoApiContext, mEventList, location);
                 mEventsRepository.insertAll(mEventList);
