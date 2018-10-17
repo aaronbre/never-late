@@ -76,17 +76,9 @@ public class BackgroundUtils {
                 && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        providerClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                if (location == null) callback.getLocationFailedCallback();
-                else callback.getLocationSuccessCallback(location);
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                callback.getLocationFailedCallback();
-            }
-        });
+        providerClient.getLastLocation().addOnSuccessListener(location -> {
+            if (location == null) callback.getLocationFailedCallback();
+            else callback.getLocationSuccessCallback(location);
+        }).addOnFailureListener(e -> callback.getLocationFailedCallback());
     }
 }

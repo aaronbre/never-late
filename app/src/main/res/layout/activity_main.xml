@@ -19,16 +19,4 @@
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/material_component_floating_action_button_margin"
         android:src="@drawable/ic_add_white_24dp" />
-
-    <ImageView
-        android:id="@+id/progress_spinner"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/progress"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
 </FrameLayout>

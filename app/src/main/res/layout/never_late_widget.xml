@@ -8,12 +8,14 @@
     android:orientation="vertical">
 
     <TextView
-        style="@style/headline"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimaryDark"
         android:padding="10dp"
-        android:text="Your next event"
+        android:textAllCaps="true"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:text="@string/widget_header"
         android:textAlignment="center"
         android:textColor="@android:color/white" />
 
@@ -21,7 +23,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/widget_margin"
-        android:background="@color/colorPrimaryLight"
+        android:background="@color/colorPrimary"
         android:padding="@dimen/material_layout_vertical_spacing_between_content_areas">
 
         <TextView
@@ -65,7 +67,8 @@
             android:layout_below="@id/widget_event_location"
             android:textAlignment="center"
             android:textColor="@android:color/white"
-            android:textSize="@dimen/material_typography_subheading"
+            android:textSize="10sp"
+            android:textAllCaps="true"
             android:textStyle="bold"
             android:layout_marginTop="@dimen/material_layout_vertical_spacing_between_content_areas"
             tools:text="You should leave at about - 5:45PM" />

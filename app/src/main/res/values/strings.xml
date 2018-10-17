@@ -17,8 +17,8 @@
     <string name="start_time">Start Time</string>
     <string name="end_time">End Time</string>
     <string name="title_activity_maps">Map</string>
-    <string name="entering_geofence_notification_title">Entering divable distance to - </string>
-    <string name="entering_geofence_notification_content">Entering divable distance to - </string>
+    <string name="entering_geofence_notification_title">Entering drivable distance to - </string>
+    <string name="entering_geofence_notification_content">Entering drivable distance to - </string>
     <string name="refresh_error_no_connection">Internet connection is required. Check your settings and try again</string>
     <string name="launch_data_settings_button">Settings</string>
     <string name="menu_item_refresh">Refresh</string>
@@ -34,11 +34,20 @@
     <string name="search">Search</string>
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
-    <string name="event_detail_leave_time">You should leave at about %1$s</string>
+    <string name="event_detail_leave_time">Time to leave - %1$s</string>
     <string name="time_icon">Time icon</string>
     <string name="title_icon">Title icon</string>
     <string name="content_divider">Content divider</string>
     <string name="location_icon">Location icon</string>
     <string name="driving_time_icon">Driving time icon</string>
+    <string name="km_signature">KM</string>
+    <string name="miles_signature">MILES</string>
+    <string name="am">AM</string>
+    <string name="pm">PM</string>
+    <string name="foreground_notification_cancel">Cancel tracking</string>
+    <string name="event_not_found_toast_text">Unable to load event please try again</string>
+    <string name="current_location_map_title">Your Location</string>
+    <string name="leave_at_time">Time to leave - %1$s</string>
+    <string name="widget_header">Your next event</string>
 
 </resources>

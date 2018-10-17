@@ -24,6 +24,7 @@
             android:id="@+id/event_detail_title_image"
             style="@style/eventDetailImage"
             android:src="@drawable/ic_title_gray_24dp"
+            android:contentDescription="@string/title_icon"
             app:layout_constraintTop_toTopOf="@id/event_detail_title" />
 
         <TextView
@@ -39,15 +40,15 @@
             android:id="@+id/event_detail_description"
             style="@style/eventDetailText"
             android:text="@{event.description}"
+            android:layout_width="match_parent"
             android:visibility="@{event.description == null ? View.VISIBLE : View.GONE}"
             app:layout_constraintTop_toBottomOf="@id/event_detail_title"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             tools:text="Check up appointment for susan with Doctor Gittelman and some additonal text goes here" />
 
         <ImageView
             android:id="@+id/title_time_divider"
             style="@style/eventDetailDivder"
+            android:contentDescription="@string/content_divider"
             app:layout_constraintTop_toBottomOf="@id/event_detail_description" />
 
         <ImageView
@@ -56,6 +57,7 @@
             android:layout_marginStart="@dimen/material_layout_keylines_screen_edge_margin"
             android:layout_marginTop="@dimen/vertical_content_spacing_x_2"
             android:src="@drawable/ic_access_time_gray_24dp"
+            android:contentDescription="@string/time_icon"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/title_time_divider" />
 
@@ -98,25 +100,30 @@
         <ImageView
             android:id="@+id/time_location_divider"
             style="@style/eventDetailDivder"
+            android:contentDescription="@string/content_divider"
             app:layout_constraintTop_toBottomOf="@id/event_detail_start" />
 
         <ImageView
             android:id="@+id/event_detail_location_image"
             style="@style/eventDetailImage"
             android:layout_marginTop="@dimen/vertical_content_spacing_x_2"
+            android:contentDescription="@string/location_icon"
             android:src="@drawable/ic_location_gray_24dp"
             app:layout_constraintTop_toBottomOf="@+id/time_location_divider" />
 
         <TextView
             android:id="@+id/event_detail_location"
+            android:layout_width="match_parent"
             style="@style/eventDetailText"
+            android:maxLines="4"
             android:text="@{event.location}"
             app:layout_constraintTop_toTopOf="@id/event_detail_location_image"
-            tools:text="665 Princeton Avenue, Lakewood NJ 08701" />
+            tools:text="@tools:sample/lorem/random"/>
 
         <ImageView
             android:id="@+id/location_map_divider"
             style="@style/eventDetailDivder"
+            android:contentDescription="@string/content_divider"
             app:layout_constraintTop_toBottomOf="@id/event_detail_location" />
 
         <ImageView

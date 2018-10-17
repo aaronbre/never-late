@@ -67,25 +67,9 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
         Event event = mFilteredEvents.get(position);
         holder.binding.eventTitle.setText(event.getTitle());
         holder.binding.eventLocation.setText(event.getLocation());
-        if (event.getDistance() != null) holder.binding.eventDistance.setText(getHumanReadableDistance(event.getDistance()));
+        if (event.getDistance() != null) holder.binding.eventDistance.setText(
+                DirectionsUtils.getHumanReadableDistance(mContext,event.getDistance(),  PreferenceManager.getDefaultSharedPreferences(mContext)));
         if (event.getTimeTo() != null) holder.binding.eventTimeTo.setText(DirectionsUtils.readableTravelTime(event.getTimeTo()));
-    }
-
-    private String getHumanReadableDistance(Long distance){
-        //TODO add a shared prefs to miles or km and fix this accordingly
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        boolean useMetric = false;
-        if(sharedPreferences.contains(Constants.UNIT_SYSTEM_PREFS_KEY)){
-            useMetric = sharedPreferences.getBoolean(Constants.UNIT_SYSTEM_PREFS_KEY, false);
-        }
-        float km = distance.floatValue()/1000;
-        DecimalFormat df = new DecimalFormat("#.#");
-        if(useMetric){
-            return df.format(km) + " KM";
-        }else {
-            double miles = LocationUtils.kmToMiles(km);
-            return df.format(miles) + " MILES";
-        }
     }
 
     @Override

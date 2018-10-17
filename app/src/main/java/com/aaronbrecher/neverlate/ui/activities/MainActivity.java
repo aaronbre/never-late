@@ -13,7 +13,6 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.provider.CalendarContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -324,24 +323,4 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         super.onSaveInstanceState(outState);
         outState.putBoolean(SHOW_ALL_EVENTS_KEY, shouldShowAllEvents);
     }
-
-    //    /**
-//     * handle showing a loader image while loading data
-//     */
-//    private void toggleListVisibility() {
-//        if (mListContainer.getVisibility() == View.VISIBLE) {
-//            mListContainer.setVisibility(View.GONE);
-//            if (getResources().getBoolean(R.bool.is_tablet))
-//                mDetailContainer.setVisibility(View.GONE);
-//            Animation rotate = AnimationUtils.loadAnimation(this, R.anim.rotate);
-//            mProgressSpinner.setVisibility(View.VISIBLE);
-//            mProgressSpinner.startAnimation(rotate);
-//        } else if (mListContainer.getVisibility() == View.GONE) {
-//            mProgressSpinner.clearAnimation();
-//            mProgressSpinner.setVisibility(View.GONE);
-//            mListContainer.setVisibility(View.VISIBLE);
-//            if (getResources().getBoolean(R.bool.is_tablet))
-//                mDetailContainer.setVisibility(View.VISIBLE);
-//        }
-//    }
 }
