@@ -60,7 +60,7 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
             mBinding.setEvent(event);
             mMapFragment.getMapAsync(EventDetailFragment.this);
             mEvent = event;
-            String timeToLeave = DirectionsUtils.getTimeToLeaveHumanReadable(mEvent.getTimeTo(),
+            String timeToLeave = DirectionsUtils.getTimeToLeaveHumanReadable(getActivity(), mEvent.getTimeTo(),
                     GeofenceUtils.determineRelevantTime(mEvent.getStartTime(), mEvent.getEndTime()));
             String formatted = getString(R.string.event_detail_leave_time, timeToLeave);
             mBinding.eventDetailLeaveTime.setText(formatted);
@@ -120,7 +120,7 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
         }
         if (mUserLocationLatLng != null) {
             mLocationMarker = googleMap.addMarker(new MarkerOptions().position(mUserLocationLatLng)
-                    .title("Your Location"));
+                    .title(getString(R.string.current_location_map_title)));
             builder.include(mUserLocationLatLng);
         }
         googleMap.setOnMapLoadedCallback(() -> {

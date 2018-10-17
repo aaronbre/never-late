@@ -45,11 +45,15 @@ public class EventDetailActivity extends AppCompatActivity{
         mIntent = getIntent();
 
         if (!mIntent.hasExtra(Constants.EVENT_DETAIL_INTENT_EXTRA)) {
-            Toast.makeText(this, "Unable to load event please try again", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.event_not_found_toast_text, Toast.LENGTH_LONG).show();
             finish();
         }
         //Samsung devices throw error when parsing this line fixes it
         mEvent = Event.convertJsonToEvent(mIntent.getStringExtra(Constants.EVENT_DETAIL_INTENT_EXTRA));
+        if(mEvent == null){
+            Toast.makeText(this, R.string.event_not_found_toast_text, Toast.LENGTH_LONG).show();
+            finish();
+        }
         mFab = findViewById(R.id.detail_edit_fab);
         setTitle(mEvent.getTitle());
         mViewModel.setEvent(mEvent);

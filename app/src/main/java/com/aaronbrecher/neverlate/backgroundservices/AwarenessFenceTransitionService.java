@@ -68,7 +68,7 @@ public class AwarenessFenceTransitionService extends JobIntentService {
         } else {
             intent = new Intent(this, EventDetailActivity.class);
         }
-        intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, event);
+        intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, Event.convertEventToJson(event));
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         String notificationText;

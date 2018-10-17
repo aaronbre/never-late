@@ -1,9 +1,13 @@
 package com.aaronbrecher.neverlate.Utils;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.text.format.DateFormat;
+import android.text.format.DateUtils;
 
 import com.aaronbrecher.neverlate.Constants;
+import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.models.Event;
 import com.google.maps.DistanceMatrixApiRequest;
 import com.google.maps.GeoApiContext;
@@ -19,6 +23,7 @@ import org.joda.time.LocalDateTime;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 //this class will be used to get direction information time etc.
@@ -88,7 +93,7 @@ public class DirectionsUtils {
         return hours + ":" + minutes;
     }
 
-    public static String getHumanReadableDistance(Long distance, SharedPreferences sharedPreferences){
+    public static String getHumanReadableDistance(Context context, Long distance, SharedPreferences sharedPreferences){
         //TODO add a shared prefs to miles or km and fix this accordingly
         boolean useMetric = false;
         if(sharedPreferences.contains(Constants.UNIT_SYSTEM_PREFS_KEY)){
@@ -97,26 +102,31 @@ public class DirectionsUtils {
         float km = distance.floatValue()/1000;
         DecimalFormat df = new DecimalFormat("#.#");
         if(useMetric){
-            return df.format(km) + " KM";
+            return df.format(km) + context.getString(R.string.km_signature);
         }else {
             double miles = LocationUtils.kmToMiles(km);
-            return df.format(miles) + " MILES";
+            return df.format(miles) + context.getString(R.string.miles_signature);
         }
     }
 
-    public static String getTimeToLeaveHumanReadable(long timeTo, long eventTime){
+    public static String getTimeToLeaveHumanReadable(Context context, long timeTo, long eventTime){
+        java.text.DateFormat dateFormat = DateFormat.getTimeFormat(context);
+
         timeTo = timeTo * 1000;
         long leaveTime = eventTime - timeTo;
-        LocalDateTime localDateTime = new LocalDateTime(leaveTime);
-        String amPm;
-        int hour;
-        if(localDateTime.getHourOfDay() < 12){
-            hour = localDateTime.getHourOfDay();
-            amPm = "AM";
-        } else {
-            hour = localDateTime.getHourOfDay() - 12;
-            amPm = "PM";
-        }
-        return hour + ":" + localDateTime.getMinuteOfHour() + " " + amPm;
+        Date date = new Date(leaveTime);
+        return DateUtils.getRelativeTimeSpanString(leaveTime, System.currentTimeMillis(),DateUtils.MINUTE_IN_MILLIS).toString();
+        //return dateFormat.format(date);
+//        LocalDateTime localDateTime = new LocalDateTime(leaveTime);
+//        String amPm;
+//        int hour;
+//        if(localDateTime.getHourOfDay() < 12){
+//            hour = localDateTime.getHourOfDay();
+//            amPm = context.getString(R.string.am);
+//        } else {
+//            hour = localDateTime.getHourOfDay() - 12;
+//            amPm = context.getString(R.string.pm);
+//        }
+//        return hour + ":" + localDateTime.getMinuteOfHour() + " " + amPm;
     }
 }

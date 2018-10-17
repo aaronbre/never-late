@@ -97,7 +97,7 @@ public class DrivingForegroundService extends Service {
                 .setSmallIcon(R.drawable.ic_geofence_car)
                 .setContentTitle(getString(R.string.driving_foreground_notification_title))
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(getString(R.string.driving_foreground_notification_text)))
-                .addAction(R.drawable.ic_cancel_black_24dp, "Cancel tracking", mCancelIntent)
+                .addAction(R.drawable.ic_cancel_black_24dp, getString(R.string.foreground_notification_cancel), mCancelIntent)
                 .build();
     }
 
@@ -155,7 +155,7 @@ public class DrivingForegroundService extends Service {
 
     private void showEventNotification(Event event, int type, Boolean pastEndTime) {
         Intent intent = new Intent(this, EventDetailActivity.class);
-        intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, event);
+        intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, Event.convertEventToJson(event));
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_geofence_car)

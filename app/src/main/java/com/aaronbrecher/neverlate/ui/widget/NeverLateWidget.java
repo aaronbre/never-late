@@ -75,14 +75,14 @@ public class NeverLateWidget extends AppWidgetProvider {
             intent = new Intent(context, MainActivity.class);
         } else {
             intent = new Intent(context, EventDetailActivity.class);
-            intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, event);
-            String timeToLeave = DirectionsUtils.getTimeToLeaveHumanReadable(event.getTimeTo(),
+            intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, Event.convertEventToJson(event));
+            String timeToLeave = DirectionsUtils.getTimeToLeaveHumanReadable(context, event.getTimeTo(),
                     GeofenceUtils.determineRelevantTime(event.getStartTime(), event.getEndTime()));
-            remoteViews.setTextViewText(R.id.widget_leave_time, "Leave at about - " + timeToLeave);
+            remoteViews.setTextViewText(R.id.widget_leave_time, context.getString(R.string.leave_at_time, timeToLeave));
             remoteViews.setTextViewText(R.id.widget_event_title, event.getTitle());
             remoteViews.setTextViewText(R.id.widget_event_location, event.getLocation());
             remoteViews.setTextViewText(R.id.widget_event_distance,
-                    DirectionsUtils.getHumanReadableDistance(event.getDistance(), PreferenceManager.getDefaultSharedPreferences(context)));
+                    DirectionsUtils.getHumanReadableDistance(context, event.getDistance(), PreferenceManager.getDefaultSharedPreferences(context)));
             remoteViews.setTextViewText(R.id.widget_event_time_to, DirectionsUtils.readableTravelTime(event.getTimeTo()));
         }
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
