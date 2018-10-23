@@ -29,6 +29,8 @@
         If you would like to see events without locations and add a location please select so from the menu.</string>
     <string name="no_events_heading">No tracked events!</string>
     <string name="no_events_button">view events without location</string>
+    <string name="passed_event_heading">Event Missed</string>
+    <string name="passed_event_text">Seems like this event has already passed, make sure that notifications are active so you don\'t miss any other events.</string>
     <string name="menu_item_show_all">Show all Events</string>
     <string name="menu_item_show_loc_only">Show only events with location</string>
     <string name="search">Search</string>
@@ -49,5 +51,7 @@
     <string name="current_location_map_title">Your Location</string>
     <string name="leave_at_time">Time to leave - %1$s</string>
     <string name="widget_header">Your next event</string>
+
+    <string name="admob_id">ca-app-pub-6961678341915263~3845118420</string>
 
 </resources>

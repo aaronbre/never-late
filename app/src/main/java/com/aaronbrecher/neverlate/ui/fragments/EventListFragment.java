@@ -61,7 +61,7 @@ public class EventListFragment extends Fragment {
         appComponent.inject(this);
         mActivity = (MainActivity) getActivity();
         mViewModel = ViewModelProviders.of(mActivity, mViewModelFactory).get(MainActivityViewModel.class);
-        mListAdapter = new EventListAdapter(null, null, mActivity);
+        mListAdapter = new EventListAdapter(null, mActivity);
         mViewModel.getShouldShowAllEvents().observe(this, showAllEventsObserver);
     }
 

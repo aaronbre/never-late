@@ -52,31 +52,4 @@ public class GeofenceUtils {
         LocalDateTime now = Converters.dateTimeFromUnix(System.currentTimeMillis());
         return eventTime.isBefore(now);
     }
-
-    public static int getFenceRadius(long distance, long drivingTime, long eventTime) {
-        long minutesToevent = (eventTime - System.currentTimeMillis()) / 60000;
-        int drivingMinutes = (int) drivingTime / 60;
-        long kmDistance = distance / 1000;
-        float kmPerMinute = (float) kmDistance / drivingMinutes;
-        int radius = (int) Math.round(kmPerMinute * minutesToevent) * 1000;
-        return radius > 100 ? radius : 100;
-    }
-
-    public static double getAverageSpeed(List<Event> events) {
-        int numEvents = 0;
-        double speedSum = 0;
-        for (Event event : events) {
-            if (event.getDistance() != null && event.getTimeTo() != null) {
-                numEvents++;
-                speedSum += getSpeed(event.getDistance(), event.getTimeTo());
-            }
-        }
-        return numEvents == 0 ? 0 : speedSum / numEvents;
-    }
-
-    public static double getSpeed(long distance, long drivingTime) {
-        int drivingMinutes = (int) drivingTime / 60;
-        long kmDistance = distance / 1000;
-        return (double) kmDistance / drivingMinutes;
-    }
 }

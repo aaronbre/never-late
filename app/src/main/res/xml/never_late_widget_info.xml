@@ -3,7 +3,7 @@
     android:initialKeyguardLayout="@layout/never_late_widget"
     android:initialLayout="@layout/never_late_widget"
     android:minWidth="250dp"
-    android:minHeight="80dp"
+    android:minHeight="100dp"
     android:previewImage="@drawable/example_appwidget_preview"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="1800000"

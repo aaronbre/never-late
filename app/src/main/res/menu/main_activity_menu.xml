@@ -10,7 +10,8 @@
     <item
         android:id="@+id/main_activity_menu_sync"
         android:title="@string/menu_item_refresh"
-        app:showAsAction="never"/>
+        android:icon="@drawable/ic_refresh_white_24dp"
+        app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/main_activity_menu_show_all"
         android:title="@string/menu_item_show_all"

@@ -5,6 +5,7 @@
     <dimen name="small_text">10sp</dimen>
     <dimen name="margin_very_small">4dp</dimen>
     <dimen name="vertical_content_spacing_x_2">16dp</dimen>
+    <dimen name="image_top_margin">54dp</dimen>
 
     <!--
 Refer to App Widget Documentation for margin information

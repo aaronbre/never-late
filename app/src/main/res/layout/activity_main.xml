@@ -19,4 +19,9 @@
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/material_component_floating_action_button_margin"
         android:src="@drawable/ic_add_white_24dp" />
+
+    <ProgressBar
+        android:id="@+id/loading_icon"
+        style="@style/GenericProgressIndicator"
+        android:visibility="gone"/>
 </FrameLayout>

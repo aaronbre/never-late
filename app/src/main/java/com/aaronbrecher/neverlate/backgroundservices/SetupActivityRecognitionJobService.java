@@ -26,12 +26,7 @@ import java.util.List;
 public class SetupActivityRecognitionJobService extends JobService {
     @Override
     public boolean onStartJob(final JobParameters job) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                doWork(job);
-            }
-        }).start();
+        new Thread(() -> doWork(job)).start();
         return true;
     }
 
@@ -43,7 +38,7 @@ public class SetupActivityRecognitionJobService extends JobService {
     /**
      * The job to be run on a separate thread this will set up the app to monitor if the user
      * has begun driving or if they have stopped driving
-     * set at walking for debug TODO switch to inVehicle
+     *
      * @param job
      */
     public void doWork(final JobParameters job) {
@@ -56,27 +51,35 @@ public class SetupActivityRecognitionJobService extends JobService {
                 .setActivityType(DetectedActivity.IN_VEHICLE)
                 .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
                 .build());
+        //for testing TODO remove
+        transitions.add(new ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.WALKING)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+                .build());
+        transitions.add(new ActivityTransition.Builder()
+                .setActivityType(DetectedActivity.WALKING)
+                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
+                .build());
+
         ActivityTransitionRequest request = new ActivityTransitionRequest(transitions);
         PendingIntent pendingIntent = getPendingIntent();
 
-        ActivityRecognition.getClient(this).requestActivityTransitionUpdates(request, pendingIntent)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        jobFinished(job, false);
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                jobFinished(job, true);
-            }
-        });
+        ActivityRecognition.getClient(getApplicationContext()).requestActivityTransitionUpdates(request, pendingIntent)
+                .addOnSuccessListener(aVoid ->
+                {
+                    jobFinished(job, false);
+                })
+                .addOnFailureListener(e ->
+                {
+                    e.printStackTrace();
+                    jobFinished(job, true);
+                });
     }
 
     // this pending intent uses the app context so a different pending intent will have the same context
     // this will be useful for removing the ActivityReccognition in a different class...
     private PendingIntent getPendingIntent() {
-        Intent intent = new Intent(NeverLateApp.getApp(), StartJobIntentServiceBroadcastReceiver.class);
+        Intent intent = new Intent(getApplicationContext(), StartJobIntentServiceBroadcastReceiver.class);
         intent.setAction(Constants.ACTION_START_ACTIVITY_TRANSITION_SERVICE);
         return PendingIntent.getBroadcast(this, Constants.ACTIVITY_TRANSITION_PENDING_INTENT_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
