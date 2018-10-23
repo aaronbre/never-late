@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         MobileAds.initialize(this, getString(R.string.admob_id));
     }
 
-    private void loadNoEventsFragment() {
+    public void loadNoEventsFragment() {
         NoEventsFragment fragment = new NoEventsFragment();
         mFragmentManager.beginTransaction().replace(R.id.main_activity_list_fragment_container, fragment).commit();
     }

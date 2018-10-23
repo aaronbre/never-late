@@ -87,7 +87,12 @@ public class EventListFragment extends Fragment {
     private final Observer<List<Event>> eventsObserver = new Observer<List<Event>>() {
         @Override
         public void onChanged(@Nullable List<Event> events) {
-            mListAdapter.swapLists(events);
+            if(events == null || events.size() == 0){
+               mActivity.loadNoEventsFragment();
+            }
+            else {
+                mListAdapter.swapLists(events);
+            }
         }
     };
 
