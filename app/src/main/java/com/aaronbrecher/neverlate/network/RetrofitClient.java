@@ -10,11 +10,7 @@ public class RetrofitClient {
 
     public static Retrofit getClient(String baseUrl){
         if(retrofit == null){
-            //TODO remove logging interceptor in production mode :)
-            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
             OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
-            httpClient.addInterceptor(loggingInterceptor);
             retrofit = new Retrofit.Builder()
                     .baseUrl(baseUrl)
                     .addConverterFactory(GsonConverterFactory.create())

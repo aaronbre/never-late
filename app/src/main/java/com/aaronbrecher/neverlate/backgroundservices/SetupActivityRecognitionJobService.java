@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
+import com.crashlytics.android.Crashlytics;
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
 import com.google.android.gms.location.ActivityRecognition;
@@ -51,24 +52,11 @@ public class SetupActivityRecognitionJobService extends JobService {
                 .setActivityType(DetectedActivity.IN_VEHICLE)
                 .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
                 .build());
-        //for testing TODO remove
-        transitions.add(new ActivityTransition.Builder()
-                .setActivityType(DetectedActivity.WALKING)
-                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-                .build());
-        transitions.add(new ActivityTransition.Builder()
-                .setActivityType(DetectedActivity.WALKING)
-                .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
-                .build());
-
         ActivityTransitionRequest request = new ActivityTransitionRequest(transitions);
         PendingIntent pendingIntent = getPendingIntent();
 
         ActivityRecognition.getClient(getApplicationContext()).requestActivityTransitionUpdates(request, pendingIntent)
-                .addOnSuccessListener(aVoid ->
-                {
-                    jobFinished(job, false);
-                })
+                .addOnSuccessListener(aVoid -> jobFinished(job, false))
                 .addOnFailureListener(e ->
                 {
                     e.printStackTrace();

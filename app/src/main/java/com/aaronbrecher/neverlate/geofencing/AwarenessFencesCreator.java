@@ -121,7 +121,7 @@ public class AwarenessFencesCreator implements LocationCallback {
                 Constants.LOCATION_FENCE_RADIUS,
                 Constants.LOCATION_FENCE_DWELL_TIME);
         //TODO the end time is such for testing purposes in reality possibly will end the time before this
-        AwarenessFence timeFence = TimeFence.inInterval(triggerTime - Constants.TIME_TEN_MINUTES, triggerTime + Constants.ONE_HOUR);
+        AwarenessFence timeFence = TimeFence.inInterval(triggerTime - Constants.TIME_TEN_MINUTES, triggerTime + Constants.TIME_FIFTEEN_MINUTES);
         return AwarenessFence.and(locationFence, timeFence);
     }
 
