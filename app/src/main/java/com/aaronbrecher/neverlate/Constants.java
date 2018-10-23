@@ -7,13 +7,11 @@ import android.provider.CalendarContract.Events;
 public class Constants {
     public static final String DATABASE_NAME = "events-database";
     public static final int PERMISSIONS_REQUEST_CODE = 101;
-    public static final int GEOFENCE_TRANSITION_PENDING_INTENT_CODE = 0;
     public static final String NOTIFICATION_CHANNEL_ID = "geofencing-channel";
     public static final String EVENT_DETAIL_INTENT_EXTRA = "event-details";
     public static final String EVENT_LIST_TAG = "event-list-frag";
     public static final String EVENT_DETAIL_FRAGMENT_TAG = "event-detail-frag";
     public static final String GEOFENCE_REQUEST_ID = "never-late-fences";
-    public static final int GEOFENCE_RESPONSE_MILLIS = 100000;
 
     //awareness constants
     public static final int AWARENESS_TRANSITION_PENDING_INTENT_CODE = 1;
@@ -36,10 +34,12 @@ public class Constants {
     ;
 
     //Services Constants
-    public static final String FIREBASE_JOB_SERVICE_UPDATE_GEOFENCES = "update-geofences";
     public static final String FIREBASE_JOB_SERVICE_SETUP_ACTIVITY_RECOG = "set-up-activity-recog";
     public static final int CALENDAR_ALARM_SERVICE_REQUEST_CODE = 102;
     public static final int ACTIVITY_TRANSITION_PENDING_INTENT_CODE = 2;
+    public static final String FIREBASE_JOB_SERVICE_CHECK_CALENDAR_CHANGED = "check-calendar-change";
+    public static final int CHECK_CALENDAR_START_WINDOW = 60*60;
+    public static final int CHECK_CALENDAR_END_WINDOW = CHECK_CALENDAR_START_WINDOW + 600;
 
     //prefs key
     public static final String KM_PER_MINUTE_PREFS_KEY = "miles-per-minute";

@@ -9,6 +9,8 @@ import com.aaronbrecher.neverlate.dependencyinjection.AppModule;
 import com.aaronbrecher.neverlate.dependencyinjection.DaggerAppComponent;
 import com.aaronbrecher.neverlate.dependencyinjection.RoomModule;
 import com.jakewharton.threetenabp.AndroidThreeTen;
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 
 public class NeverLateApp extends Application {
     private static NeverLateApp app;
@@ -17,6 +19,7 @@ public class NeverLateApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
         app = this;
         AndroidThreeTen.init(this);
         mAppComponent = DaggerAppComponent.builder()

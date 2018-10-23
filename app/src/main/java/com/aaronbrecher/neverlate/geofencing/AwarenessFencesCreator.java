@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.widget.Toast;
 
@@ -32,10 +31,7 @@ import com.google.android.gms.awareness.fence.FenceUpdateRequest;
 import com.google.android.gms.awareness.fence.LocationFence;
 import com.google.android.gms.awareness.fence.TimeFence;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.gson.Gson;
-import com.google.maps.GeoApiContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +45,6 @@ public class AwarenessFencesCreator implements LocationCallback {
     FusedLocationProviderClient mLocationProviderClient;
     @Inject
     SharedPreferences mSharedPreferences;
-    @Inject
-    GeoApiContext mGeoApiContext;
     @Inject
     EventsRepository mEventsRepository;
     @Inject
@@ -99,6 +93,7 @@ public class AwarenessFencesCreator implements LocationCallback {
     private List<AwarenessFenceWithName> createFences() {
         List<AwarenessFenceWithName> fenceList = new ArrayList<>();
         for (Event event : mEventList) {
+            //all events will start with the value set to ROOM_INVALID... as a sentinal
             if(event.getTimeTo() == Constants.ROOM_INVALID_LONG_VALUE) continue;
             String name = Constants.AWARENESS_FENCE_NAME_PREFIX + event.getId();
             long relevantTime = GeofenceUtils.determineRelevantTime(event.getStartTime(), event.getEndTime());
@@ -174,7 +169,7 @@ public class AwarenessFencesCreator implements LocationCallback {
             mSharedPreferences.edit()
                     .putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location))
                     .apply();
-            DirectionsUtils.addDistanceInfoToEventList(mGeoApiContext, mEventList, location);
+            DirectionsUtils.addDistanceInfoToEventList(mEventList, location);
             mEventsRepository.insertAll(mEventList);
             updateFences();
         });
@@ -197,6 +192,10 @@ public class AwarenessFencesCreator implements LocationCallback {
         }
     }
 
+    /**
+     * This subclass is used to make it easier to add a geofence with a name
+     * built from the Event. All names will have a prefix + the event ID
+     */
     private class AwarenessFenceWithName {
         public AwarenessFence fence;
         public String name;

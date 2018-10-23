@@ -3,12 +3,8 @@ package com.aaronbrecher.neverlate.ui.widget;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.widget.RemoteViews;
 
@@ -18,13 +14,10 @@ import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
 import com.aaronbrecher.neverlate.Utils.GeofenceUtils;
-import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.database.EventsRepository;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.ui.activities.EventDetailActivity;
 import com.aaronbrecher.neverlate.ui.activities.MainActivity;
-
-import org.joda.time.LocalDateTime;
 
 import java.util.List;
 
@@ -76,7 +69,7 @@ public class NeverLateWidget extends AppWidgetProvider {
         } else {
             intent = new Intent(context, EventDetailActivity.class);
             intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, Event.convertEventToJson(event));
-            String timeToLeave = DirectionsUtils.getTimeToLeaveHumanReadable(context, event.getTimeTo(),
+            String timeToLeave = DirectionsUtils.getTimeToLeaveHumanReadable(event.getTimeTo(),
                     GeofenceUtils.determineRelevantTime(event.getStartTime(), event.getEndTime()));
             remoteViews.setTextViewText(R.id.widget_leave_time, context.getString(R.string.leave_at_time, timeToLeave));
             remoteViews.setTextViewText(R.id.widget_event_title, event.getTitle());

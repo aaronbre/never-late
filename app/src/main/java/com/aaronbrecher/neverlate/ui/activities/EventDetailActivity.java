@@ -11,6 +11,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -18,9 +19,16 @@ import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.GeofenceUtils;
+import com.aaronbrecher.neverlate.backgroundservices.StartJobIntentServiceBroadcastReceiver;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
 import com.aaronbrecher.neverlate.viewmodels.DetailActivityViewModel;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
+
+import java.util.ArrayList;
 
 import javax.inject.Inject;
 
@@ -30,9 +38,12 @@ public class EventDetailActivity extends AppCompatActivity{
     @Inject
     SharedPreferences mSharedPreferences;
     private DetailActivityViewModel mViewModel;
-    private FloatingActionButton mFab;
+    private AdView mAdView;
+    private InterstitialAd mInterstitialAd;
     private Event mEvent;
     private Intent mIntent;
+
+    private static ArrayList<Integer> eventsViewed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +65,7 @@ public class EventDetailActivity extends AppCompatActivity{
             Toast.makeText(this, R.string.event_not_found_toast_text, Toast.LENGTH_LONG).show();
             finish();
         }
-        mFab = findViewById(R.id.detail_edit_fab);
+        FloatingActionButton fab = findViewById(R.id.detail_edit_fab);
         setTitle(mEvent.getTitle());
         mViewModel.setEvent(mEvent);
         if(GeofenceUtils.eventIsPassedCurrentTime(mEvent.getEndTime())){
@@ -67,13 +78,38 @@ public class EventDetailActivity extends AppCompatActivity{
                     .add(R.id.event_detail_fragment_container, eventDetailFragment, Constants.EVENT_DETAIL_FRAGMENT_TAG)
                     .commit();
         }
-        mFab.setOnClickListener(v -> {
+        fab.setOnClickListener(v -> {
             int id = mEvent.getId();
             Uri uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, id);
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(uri);
             startActivity(intent);
         });
+        showAd();
+
+    }
+
+    /**
+     * Method to display an interstitial ad to the user. Currently will show an ad once for
+     * each new event opened (if user closes app will restart the count). Possibly change this
+     * to show only once on each app lifecycle
+     */
+    private void showAd() {
+        if(eventsViewed == null) eventsViewed = new ArrayList<>();
+        Integer eventId = mEvent.getId();
+        if(!eventsViewed.contains(eventId)){
+           eventsViewed.add(eventId);
+            mInterstitialAd = new InterstitialAd(this);
+            mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+            mInterstitialAd.loadAd(new AdRequest.Builder().build());
+
+            mInterstitialAd.setAdListener(new AdListener(){
+                @Override
+                public void onAdLoaded() {
+                    mInterstitialAd.show();
+                }
+            });
+        }
     }
 
     @Override

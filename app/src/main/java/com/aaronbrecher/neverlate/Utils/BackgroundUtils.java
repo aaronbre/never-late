@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 
 import com.aaronbrecher.neverlate.Constants;
+import com.aaronbrecher.neverlate.backgroundservices.CheckForCalendarChangedService;
 import com.aaronbrecher.neverlate.backgroundservices.StartJobIntentServiceBroadcastReceiver;
 import com.aaronbrecher.neverlate.backgroundservices.SetupActivityRecognitionJobService;
 import com.aaronbrecher.neverlate.interfaces.LocationCallback;
@@ -71,6 +72,26 @@ public class BackgroundUtils {
                 .build();
     }
 
+    /**
+     * Returns a Job that will be used to check the calendar for changes periodically
+     */
+    public static Job setUpPeriodicCalendarChecks(FirebaseJobDispatcher dispatcher){
+        return dispatcher.newJobBuilder()
+                .setService(CheckForCalendarChangedService.class)
+                .setTag(Constants.FIREBASE_JOB_SERVICE_CHECK_CALENDAR_CHANGED)
+                .setRecurring(true)
+                .setTrigger(Trigger.executionWindow(Constants.CHECK_CALENDAR_START_WINDOW, Constants.CHECK_CALENDAR_END_WINDOW))
+                .setReplaceCurrent(true)
+                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
+                .build();
+    }
+
+    /**
+     * get the user last known location and send it back to provided callback
+     * @param callback interface that will use the location
+     * @param context context to use the fused location provider
+     * @param providerClient
+     */
     public static void getLocation(final LocationCallback callback, Context context, FusedLocationProviderClient providerClient) {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {

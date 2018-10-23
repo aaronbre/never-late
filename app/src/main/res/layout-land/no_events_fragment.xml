@@ -10,7 +10,7 @@
         android:layout_width="479dp"
         android:layout_height="353dp"
         android:contentDescription="@string/no_events_error_image"
-        android:src="@drawable/ic_searching"
+        android:src="@drawable/no_events_image"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/guideline2" />
 

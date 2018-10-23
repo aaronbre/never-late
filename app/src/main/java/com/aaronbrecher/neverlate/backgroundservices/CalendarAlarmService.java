@@ -1,12 +1,10 @@
 package com.aaronbrecher.neverlate.backgroundservices;
 
-import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.JobIntentService;
 import android.util.Log;
 
@@ -27,14 +25,15 @@ import com.firebase.jobdispatcher.GooglePlayDriver;
 import com.firebase.jobdispatcher.Job;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.gson.Gson;
-import com.google.maps.GeoApiContext;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
-import static com.aaronbrecher.neverlate.Utils.BackgroundUtils.DEFAULT_JOB_TIMEFRAME;
-
+/**
+ * Service to update the Database from the Native Calendar app, will be scheduled
+ * for 12AM each day
+ */
 public class CalendarAlarmService extends JobIntentService implements LocationCallback {
     public static final String TAG = CalendarAlarmService.class.getSimpleName();
     @Inject
@@ -49,7 +48,6 @@ public class CalendarAlarmService extends JobIntentService implements LocationCa
     AppExecutors mAppExecutors;
 
     private List<Event> mEventList;
-    private GeoApiContext mGeoApiContext = new GeoApiContext().setApiKey(BuildConfig.GOOGLE_API_KEY);
     static final int JOB_ID = 1000;
 
     public CalendarAlarmService() {
@@ -73,8 +71,14 @@ public class CalendarAlarmService extends JobIntentService implements LocationCa
         mEventList = CalendarUtils.getCalendarEventsForToday(this);
         mEventsRepository.insertAll(mEventList);
         BackgroundUtils.getLocation(this, this, mLocationProviderClient);
+        initializeActivityRecognition();
+        initializeCalendarCheckJob();
     }
 
+    /**
+     * Set up Geofences for the provided list of events
+     * @param eventList
+     */
     private void initializeGeofences(List<Event> eventList) {
         AwarenessFencesCreator geofenceCreator = new AwarenessFencesCreator.Builder(eventList).build();
         geofenceCreator.buildAndSaveFences();
@@ -88,17 +92,29 @@ public class CalendarAlarmService extends JobIntentService implements LocationCa
                 Gson gson = new Gson();
                 mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location)).apply();
                 if(mEventList == null || mEventList.size() == 0) return;
-                DirectionsUtils.addDistanceInfoToEventList(mGeoApiContext, mEventList, location);
+                DirectionsUtils.addDistanceInfoToEventList(mEventList, location);
                 mEventsRepository.insertAll(mEventList);
                 initializeGeofences(mEventList);
-                initializeActivityRecognition();
             }
         });
     }
 
+    /**
+     * initialize the Activity monitor to track when user is in a vehicle
+     */
     private void initializeActivityRecognition() {
         FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
         Job job = BackgroundUtils.setUpActivityRecognitionJob(dispatcher);
+        dispatcher.mustSchedule(job);
+    }
+
+    /**
+     * initialize a job to perodically check the calendar for changes throughout
+     * the day
+     */
+    private void initializeCalendarCheckJob(){
+        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
+        Job job = BackgroundUtils.setUpPeriodicCalendarChecks(dispatcher);
         dispatcher.mustSchedule(job);
     }
 
