@@ -1,31 +1,22 @@
 package com.aaronbrecher.neverlate.adapters;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
 
-import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
-import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.databinding.EventsListItemBinding;
-import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.maps.DirectionsApiRequest;
-import com.google.maps.PendingResult;
-import com.google.maps.model.DirectionsResult;
+import com.aaronbrecher.neverlate.models.Event;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,24 +25,19 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
     private List<Event> mEvents;
     private List<Event> mFilteredEvents;
     private ListItemClickListener mClickListener;
-    private Location mLocation;
     private Context mContext;
-    private Handler mHandler;
 
     /**
      * Constructor for the adapter
      *
      * @param events        The list of Events to be used - may be null and set later with swapLists
-     * @param location      The current Location of the user - may be null and set later with setLocation
      * @param clickListener Interface to handle clicks will be used also as context - MUST BE A VALID CONTEXT!!
      */
-    public EventListAdapter(List<Event> events, Location location, ListItemClickListener clickListener) {
+    public EventListAdapter(List<Event> events,ListItemClickListener clickListener) {
         mEvents = events;
         mFilteredEvents = events;
-        mLocation = location;
         mClickListener = clickListener;
         mContext = (Context) mClickListener;
-        mHandler = new Handler(mContext.getMainLooper());
     }
 
     @NonNull
@@ -101,6 +87,10 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
         }
     }
 
+    /**
+     * Filter the list based on the searchbar in menu
+     * @return
+     */
     @Override
     public Filter getFilter() {
         return new Filter() {

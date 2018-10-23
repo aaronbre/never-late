@@ -1,7 +1,6 @@
 package com.aaronbrecher.neverlate.backgroundservices;
 
 import android.Manifest;
-import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,17 +8,13 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.JobIntentService;
 
 import com.aaronbrecher.neverlate.AppExecutors;
-import com.aaronbrecher.neverlate.BuildConfig;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
-import com.aaronbrecher.neverlate.Utils.BackgroundUtils;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
-import com.aaronbrecher.neverlate.Utils.GeofenceUtils;
 import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.database.EventsRepository;
 import com.aaronbrecher.neverlate.geofencing.AwarenessFencesCreator;
@@ -29,7 +24,6 @@ import com.google.android.gms.location.ActivityTransitionEvent;
 import com.google.android.gms.location.ActivityTransitionResult;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.maps.GeoApiContext;
 
 import java.util.List;
 
@@ -99,25 +93,17 @@ public class ActivityTransitionService extends JobIntentService {
             return;
         }
 
-        mLocationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(final Location location) {
-                mAppExecutors.diskIO().execute(() -> {
-                    List<Event> eventList = mEventsRepository.queryAllCurrentEventsSync();
-                    DirectionsUtils.addDistanceInfoToEventList(
-                            new GeoApiContext().setApiKey(BuildConfig.GOOGLE_API_KEY),
-                            eventList,
-                            location);
-                    AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(eventList).build();
-                    creator.setEventList(eventList);
-                    creator.buildAndSaveFences();
-                    //save the new location to shared prefs
-                    mSharedPreferences.edit()
-                            .putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location))
-                            .apply();
-                });
-            }
-        });
+        mLocationProviderClient.getLastLocation().addOnSuccessListener(location -> mAppExecutors.diskIO().execute(() -> {
+            List<Event> eventList = mEventsRepository.queryAllCurrentEventsSync();
+            DirectionsUtils.addDistanceInfoToEventList(eventList, location);
+            AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(eventList).build();
+            creator.setEventList(eventList);
+            creator.buildAndSaveFences();
+            //save the new location to shared prefs
+            mSharedPreferences.edit()
+                    .putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location))
+                    .apply();
+        }));
     }
 
 }

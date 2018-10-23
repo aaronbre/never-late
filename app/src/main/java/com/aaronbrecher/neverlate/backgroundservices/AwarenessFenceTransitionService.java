@@ -20,6 +20,9 @@ import com.google.android.gms.awareness.fence.FenceState;
 
 import javax.inject.Inject;
 
+/**
+ * Service to be triggered when the user triggers the awarenessFence
+ */
 public class AwarenessFenceTransitionService extends JobIntentService {
     private static final String TAG = AwarenessFenceTransitionService.class.getSimpleName();
     @Inject
@@ -44,6 +47,8 @@ public class AwarenessFenceTransitionService extends JobIntentService {
     protected void onHandleWork(@NonNull Intent intent) {
         FenceState fenceState = FenceState.extract(intent);
         if (fenceState.getFenceKey().contains(Constants.AWARENESS_FENCE_NAME_PREFIX)) {
+            //if the fence is true then user is still in his location and needs to
+            //leave to his event now.
             if (fenceState.getCurrentState() == FenceState.TRUE) {
                 int id = Integer.valueOf(fenceState.getFenceKey().replaceAll("\\D+", ""));
                 mEvent = mEventsRepository.queryEventById(id);
@@ -56,8 +61,6 @@ public class AwarenessFenceTransitionService extends JobIntentService {
     /**
      * This will create a notification for the geofence by getting the event data
      * from Room using the Id of the geofence
-     * TODO there is currently a bug when using notification to launch app parceable has issues no such issues when launching from intent in mainActivity...
-     *
      * @param event
      */
     private NotificationCompat.Builder createNotificationForFence(Event event) {

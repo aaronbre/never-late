@@ -62,7 +62,7 @@ public class DrivingForegroundService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent.getAction().equals(Constants.ACTION_CANCEL_DRIVING_SERVICE)) {
+        if (intent.getAction() != null && intent.getAction().equals(Constants.ACTION_CANCEL_DRIVING_SERVICE)) {
             mLocationProviderClient.removeLocationUpdates(mCancelIntent);
             stopForeground(true);
             stopSelf();
@@ -79,7 +79,7 @@ public class DrivingForegroundService extends Service {
                         ActivityCompat.checkSelfPermission(DrivingForegroundService.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     return;
                 }
-                mLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
+                mLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationCallback, getMainLooper());
             });
         }
         return START_STICKY;
@@ -108,6 +108,9 @@ public class DrivingForegroundService extends Service {
                 .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     }
 
+    /**
+     * Create the callback to be called each time the location is updated
+     */
     private void createLocationCallback() {
         mLocationCallback = new LocationCallback() {
             @Override
@@ -117,7 +120,8 @@ public class DrivingForegroundService extends Service {
                 for (Event event : mEventList) {
                     int distance = determineDistanceToEvent(event, location);
                     if (distance != -1) {
-                        //determine speed from timeTo and distance
+                        //determine driving speed to event based on the data from the DistanceMatrix, will use
+                        //the distance/driving time to get a decent representation, otherwise will assume an average speed
                         double speed = event.getTimeTo() != null && event.getDistance() != null ? (event.getTimeTo() / 60) / (event.getDistance() / 1000) : mDefaultSpeed;
                         //calculate time for current distance
                         int drivingTimeToEventMillis = (int) (distance / 1000 * speed) * 60 * 1000;
@@ -138,6 +142,14 @@ public class DrivingForegroundService extends Service {
         };
     }
 
+    /**
+     * determine the current distance to the event, this will be done using the location.distance method.
+     * This will be an "as the crow flies" distance which is not as accurate as DistanceMatrix data but
+     * making an API call for each event each time is not financially possible...
+      * @param event current event
+     * @param location the users current location as of triggering the location request
+     * @return
+     */
     private int determineDistanceToEvent(Event event, Location location) {
         // first check if user is still within the previous fence. If so no need to do extra work
         String latLngString = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");

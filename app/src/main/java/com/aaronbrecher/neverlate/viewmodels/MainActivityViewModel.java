@@ -5,11 +5,9 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.os.AsyncTask;
 
-import com.aaronbrecher.neverlate.BuildConfig;
 import com.aaronbrecher.neverlate.database.EventsRepository;
 import com.aaronbrecher.neverlate.database.GeofencesRepository;
 import com.aaronbrecher.neverlate.models.Event;
-import com.google.maps.GeoApiContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +24,6 @@ public class MainActivityViewModel extends BaseViewModel {
     //this field differs from the getAllCurrentEvents as the db is not location aware
     //this field will contain the location info as well (distance and time to travel)
     private MutableLiveData<List<Event>> mEventsWithLocation;
-    private GeoApiContext mGeoApiContext = new GeoApiContext().setApiKey(BuildConfig.GOOGLE_API_KEY);
-
 
     @Inject
     public MainActivityViewModel(EventsRepository eventsRepository, GeofencesRepository geofencesRepository, Application application) {

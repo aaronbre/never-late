@@ -23,10 +23,11 @@ import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 
 import com.aaronbrecher.neverlate.AppExecutors;
-import com.aaronbrecher.neverlate.BuildConfig;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
@@ -43,6 +44,7 @@ import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
 import com.aaronbrecher.neverlate.ui.fragments.EventListFragment;
 import com.aaronbrecher.neverlate.ui.fragments.NoEventsFragment;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
@@ -51,7 +53,7 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.Task;
-import com.google.maps.GeoApiContext;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.List;
 
@@ -60,7 +62,7 @@ import javax.inject.Inject;
 import static com.aaronbrecher.neverlate.Constants.PERMISSIONS_REQUEST_CODE;
 
 public class MainActivity extends AppCompatActivity implements ListItemClickListener, LocationCallback {
-
+    //TODO possibly cap the number of refreshes...
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String SHOW_ALL_EVENTS_KEY = "should-show-all-events";
 
@@ -73,11 +75,13 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     @Inject
     AppExecutors mAppExecutors;
 
-    private GeoApiContext mGeoApiContext = new GeoApiContext().setApiKey(BuildConfig.GOOGLE_API_KEY);
+    private FirebaseAnalytics mFirebaseAnalytics;
+
     private List<Event> mEventList;
     MainActivityViewModel mViewModel;
     private FragmentManager mFragmentManager;
     private FrameLayout mListContainer;
+    private ProgressBar mLoadingIcon;
     private SearchView mSearchView;
     private boolean shouldShowAllEvents = false;
 
@@ -88,10 +92,11 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         ((NeverLateApp) getApplication())
                 .getAppComponent()
                 .inject(this);
-
         setUpNotificationChannel();
         mViewModel = ViewModelProviders.of(this, mViewModelFactory)
                 .get(MainActivityViewModel.class);
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
         if(savedInstanceState != null && savedInstanceState.containsKey(SHOW_ALL_EVENTS_KEY)){
             shouldShowAllEvents = savedInstanceState.getBoolean(SHOW_ALL_EVENTS_KEY, false);
             mViewModel.setShouldShowAllEvents(shouldShowAllEvents);
@@ -101,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         }
         mFragmentManager = getSupportFragmentManager();
         mListContainer = findViewById(R.id.main_activity_list_fragment_container);
+        mLoadingIcon = findViewById(R.id.loading_icon);
         FloatingActionButton fab = findViewById(R.id.event_list_fab);
 
         if (!SystemUtils.hasPermissions(this)) {
@@ -109,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             setUpAlarmManager();
         }
         checkLocationSettings();
+
         mViewModel.getAllCurrentEvents().observe(this, events -> {
             if (events == null || events.size() < 1) {
                 loadNoEventsFragment();
@@ -124,6 +131,8 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             calIntent.setData(CalendarContract.Events.CONTENT_URI);
             startActivity(calIntent);
         });
+
+        MobileAds.initialize(this, getString(R.string.admob_id));
     }
 
     private void loadNoEventsFragment() {
@@ -225,6 +234,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         switch (id) {
             case R.id.main_activity_menu_sync:
                 if (SystemUtils.isConnected(this)) {
+                    showLoadingIcon();
                     mAppExecutors.diskIO().execute(() -> {
                         mEventList = CalendarUtils.getCalendarEventsForToday(MainActivity.this);
                         BackgroundUtils.getLocation(MainActivity.this, MainActivity.this, mLocationProviderClient);
@@ -275,9 +285,10 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         mAppExecutors.networkIO().execute(() -> {
             if (mEventList == null || mEventList.size() < 1){
                 mViewModel.deleteAllEvents();
+                mAppExecutors.mainThread().execute(this::hideLoadingIcon);
                 return;
             }
-            DirectionsUtils.addDistanceInfoToEventList(mGeoApiContext, mEventList, location);
+            DirectionsUtils.addDistanceInfoToEventList(mEventList, location);
             mViewModel.deleteAllEvents();
             mViewModel.insertEvents(mEventList);
             mSharedPreferences.edit().
@@ -285,6 +296,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                     .apply();
             AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(mEventList).build();
             creator.buildAndSaveFences();
+            mAppExecutors.mainThread().execute(this::hideLoadingIcon);
         });
     }
 
@@ -295,6 +307,16 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             mViewModel.insertEvents(mEventList);
         });
         //TODO find out why it failed? Location is needed for the app to operate...
+    }
+
+    private void hideLoadingIcon(){
+        mLoadingIcon.setVisibility(View.GONE);
+        mListContainer.setVisibility(View.VISIBLE);
+    }
+
+    private void showLoadingIcon(){
+        mListContainer.setVisibility(View.GONE);
+        mLoadingIcon.setVisibility(View.VISIBLE);
     }
 
     private void checkLocationSettings() {

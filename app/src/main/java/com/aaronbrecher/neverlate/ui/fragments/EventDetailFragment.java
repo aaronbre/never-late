@@ -60,7 +60,7 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
             mBinding.setEvent(event);
             mMapFragment.getMapAsync(EventDetailFragment.this);
             mEvent = event;
-            String timeToLeave = DirectionsUtils.getTimeToLeaveHumanReadable(getActivity(), mEvent.getTimeTo(),
+            String timeToLeave = DirectionsUtils.getTimeToLeaveHumanReadable(mEvent.getTimeTo(),
                     GeofenceUtils.determineRelevantTime(mEvent.getStartTime(), mEvent.getEndTime()));
             String formatted = getString(R.string.event_detail_leave_time, timeToLeave);
             mBinding.eventDetailLeaveTime.setText(formatted);
@@ -106,7 +106,6 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
     }
 
     private void setUpMap(GoogleMap googleMap) {
-        //TODO NOT Working fix this
         if (mEventMarker != null) mEventMarker.remove();
         if (mLocationMarker != null) mLocationMarker.remove();
         LatLng latLng = mEvent.getLocationLatlng();

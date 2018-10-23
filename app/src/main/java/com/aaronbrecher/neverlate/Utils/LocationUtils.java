@@ -17,12 +17,9 @@ import java.text.DecimalFormat;
 import java.util.List;
 
 public class LocationUtils {
+
     /**
-     * this code needs an internet connection and takes up time...
-     * TODO possibly change DB schema to hold a latlng and do this in the initial load to DB
-     * @param context
-     * @param address
-     * @return
+     * Use the Geocoder API to convert given address to it's LatLng location
      */
     public static LatLng latlngFromAddress(Context context, String address) {
         Geocoder geocoder = new Geocoder(context);
@@ -30,7 +27,7 @@ public class LocationUtils {
         LatLng latLng = null;
         try {
             addresses = geocoder.getFromLocationName(address, 1);
-            if (addresses == null) return null ;
+            if (addresses == null) return null;
             Address location = addresses.get(0);
             latLng = new LatLng(location.getLatitude(), location.getLongitude());
 
@@ -44,11 +41,20 @@ public class LocationUtils {
         return kilometers * .621;
     }
 
-    public static String locationToLatLngString(Location location){
+    //Convert a Location object to a string representation
+    public static String locationToLatLngString(Location location) {
         return location.getLatitude() + "," + location.getLongitude();
     }
 
-    public static Location locationFromLatLngString(String latLng){
+    /**
+     * Convert a String representation of Latitude and Longitude to a
+     * Location Object, Used to store the location in SharedPrefs after issues wiht Parceable
+     *
+     * @param latLng String of Lat Long
+     * @return Location using provided Lat and Long
+     */
+    public static Location locationFromLatLngString(String latLng) {
+        if (latLng.isEmpty()) return null;
         String[] l = latLng.split(",");
         double latitude = Double.valueOf(l[0]);
         double longitude = Double.valueOf(l[1]);

@@ -1,0 +1,56 @@
+{
+  "project_info": {
+    "project_number": "163963293154",
+    "firebase_url": "https://never-late-212716.firebaseio.com",
+    "project_id": "never-late-212716",
+    "storage_bucket": "never-late-212716.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:163963293154:android:c6fba14e2e700933",
+        "android_client_info": {
+          "package_name": "com.aaronbrecher.neverlate"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "163963293154-int65ds87heki9gvtbdd18b2b98nk60f.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aaronbrecher.neverlate",
+            "certificate_hash": "c1dd363156b8c04c27caa626e50725f8b3b1a6b9"
+          }
+        },
+        {
+          "client_id": "163963293154-r28v7o2v6m62njq7idqvp2c14et6oo9r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBg4UhjWgrnLvp4A4ioBhCcEjxurhIMj1Q"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "163963293154-r28v7o2v6m62njq7idqvp2c14et6oo9r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      },
+      "admob_app_id": "ca-app-pub-6961678341915263~3845118420"
+    }
+  ],
+  "configuration_version": "1"
+}
