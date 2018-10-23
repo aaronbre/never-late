@@ -12,7 +12,6 @@
         android:contentDescription="@string/no_events_error_image"
         android:src="@drawable/event_passed_image"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -20,13 +19,14 @@
         style="@style/headline"
         android:text="@string/passed_event_heading"
         android:textColor="@android:color/black"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/passed_event_image" />
+        app:layout_constraintEnd_toStartOf="@id/passed_event_image"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
     <TextView
         android:id="@+id/passed_event_text"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/material_layout_vertical_spacing_between_content_areas"
         android:lineSpacingExtra="2dp"
@@ -36,7 +36,7 @@
         android:textAlignment="center"
         android:textColor="#344B67"
         android:textSize="@dimen/material_component_lists_two_line_text_size"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/passed_event_image"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/passed_event_heading" />
 

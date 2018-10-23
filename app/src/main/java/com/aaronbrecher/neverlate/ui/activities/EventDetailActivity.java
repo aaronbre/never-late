@@ -22,6 +22,7 @@ import com.aaronbrecher.neverlate.Utils.GeofenceUtils;
 import com.aaronbrecher.neverlate.backgroundservices.StartJobIntentServiceBroadcastReceiver;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
+import com.aaronbrecher.neverlate.ui.fragments.PassedEventFragment;
 import com.aaronbrecher.neverlate.viewmodels.DetailActivityViewModel;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
@@ -70,6 +71,9 @@ public class EventDetailActivity extends AppCompatActivity{
         mViewModel.setEvent(mEvent);
         if(GeofenceUtils.eventIsPassedCurrentTime(mEvent.getEndTime())){
             //show message that event has already passed.
+            PassedEventFragment passedEventFragment = new PassedEventFragment();
+            fab.setVisibility(View.GONE);
+            getSupportFragmentManager().beginTransaction().replace(R.id.event_detail_fragment_container, passedEventFragment).commit();
         }
         else {
             EventDetailFragment eventDetailFragment = new EventDetailFragment();
