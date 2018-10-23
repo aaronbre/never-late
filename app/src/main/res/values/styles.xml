@@ -47,6 +47,7 @@
     </style>
 
     <style name="eventDetailDivder.Land" parent="eventDetailDivder">
+        <item name="android:layout_marginTop">@dimen/small_margin</item>
         <item name="layout_constraintEnd_toEndOf">@id/guideline</item>
     </style>
 
@@ -63,6 +64,19 @@
         <item name="layout_constraintStart_toStartOf">parent</item>
         <item name="android:layout_marginEnd">@dimen/material_layout_vertical_spacing_between_content_areas</item>
         <item name="layout_constraintEnd_toStartOf">@id/guideline</item>
+    </style>
+
+    <!--Loading animation-->
+    <style name="GenericProgressBackground" parent="android:Theme">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">fill_parent</item>
+        <item name="android:background">#DD111111</item>
+        <item name="android:gravity">center</item>
+    </style>
+    <style name="GenericProgressIndicator" parent="@android:style/Widget.ProgressBar.Large">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_horizontal|center_vertical</item>
     </style>
 
 </resources>

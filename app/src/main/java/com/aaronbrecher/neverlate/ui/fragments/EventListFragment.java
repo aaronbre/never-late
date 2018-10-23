@@ -7,7 +7,6 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Debug;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -21,7 +20,6 @@ import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.adapters.EventListAdapter;
 import com.aaronbrecher.neverlate.databinding.MainActivityListFragmentBinding;
 import com.aaronbrecher.neverlate.dependencyinjection.AppComponent;
-import com.aaronbrecher.neverlate.geofencing.Geofencing;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.ui.activities.MainActivity;
@@ -32,6 +30,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+//TODO when the list becomes empty need to close the fragment and load the no-events-fragment, probably needs to be done in mainActivity via a interface
 public class EventListFragment extends Fragment {
 
     ListItemClickListener mListItemClickListener;
@@ -62,8 +61,8 @@ public class EventListFragment extends Fragment {
         appComponent.inject(this);
         mActivity = (MainActivity) getActivity();
         mViewModel = ViewModelProviders.of(mActivity, mViewModelFactory).get(MainActivityViewModel.class);
-        mListAdapter = new EventListAdapter(null, null, mActivity);
-        mViewModel.getAllCurrentEvents().observe(this, eventsObserver);
+        mListAdapter = new EventListAdapter(null, mActivity);
+        mViewModel.getShouldShowAllEvents().observe(this, showAllEventsObserver);
     }
 
     @Nullable
@@ -91,4 +90,21 @@ public class EventListFragment extends Fragment {
             mListAdapter.swapLists(events);
         }
     };
+
+    private final Observer<Boolean> showAllEventsObserver = new Observer<Boolean>() {
+        @Override
+        public void onChanged(@Nullable Boolean shouldShow) {
+            if(shouldShow != null && shouldShow){
+                mViewModel.getAllCurrentEvents().removeObserver(eventsObserver);
+                mViewModel.getAllEvents().observe(EventListFragment.this, eventsObserver);
+            }else {
+                mViewModel.getAllEvents().removeObserver(eventsObserver);
+                mViewModel.getAllCurrentEvents().observe(EventListFragment.this, eventsObserver);
+            }
+        }
+    };
+
+    public void filter(CharSequence query){
+        mListAdapter.getFilter().filter(query);
+    }
 }

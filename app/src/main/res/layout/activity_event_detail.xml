@@ -1,16 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".ui.activities.EventDetailActivity">
-
     <FrameLayout
         android:id="@+id/event_detail_fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
        />
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/detail_edit_fab"
+        android:layout_width="@dimen/material_component_floating_action_button_size"
+        android:layout_height="@dimen/material_component_floating_action_button_size"
+        android:layout_margin="@dimen/material_component_floating_action_button_margin"
+        android:src="@drawable/ic_edit_white_24dp"
+        android:layout_gravity="bottom|end"/>
 
-</LinearLayout>
+    <com.google.android.gms.ads.AdView
+        xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        ads:adSize="SMART_BANNER"
+        android:layout_gravity="bottom"
+        ads:adUnitId="ca-app-pub-3940256099942544/6300978111"/>
+</FrameLayout>

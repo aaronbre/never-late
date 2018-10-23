@@ -11,8 +11,9 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 
 import com.aaronbrecher.neverlate.Constants;
-import com.aaronbrecher.neverlate.backgroundservices.CalendarAlarmService;
-import com.aaronbrecher.neverlate.backgroundservices.GeofenceJobService;
+import com.aaronbrecher.neverlate.backgroundservices.CheckForCalendarChangedService;
+import com.aaronbrecher.neverlate.backgroundservices.StartJobIntentServiceBroadcastReceiver;
+import com.aaronbrecher.neverlate.backgroundservices.SetupActivityRecognitionJobService;
 import com.aaronbrecher.neverlate.interfaces.LocationCallback;
 import com.firebase.jobdispatcher.Constraint;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
@@ -44,9 +45,9 @@ public class BackgroundUtils {
         ZonedDateTime zdt = midnight.atZone(ZoneId.systemDefault());
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(context, CalendarAlarmService.class);
+        Intent intent = new Intent(context, StartJobIntentServiceBroadcastReceiver.class);
         intent.setAction(Constants.ACTION_ADD_CALENDAR_EVENTS);
-        PendingIntent pendingIntent = PendingIntent.getService(context, Constants.CALENDAR_ALARM_SERVICE_REQUEST_CODE, intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, Constants.CALENDAR_ALARM_SERVICE_REQUEST_CODE, intent, 0);
         if (alarmManager != null) {
             alarmManager.setRepeating(AlarmManager.RTC,
                     zdt.toInstant().toEpochMilli(), AlarmManager.INTERVAL_DAY, pendingIntent);
@@ -56,41 +57,49 @@ public class BackgroundUtils {
     }
 
     /**
-     * Create a job to repeat every 15 minutes to update the geofences ultimately
-     * will either use the default 15 mins or user provided time from prefs
-     *
-     * @param dispatcher a dispatcher to create the job
-     * @param timeframe  the timeframe to schedule job, end will be +5
-     * @return a FirebaseJob to schedule via firebase dispatcher
+     * Job to Setup the app to listen to activity changes this is done as a job to allow
+     * for rescheduling in the event of the request failing
      */
-    public static Job createJob(FirebaseJobDispatcher dispatcher, int timeframe) {
-        //TODO change trigger to check for user preference...
+    public static Job setUpActivityRecognitionJob(FirebaseJobDispatcher dispatcher) {
         return dispatcher.newJobBuilder()
-                .setService(GeofenceJobService.class)
-                .setTag(Constants.FIREBASE_JOB_SERVICE_UPDATE_GEOFENCES)
-                .setTrigger(Trigger.executionWindow(timeframe * 60, (timeframe + 5) * 60))
-                .setRecurring(true)
+                .setService(SetupActivityRecognitionJobService.class)
+                .setTag(Constants.FIREBASE_JOB_SERVICE_SETUP_ACTIVITY_RECOG)
+                .setTrigger(Trigger.NOW)
+                .setRecurring(false)
                 .setReplaceCurrent(true)
                 .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
                 .setConstraints(Constraint.ON_ANY_NETWORK)
                 .build();
     }
 
+    /**
+     * Returns a Job that will be used to check the calendar for changes periodically
+     */
+    public static Job setUpPeriodicCalendarChecks(FirebaseJobDispatcher dispatcher){
+        return dispatcher.newJobBuilder()
+                .setService(CheckForCalendarChangedService.class)
+                .setTag(Constants.FIREBASE_JOB_SERVICE_CHECK_CALENDAR_CHANGED)
+                .setRecurring(true)
+                .setTrigger(Trigger.executionWindow(Constants.CHECK_CALENDAR_START_WINDOW, Constants.CHECK_CALENDAR_END_WINDOW))
+                .setReplaceCurrent(true)
+                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
+                .build();
+    }
+
+    /**
+     * get the user last known location and send it back to provided callback
+     * @param callback interface that will use the location
+     * @param context context to use the fused location provider
+     * @param providerClient
+     */
     public static void getLocation(final LocationCallback callback, Context context, FusedLocationProviderClient providerClient) {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        providerClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                callback.getLocationSuccessCallback(location);
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                callback.getLocationFailedCallback();
-            }
-        });
+        providerClient.getLastLocation().addOnSuccessListener(location -> {
+            if (location == null) callback.getLocationFailedCallback();
+            else callback.getLocationSuccessCallback(location);
+        }).addOnFailureListener(e -> callback.getLocationFailedCallback());
     }
 }
