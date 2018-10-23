@@ -26,11 +26,14 @@ public interface EventsDao {
     LiveData<List<Event>> queryAllEvents();
 
     //query all not expired events in the database
-    @Query("SELECT * FROM events WHERE endTime > :currentTime ORDER BY startTime")
+    @Query("SELECT * FROM events WHERE endTime > :currentTime AND location IS NOT NULL AND location != '' ORDER BY startTime")
     LiveData<List<Event>> queryAllCurrentEvents(long currentTime);
 
     @Query("SELECT * FROM events WHERE endTime > :currentTime ORDER BY startTime")
     List<Event> queryAllCurrentEventsSync(long currentTime);
+
+    @Query("SELECT * FROM events WHERE endTime > :currentTime ORDER BY startTime")
+    LiveData<List<Event>> queryEventsNoLocation(long currentTime);
 
     @Query("SELECT * FROM events WHERE id = :id")
     Event queryEventById(int id);

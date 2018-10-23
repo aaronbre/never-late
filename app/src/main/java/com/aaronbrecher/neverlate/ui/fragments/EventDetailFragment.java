@@ -4,6 +4,8 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,23 +14,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
+import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
+import com.aaronbrecher.neverlate.Utils.GeofenceUtils;
 import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.databinding.EventDetailFragmentBinding;
 import com.aaronbrecher.neverlate.dependencyinjection.AppComponent;
 import com.aaronbrecher.neverlate.models.Event;
-import com.aaronbrecher.neverlate.models.GeofenceModel;
 import com.aaronbrecher.neverlate.viewmodels.BaseViewModel;
 import com.aaronbrecher.neverlate.viewmodels.DetailActivityViewModel;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -36,16 +40,19 @@ import org.threeten.bp.format.DateTimeFormatter;
 
 import javax.inject.Inject;
 
-public class EventDetailFragment extends Fragment implements OnMapReadyCallback{
+public class EventDetailFragment extends Fragment implements OnMapReadyCallback {
 
     @Inject
     ViewModelProvider.Factory mViewModelFactory;
+    @Inject
+    SharedPreferences mSharedPreferences;
     private BaseViewModel mViewModel;
     private EventDetailFragmentBinding mBinding;
     private SupportMapFragment mMapFragment;
     private Event mEvent;
-    private Marker mMapMarker;
-    private Circle mMapCircle;
+    private Marker mEventMarker;
+    private Marker mLocationMarker;
+    private LatLng mUserLocationLatLng;
 
     private Observer<Event> mEventObserver = new Observer<Event>() {
         @Override
@@ -53,17 +60,21 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback{
             mBinding.setEvent(event);
             mMapFragment.getMapAsync(EventDetailFragment.this);
             mEvent = event;
+            String timeToLeave = DirectionsUtils.getTimeToLeaveHumanReadable(mEvent.getTimeTo(),
+                    GeofenceUtils.determineRelevantTime(mEvent.getStartTime(), mEvent.getEndTime()));
+            String formatted = getString(R.string.event_detail_leave_time, timeToLeave);
+            mBinding.eventDetailLeaveTime.setText(formatted);
         }
     };
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        AppComponent appComponent = ((NeverLateApp)getActivity().getApplication()).getAppComponent();
+        AppComponent appComponent = ((NeverLateApp) getActivity().getApplication()).getAppComponent();
         appComponent.inject(this);
-        if(getResources().getBoolean(R.bool.is_tablet)){
+        if (getResources().getBoolean(R.bool.is_tablet)) {
             mViewModel = ViewModelProviders.of(getActivity(), mViewModelFactory).get(MainActivityViewModel.class);
-        }else{
+        } else {
             mViewModel = ViewModelProviders.of(getActivity(), mViewModelFactory).get(DetailActivityViewModel.class);
         }
 
@@ -78,39 +89,49 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback{
         mMapFragment = (SupportMapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.event_detail_map);
         mViewModel.getEvent().observe(this, mEventObserver);
+
+        if(mSharedPreferences.contains(Constants.USER_LOCATION_PREFS_KEY)){
+            String latLngString = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");
+            if(!latLngString.isEmpty()){
+                Location location = LocationUtils.locationFromLatLngString(latLngString);
+                mUserLocationLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+            }
+        }
         return mBinding.getRoot();
     }
 
     @Override
     public void onMapReady(final GoogleMap googleMap) {
-        mViewModel.getGeofenceForKey(mEvent.getId()).observe(this, new Observer<GeofenceModel>() {
-            @Override
-            public void onChanged(@Nullable GeofenceModel geofenceModel) {
-                int radius = geofenceModel != null ? geofenceModel.getFenceRadius() : 100;
-                addGeofenceToMap(googleMap, radius
-                );
-            }
-        });
+        setUpMap(googleMap);
     }
 
-    private void addGeofenceToMap(GoogleMap googleMap, int fenceRadius) {
-        if(mMapMarker != null) mMapMarker.remove();
-        if(mMapCircle != null)mMapCircle.remove();
+    private void setUpMap(GoogleMap googleMap) {
+        if (mEventMarker != null) mEventMarker.remove();
+        if (mLocationMarker != null) mLocationMarker.remove();
         LatLng latLng = mEvent.getLocationLatlng();
-        if(latLng == null) return;
-        CircleOptions circleOptions = new CircleOptions()
-                .center(latLng)
-                .radius(fenceRadius);
-        mMapMarker = googleMap.addMarker(new MarkerOptions().position(latLng)
-                .title(mEvent.getTitle()));
-        mMapCircle = googleMap.addCircle(circleOptions);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,10.0f));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
+
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        if (latLng != null) {
+            mEventMarker = googleMap.addMarker(new MarkerOptions().position(latLng)
+                    .title(mEvent.getTitle()));
+            builder.include(latLng);
+        }
+        if (mUserLocationLatLng != null) {
+            mLocationMarker = googleMap.addMarker(new MarkerOptions().position(mUserLocationLatLng)
+                    .title(getString(R.string.current_location_map_title)));
+            builder.include(mUserLocationLatLng);
+        }
+        googleMap.setOnMapLoadedCallback(() -> {
+            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(builder.build(), 200);
+            googleMap.animateCamera(cu);
+        });
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if(mEvent != null){
+        if (mEvent != null) {
             mViewModel.getGeofenceForKey(mEvent.getId()).removeObservers(this);
         }
     }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_container"
@@ -10,18 +10,18 @@
     <FrameLayout
         android:id="@+id/main_activity_list_fragment_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"/>
 
-    </FrameLayout>
-    <ImageView
-        android:id="@+id/progress_spinner"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/progress"
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/event_list_fab"
+        android:layout_width="@dimen/material_component_floating_action_button_size"
+        android:layout_height="@dimen/material_component_floating_action_button_size"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="@dimen/material_component_floating_action_button_margin"
+        android:src="@drawable/ic_add_white_24dp" />
+
+    <ProgressBar
+        android:id="@+id/loading_icon"
+        style="@style/GenericProgressIndicator"
         android:visibility="gone"/>
-
-</android.support.constraint.ConstraintLayout>
+</FrameLayout>

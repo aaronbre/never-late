@@ -14,8 +14,8 @@
         <TextView
             android:id="@+id/event_title"
             style="@style/headline"
-            app:layout_constraintBottom_toTopOf="@+id/event_location"
-            app:layout_constraintStart_toStartOf="@+id/event_location"
+            app:layout_constraintBottom_toTopOf="@id/event_location"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_chainStyle="spread"
             tools:text="Doctors Appointment" />
@@ -23,14 +23,16 @@
         <TextView
             android:id="@+id/event_location"
             style="@style/smallSubHeading"
+            android:maxWidth="@dimen/address_max_width"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/event_title"
-            tools:text="52 Gordon st. Elsternwick VIC" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/event_title"
+            tools:text="665 Princeton ave lakewood NJ, Ocean county USA 08701-12943" />
 
         <TextView
             android:id="@+id/event_time_to"
             style="@style/headline"
-            app:layout_constraintBottom_toTopOf="@+id/event_distance"
+            app:layout_constraintBottom_toTopOf="@id/event_distance"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_chainStyle="spread"
             app:layout_constraintEnd_toEndOf="parent"
@@ -40,8 +42,8 @@
             android:id="@+id/event_distance"
             style="@style/smallSubHeading"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/event_time_to"
-            app:layout_constraintTop_toBottomOf="@+id/event_time_to"
+            app:layout_constraintEnd_toEndOf="@id/event_time_to"
+            app:layout_constraintTop_toBottomOf="@id/event_time_to"
             tools:text="22 Miles" />
 
     </android.support.constraint.ConstraintLayout>

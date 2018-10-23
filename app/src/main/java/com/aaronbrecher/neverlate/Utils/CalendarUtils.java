@@ -22,6 +22,7 @@ import org.threeten.bp.ZoneId;
 import org.threeten.bp.ZonedDateTime;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -39,13 +40,10 @@ public class CalendarUtils {
                 Constants.CALENDAR_EVENTS_EVENT_LOCATION};
         //TODO change this to only query calendars user has selected {NOT_MVP}
         //as of now filters for only events starting at midnight of that day until 11:59PM
-        //TODO currently filters out events without a location here possibly retrieve even events
-        //without a location and have the Room query filter, (this will allow more flexability to
-        //add the location in app..
         String selection = Constants.CALENDAR_EVENTS_DTSTART + " >= ? AND "
                 + Constants.CALENDAR_EVENTS_DTSTART + " <= ? AND "
-                + Constants.CALENDAR_EVENTS_EVENT_LOCATION + " IS NOT NULL AND " + Constants.CALENDAR_EVENTS_EVENT_LOCATION + " != '' "
-                + "AND (deleted != 1)";
+                //+ Constants.CALENDAR_EVENTS_EVENT_LOCATION + " IS NOT NULL AND " + Constants.CALENDAR_EVENTS_EVENT_LOCATION + " != '' AND "
+                + "(deleted != 1)";
         String[] args = getSelectionArgs();
         if(ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) ==
                 PackageManager.PERMISSION_GRANTED){
@@ -82,7 +80,7 @@ public class CalendarUtils {
         return new Pair<>(todayMidnight, tommorowMidnight);
     }
 
-    public static String getTimeInMillis(LocalDateTime dateTime){
+    private static String getTimeInMillis(LocalDateTime dateTime){
         ZonedDateTime zdt = dateTime.atZone(ZoneId.systemDefault());
         return String.valueOf(zdt.toInstant().toEpochMilli());
     }
@@ -97,6 +95,10 @@ public class CalendarUtils {
         return eventList;
     }
 
+    /*
+        Gets the current data from the cursor and converts it to an event
+        Object
+     */
     private static Event getEvent(Cursor cursor) {
         int idIndex = cursor.getColumnIndex(BaseColumns._ID);
         int titleIndex = cursor.getColumnIndex(Constants.CALENDAR_EVENTS_TITLE);
@@ -122,7 +124,15 @@ public class CalendarUtils {
         return event;
     }
 
+    /**
+     * Converts the Location String from the calendar to a LatLng object
+     * @param location a string of the location ex. 153 east Broadway
+     * @return LatLng of address provided
+     */
     private static LatLng convertLocationToLatLng(String location){
+        if(location == null || location.equals("")) return null;
         return LocationUtils.latlngFromAddress(NeverLateApp.getApp(), location);
     }
+
+
 }

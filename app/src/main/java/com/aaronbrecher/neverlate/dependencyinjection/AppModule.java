@@ -4,6 +4,8 @@ import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.aaronbrecher.neverlate.AppExecutors;
+import com.aaronbrecher.neverlate.BuildConfig;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -43,5 +45,11 @@ public class AppModule {
     @Singleton
     FusedLocationProviderClient provideFusedLocationProviderClient(Application application){
         return LocationServices.getFusedLocationProviderClient(application);
+    }
+
+    @Provides
+    @Singleton
+    AppExecutors provideAppExecutor(){
+        return new AppExecutors();
     }
 }

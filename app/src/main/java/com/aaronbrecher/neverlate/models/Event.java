@@ -10,8 +10,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.Gson;
 
 import org.threeten.bp.LocalDateTime;
+
+import java.util.Comparator;
 
 /**
  * Event class to represent the calendar event in a local DB
@@ -216,4 +219,47 @@ public class Event implements Parcelable {
             return new Event[size];
         }
     };
+
+    @Ignore
+    public static String convertEventToJson(Event event){
+        return new Gson().toJson(event);
+    }
+
+    @Ignore
+    public static Event convertJsonToEvent(String json){
+        return new Gson().fromJson(json, Event.class);
+    }
+
+    /*
+     *Comparator function to sort a list of events by the ID rather then time
+     */
+    @Ignore
+    public static Comparator<Event> eventIdComparator = (event1, event2) -> event1.id - event2.id;
+
+    /**
+     * shows different possible changes
+     * Same indicates no change
+     * DESCRIPTION_CHANGE indicates a change in title etc. that will not need to reset fences
+     * GEOFENCE_CHANGE indicates a change in time or location and needs to update fences
+     */
+    public enum Change {
+        SAME, DESCRIPTION_CHANGE, GEOFENCE_CHANGE;
+    }
+
+    /**
+     * Determine if there is a change in event as well as what type of change
+      * @param oldEvent the event as it is saved in DB
+     * @param newEvent the event as it is currently in the calendar
+     * @return a Change enum signifying what type of change occured
+     */
+    @Ignore
+    public static Change eventChanged(Event oldEvent, Event newEvent){
+        if(!oldEvent.title.equals(newEvent.title)
+                || !oldEvent.description.equals(newEvent.description)) return Change.DESCRIPTION_CHANGE;
+        if(!oldEvent.startTime.equals(newEvent.startTime)
+                || !oldEvent.endTime.equals(newEvent.endTime)
+                || !oldEvent.location.equals(newEvent.location)) return Change.GEOFENCE_CHANGE;
+
+        return Change.SAME;
+    }
 }
