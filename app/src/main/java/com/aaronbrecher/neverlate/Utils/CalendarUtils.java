@@ -22,7 +22,9 @@ import org.threeten.bp.ZoneId;
 import org.threeten.bp.ZonedDateTime;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -132,6 +134,73 @@ public class CalendarUtils {
     private static LatLng convertLocationToLatLng(String location){
         if(location == null || location.equals("")) return null;
         return LocationUtils.latlngFromAddress(NeverLateApp.getApp(), location);
+    }
+
+    /**
+     * Function that compares two Event lists to see if there were changes, and if so check if
+     * the change necessitates a new call to Distance Matrix
+     * @param oldEventList the previous list
+     * @param newEventList the new list
+     * @return a Hashmap of Lists one called needsGeoChanged and another noGeoChange - events without
+     * any change will be put in noGeoChange to make it easier when inserting events
+     */
+    public static HashMap<String, List<Event>> compareCalendars(List<Event> oldEventList, List<Event> newEventList){
+        HashMap<String, List<Event>> map = new HashMap<>();
+        //filter out events that where removed in newEventList
+        List<Event> filtered = filterOutRemovedEvents(oldEventList, newEventList);
+        //need to sort the lists by id rather by time so as for both to be in sync
+        //in case a new event was added in a middle time-slot
+        Collections.sort(oldEventList, Event.eventIdComparator);
+        Collections.sort(newEventList, Event.eventIdComparator);
+
+        List<Event> eventsToAddWithGeofences = new ArrayList<>();
+        List<Event> eventsToAddNoGeofences = new ArrayList<>();
+
+
+        if (newEventList.size() > oldEventList.size()) {
+            eventsToAddWithGeofences.addAll(newEventList.subList(oldEventList.size(), newEventList.size()));
+        }
+
+        // For each event check if it was changed and add it to the corresponding list
+        // events with only a title or description change do not need new fences
+        for (int i = 0, listLength = oldEventList.size(); i < listLength; i++) {
+            Event newEvent = newEventList.get(i);
+            Event oldEvent = oldEventList.get(i);
+            Event.Change change = Event.eventChanged(oldEvent, newEvent);
+            switch (change) {
+                case DESCRIPTION_CHANGE:
+                    //add the old event as it contains the duration and distance data
+                    oldEvent.setTitle(newEvent.getTitle());
+                    oldEvent.setDescription(newEvent.getDescription());
+                    eventsToAddNoGeofences.add(oldEvent);
+                    break;
+                case GEOFENCE_CHANGE:
+                    eventsToAddWithGeofences.add(newEvent);
+                    break;
+                case SAME:
+                    eventsToAddNoGeofences.add(oldEvent);
+            }
+        }
+        map.put(Constants.LIST_NEEDS_FENCE_UPDATE, eventsToAddWithGeofences);
+        map.put(Constants.LIST_NO_FENCE_UPDATE, eventsToAddNoGeofences);
+
+        return map;
+    }
+
+    private static List<Event> filterOutRemovedEvents(List<Event> oldEvents, List<Event> newEvents){
+        //TODO need to return the list of events to remove as well so as to remove fences
+        List<Integer> ids = new ArrayList<>();
+        List<Event> filtered = new ArrayList<>();
+        for(Event event : newEvents){
+            ids.add(event.getId());
+        }
+
+        for(Event event : oldEvents){
+            if(ids.contains(event.getId())){
+               filtered.add(event);
+            }
+        }
+        return filtered;
     }
 
 

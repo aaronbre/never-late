@@ -254,11 +254,12 @@ public class Event implements Parcelable {
      */
     @Ignore
     public static Change eventChanged(Event oldEvent, Event newEvent){
-        if(!oldEvent.title.equals(newEvent.title)
-                || !oldEvent.description.equals(newEvent.description)) return Change.DESCRIPTION_CHANGE;
         if(!oldEvent.startTime.equals(newEvent.startTime)
                 || !oldEvent.endTime.equals(newEvent.endTime)
                 || !oldEvent.location.equals(newEvent.location)) return Change.GEOFENCE_CHANGE;
+
+        if(!oldEvent.title.equals(newEvent.title)
+                || !oldEvent.description.equals(newEvent.description)) return Change.DESCRIPTION_CHANGE;
 
         return Change.SAME;
     }

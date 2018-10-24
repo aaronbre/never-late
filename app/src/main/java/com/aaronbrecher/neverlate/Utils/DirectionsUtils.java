@@ -27,14 +27,45 @@ import retrofit2.Response;
 public class DirectionsUtils {
 
     private static final String NOT_FOUND = "NOT_FOUND";
+    //Max allowable destinations for DistanceMatrix request
+    private static final int MAX_QUERY_SIZE = 24;
 
-    public static void addDistanceInfoToEventList(List<Event> events, Location location){
-        if (location == null) return;
-        executeQuery(events, location, 0);
+    /**
+     * function to add distance information (Distance,Duration) to events. The query will be
+     * constrained by request limits (for Google it is 24) so if the list is more than that will
+     * create sublists to do multiple requests
+     * @param events list of events from the calendar
+     * @param location the users current location
+     */
+    public static boolean addDistanceInfoToEventList(List<Event> events, Location location){
+        if (location == null) return false;
+        boolean wasAdded = false;
+        events = removeEventsWithoutLocation(events);
+        if(events.size() > MAX_QUERY_SIZE){
+            List<List<Event>> lists = splitList(events);
+            for(List<Event> list : lists){
+               wasAdded = wasAdded || executeQuery(list, location, 0);
+            }
+            return wasAdded;
+        }else {
+            return executeQuery(events, location, 0);
+        }
     }
 
-    private static void executeQuery(List<Event> events, Location location, int numTries) {
-        events = removeEventsWithoutLocation(events);
+    /**
+     * function to chunk original list
+     * @param events the original list provided by the calendar
+     * @return a list of lists each with a size less then @MAX_QUERY_SIZE
+     */
+    private static List<List<Event>> splitList(List<Event> events) {
+        List<List<Event>> lists = new ArrayList<>();
+        for(int i = 0; i < events.size(); i += MAX_QUERY_SIZE){
+            lists.add(events.subList(i, Math.min(i+MAX_QUERY_SIZE, events.size())));
+        }
+        return lists;
+    }
+
+    private static boolean executeQuery(List<Event> events, Location location, int numTries) {
         String destinations = getDestinationsAsString(events);
         String origin = location.getLatitude() + "," + location.getLongitude();
         DistanceMatrixService service = DistanceMatrixApiUtils.createService();
@@ -42,9 +73,9 @@ public class DirectionsUtils {
         try{
             Response<DistanceMatrix> response = request.execute();
             DistanceMatrix distanceMatrix = response.body();
-            if(distanceMatrix == null || distanceMatrix.getRows() == null || distanceMatrix.getRows().get(0) == null) return;
+            if(distanceMatrix == null || distanceMatrix.getRows() == null || distanceMatrix.getRows().get(0) == null) return false;
             List<Element> elements = distanceMatrix.getRows().get(0).getElements();
-            if(elements.size() < 1) return;
+            if(elements.size() < 1) return false;
             for (int i = 0, j = elements.size(); i < j; i++) {
                 Element element = elements.get(i);
                 if(element.getStatus().equals(NOT_FOUND)) continue;
@@ -56,11 +87,14 @@ public class DirectionsUtils {
             }
         }catch (IOException e){
             e.printStackTrace();
-            if(e instanceof SocketTimeoutException && numTries < 3){
+            if(e instanceof SocketTimeoutException && numTries < 2){
                 //TODO if there is a recursion problem it is from here!!!!
-                executeQuery(events, location, numTries + 1);
+                return executeQuery(events, location, numTries + 1);
+            } else {
+                return false;
             }
         }
+        return true;
     }
 
     private static List<Event> removeEventsWithoutLocation(List<Event> eventList) {

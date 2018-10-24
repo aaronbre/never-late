@@ -1,5 +1,6 @@
 package com.aaronbrecher.neverlate.ui.activities;
 
+import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.SearchManager;
@@ -26,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.aaronbrecher.neverlate.AppExecutors;
 import com.aaronbrecher.neverlate.Constants;
@@ -55,6 +57,8 @@ import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -77,7 +81,8 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
     private FirebaseAnalytics mFirebaseAnalytics;
 
-    private List<Event> mEventList;
+    private List<Event> mEventList = new ArrayList<>();
+    private List<Event> mOldList;
     MainActivityViewModel mViewModel;
     private FragmentManager mFragmentManager;
     private FrameLayout mListContainer;
@@ -121,6 +126,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                 loadNoEventsFragment();
             } else {
                 Log.i(TAG, "onChanged: was called");
+                mEventList = events;
                 loadListFragment();
                 if (mViewModel.getEvent().getValue() == null)
                     mViewModel.setEvent(events.get(0));
@@ -235,6 +241,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             case R.id.main_activity_menu_sync:
                 if (SystemUtils.isConnected(this)) {
                     showLoadingIcon();
+                    mOldList = mEventList;
                     mAppExecutors.diskIO().execute(() -> {
                         mEventList = CalendarUtils.getCalendarEventsForToday(MainActivity.this);
                         BackgroundUtils.getLocation(MainActivity.this, MainActivity.this, mLocationProviderClient);
@@ -280,24 +287,68 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         }
     }
 
+    @SuppressLint("ApplySharedPref")
     @Override
     public void getLocationSuccessCallback(final Location location) {
         mAppExecutors.networkIO().execute(() -> {
+            Location oldLocation = getOldLocation();
+            AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(null).build();
+            mSharedPreferences.edit().
+                    putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location))
+                    .commit();
             if (mEventList == null || mEventList.size() < 1){
                 mViewModel.deleteAllEvents();
                 mAppExecutors.mainThread().execute(this::hideLoadingIcon);
                 return;
             }
-            DirectionsUtils.addDistanceInfoToEventList(mEventList, location);
+
+            //if the location changed significantly need to update everything
+            if(oldLocation == null || oldLocation.distanceTo(location) >= Constants.LOCATION_FENCE_RADIUS){
+                addDistanceDataAndUpdateFences(location, creator, mEventList);
+                mViewModel.deleteAllEvents();
+                mViewModel.insertEvents(mEventList);
+                mAppExecutors.mainThread().execute(this::hideLoadingIcon);
+                return;
+            }
+
+            //if the users location did not change only update geofences that need to be updated
+            HashMap<String, List<Event>> eventLists = CalendarUtils.compareCalendars(mOldList,mEventList);
+            List<Event> noGeofenceList = eventLists.get(Constants.LIST_NO_FENCE_UPDATE);
+            List<Event> geofenceList = eventLists.get(Constants.LIST_NEEDS_FENCE_UPDATE);
+
+            if(geofenceList.size() > 0){
+                addDistanceDataAndUpdateFences(location, creator, geofenceList);
+            }
+
+            //combine both lists now that data was added so as to make one DB update
+            geofenceList.addAll(noGeofenceList);
             mViewModel.deleteAllEvents();
-            mViewModel.insertEvents(mEventList);
-            mSharedPreferences.edit().
-                    putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location))
-                    .apply();
-            AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(mEventList).build();
-            creator.buildAndSaveFences();
+            mViewModel.insertEvents(geofenceList);
             mAppExecutors.mainThread().execute(this::hideLoadingIcon);
         });
+    }
+
+    private void addDistanceDataAndUpdateFences(Location location, AwarenessFencesCreator creator, List<Event> eventList) {
+        boolean wasAdded = DirectionsUtils.addDistanceInfoToEventList(eventList, location);
+        creator.setEventList(eventList);
+        if(wasAdded){
+            creator.buildAndSaveFences();
+        }else {
+            //if the relevant info was changed but was not able to get directions data, then
+            //remove the geofences until the data can be retrieved as the fence will not be accurate
+            creator.removeFences(eventList.toArray(new Event[0]));
+            mAppExecutors.mainThread().execute(()-> Toast.makeText(MainActivity.this,
+                    R.string.unable_to_get_directions_data, Toast.LENGTH_LONG).show());
+        }
+    }
+
+    private Location getOldLocation() {
+        Location location = null;
+        if (mSharedPreferences.contains(Constants.USER_LOCATION_PREFS_KEY)) {
+            String loc = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");
+            location = LocationUtils.locationFromLatLngString(loc);
+        }
+        return location;
     }
 
     @Override

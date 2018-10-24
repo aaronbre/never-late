@@ -162,6 +162,14 @@ public class AwarenessFencesCreator implements LocationCallback {
         });
     }
 
+    public void removeFences(Event... events){
+        FenceUpdateRequest.Builder builder = new FenceUpdateRequest.Builder();
+        for (Event event : events){
+            builder.removeFence(Constants.AWARENESS_FENCE_NAME_PREFIX + event.getId());
+        }
+        mFenceClient.updateFences(builder.build());
+    }
+
     @Override
     public void getLocationSuccessCallback(final Location location) {
         mAppExecutors.diskIO().execute(() -> {

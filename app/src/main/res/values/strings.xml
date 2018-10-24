@@ -53,5 +53,6 @@
     <string name="widget_header">Your next event</string>
 
     <string name="admob_id">ca-app-pub-6961678341915263~3845118420</string>
+    <string name="unable_to_get_directions_data">Geofences where not updated, unable to get directions data. Check your internet connection and try to refresh again</string>
 
 </resources>

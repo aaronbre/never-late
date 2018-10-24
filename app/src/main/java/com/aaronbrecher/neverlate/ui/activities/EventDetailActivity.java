@@ -65,6 +65,7 @@ public class EventDetailActivity extends AppCompatActivity{
         if(mEvent == null){
             Toast.makeText(this, R.string.event_not_found_toast_text, Toast.LENGTH_LONG).show();
             finish();
+            return;
         }
         FloatingActionButton fab = findViewById(R.id.detail_edit_fab);
         setTitle(mEvent.getTitle());
@@ -104,7 +105,7 @@ public class EventDetailActivity extends AppCompatActivity{
         if(!eventsViewed.contains(eventId)){
            eventsViewed.add(eventId);
             mInterstitialAd = new InterstitialAd(this);
-            mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+            mInterstitialAd.setAdUnitId("ca-app-pub-6961678341915263/9541132389");
             mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
             mInterstitialAd.setAdListener(new AdListener(){

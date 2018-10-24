@@ -19,7 +19,7 @@ public class Constants {
     public static final long TIME_TEN_MINUTES = 10 * 60 * 1000;
     public static final long TIME_FIFTEEN_MINUTES = 15 * 60 * 1000;
     public static final long ONE_HOUR = TIME_TEN_MINUTES * 6;
-    public static final long LOCATION_FENCE_RADIUS = 2000;
+    public static final long LOCATION_FENCE_RADIUS = 1000;
     public static final long LOCATION_FENCE_DWELL_TIME = 10 * 1000;
     public static final String USER_LOCATION_PREFS_KEY = "users-location";
 
@@ -31,7 +31,9 @@ public class Constants {
     public static final String CALENDAR_EVENTS_DTSTART = Events.DTSTART;
     public static final String CALENDAR_EVENTS_DTEND = Events.DTEND;
     public static final Uri CALENDAR_EVENTS_URI = Events.CONTENT_URI;
-    ;
+
+    public static final String LIST_NEEDS_FENCE_UPDATE = "needs-fence-update";
+    public static final String LIST_NO_FENCE_UPDATE = "no-fence-update";
 
     //Services Constants
     public static final String FIREBASE_JOB_SERVICE_SETUP_ACTIVITY_RECOG = "set-up-activity-recog";

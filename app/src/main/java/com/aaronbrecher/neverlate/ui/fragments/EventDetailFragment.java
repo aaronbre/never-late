@@ -94,7 +94,8 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
             String latLngString = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");
             if(!latLngString.isEmpty()){
                 Location location = LocationUtils.locationFromLatLngString(latLngString);
-                mUserLocationLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+                if(location != null)
+                    mUserLocationLatLng = new LatLng(location.getLatitude(), location.getLongitude());
             }
         }
         return mBinding.getRoot();
