@@ -30,6 +30,9 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.perf.FirebasePerformance;
+import com.google.firebase.perf.metrics.AddTrace;
+import com.google.firebase.perf.metrics.Trace;
 
 import java.util.List;
 
@@ -63,6 +66,7 @@ public class DrivingForegroundService extends Service {
     }
 
     @SuppressLint("MissingPermission")
+    @AddTrace(name = "startForegroundTrace")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent.getAction() != null && intent.getAction().equals(Constants.ACTION_CANCEL_DRIVING_SERVICE)) {
@@ -201,6 +205,7 @@ public class DrivingForegroundService extends Service {
     }
 
     @Override
+    @AddTrace(name = "stopForegroundTrace")
     public boolean stopService(Intent name) {
         mLocationProviderClient.removeLocationUpdates(mLocationCallback);
         stopForeground(true);

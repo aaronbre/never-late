@@ -18,6 +18,7 @@ import com.aaronbrecher.neverlate.interfaces.LocationCallback;
 import com.firebase.jobdispatcher.Constraint;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.Job;
+import com.firebase.jobdispatcher.Lifetime;
 import com.firebase.jobdispatcher.RetryStrategy;
 import com.firebase.jobdispatcher.Trigger;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -78,10 +79,12 @@ public class BackgroundUtils {
     public static Job setUpPeriodicCalendarChecks(FirebaseJobDispatcher dispatcher){
         return dispatcher.newJobBuilder()
                 .setService(CheckForCalendarChangedService.class)
+                .setLifetime(Lifetime.FOREVER)
                 .setTag(Constants.FIREBASE_JOB_SERVICE_CHECK_CALENDAR_CHANGED)
                 .setRecurring(true)
                 .setTrigger(Trigger.executionWindow(Constants.CHECK_CALENDAR_START_WINDOW, Constants.CHECK_CALENDAR_END_WINDOW))
-                .setReplaceCurrent(true)
+                .setReplaceCurrent(false)
+                .setConstraints(Constraint.ON_ANY_NETWORK)
                 .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
                 .build();
     }

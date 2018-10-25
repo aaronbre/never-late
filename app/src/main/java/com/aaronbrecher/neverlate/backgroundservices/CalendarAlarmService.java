@@ -89,7 +89,6 @@ public class CalendarAlarmService extends JobIntentService implements LocationCa
     public void getLocationSuccessCallback(final Location location) {
         mAppExecutors.diskIO().execute(() -> {
             if(location != null){
-                Gson gson = new Gson();
                 mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location)).apply();
                 if(mEventList == null || mEventList.size() == 0) return;
                 DirectionsUtils.addDistanceInfoToEventList(mEventList, location);

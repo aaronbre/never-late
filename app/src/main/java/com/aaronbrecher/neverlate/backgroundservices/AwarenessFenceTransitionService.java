@@ -49,26 +49,24 @@ public class AwarenessFenceTransitionService extends JobIntentService {
         FenceState fenceState = FenceState.extract(intent);
         if (fenceState.getFenceKey().contains(Constants.AWARENESS_FENCE_PREFIX)) {
             String fenceKey = fenceState.getFenceKey();
-            int id = Integer.valueOf(fenceState.getFenceKey().replaceAll("\\D+", ""));
+            int id = Integer.valueOf(fenceKey.replaceAll("\\D+", ""));
             mEvent = mEventsRepository.queryEventById(id);
+
+            if(mEvent == null || fenceKey.contains(Constants.AWARENESS_FENCE_ARRIVAL_PREFIX)){
+                mEvent = mEvent != null ? mEvent : new Event();
+                mEvent.setId(id);
+                AwarenessFencesCreator fencesCreator = new AwarenessFencesCreator.Builder(null).build();
+                fencesCreator.removeFences(mEvent);
+                return;
+            }
+
             //if the fence is true then user is still in his location and needs to
             //leave to his event now.
             if (fenceKey.contains(Constants.AWARENESS_FENCE_MAIN_PREFIX) && fenceState.getCurrentState() == FenceState.TRUE) {
                 //this is a sanity check in a case where the event was removed from the DB
                 //but the fence was not removed
-                if(mEvent == null) return;
                 NotificationCompat.Builder notificationBuilder = createNotificationForFence(mEvent);
                 NotificationManagerCompat.from(this).notify(mEvent.getId(), notificationBuilder.build());
-            }
-            if(fenceKey.contains(Constants.AWARENESS_FENCE_ARRIVAL_PREFIX)){
-                AwarenessFencesCreator fencesCreator = new AwarenessFencesCreator.Builder(null).build();
-                //even if event is not in DB still may need to remove it, to fit with all cases
-                //will just make a new Event with the ID to remove
-                if(mEvent == null){
-                    mEvent = new Event();
-                    mEvent.setId(id);
-                }
-                fencesCreator.removeFences(mEvent);
             }
         }
     }
@@ -90,7 +88,7 @@ public class AwarenessFenceTransitionService extends JobIntentService {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         String notificationText;
-        if (event.getTimeTo() != null) {
+        if (event.getTimeTo() != Constants.ROOM_INVALID_LONG_VALUE) {
             notificationText = getString(R.string.exiting_geofence_notification_content_with_time,
                     event.getTitle(), DirectionsUtils.readableTravelTime(event.getTimeTo()));
         }else {

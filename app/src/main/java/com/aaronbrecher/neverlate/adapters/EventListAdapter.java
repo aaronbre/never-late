@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
 
+import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
 import com.aaronbrecher.neverlate.databinding.EventsListItemBinding;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
@@ -53,9 +54,9 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
         Event event = mFilteredEvents.get(position);
         holder.binding.eventTitle.setText(event.getTitle());
         holder.binding.eventLocation.setText(event.getLocation());
-        if (event.getDistance() != null) holder.binding.eventDistance.setText(
+        if (event.getDistance() != Constants.ROOM_INVALID_LONG_VALUE) holder.binding.eventDistance.setText(
                 DirectionsUtils.getHumanReadableDistance(mContext,event.getDistance(),  PreferenceManager.getDefaultSharedPreferences(mContext)));
-        if (event.getTimeTo() != null) holder.binding.eventTimeTo.setText(DirectionsUtils.readableTravelTime(event.getTimeTo()));
+        if (event.getTimeTo() != Constants.ROOM_INVALID_LONG_VALUE) holder.binding.eventTimeTo.setText(DirectionsUtils.readableTravelTime(event.getTimeTo()));
     }
 
     @Override

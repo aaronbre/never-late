@@ -23,6 +23,7 @@ import com.aaronbrecher.neverlate.models.Event;
 import com.google.android.gms.location.ActivityTransition;
 import com.google.android.gms.location.ActivityTransitionEvent;
 import com.google.android.gms.location.ActivityTransitionResult;
+import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.tasks.OnSuccessListener;
 
@@ -60,6 +61,9 @@ public class ActivityTransitionService extends JobIntentService {
             //is not relevant and vice versa
             List<ActivityTransitionEvent> events = result.getTransitionEvents();
             ActivityTransitionEvent event = events.get(events.size() - 1);
+            //only execute code for the in-vehicle activity
+            if(event.getActivityType() != DetectedActivity.IN_VEHICLE) return;
+
             if (event.getTransitionType() == ActivityTransition.ACTIVITY_TRANSITION_EXIT) {
                 stopDrivingForegroundService();
                 setUpFences();
@@ -88,7 +92,7 @@ public class ActivityTransitionService extends JobIntentService {
     private void stopDrivingForegroundService(){
         Intent intent = new Intent(this, DrivingForegroundService.class);
         intent.setAction(Constants.ACTION_CANCEL_DRIVING_SERVICE);
-        startService(intent);
+        stopService(intent);
     }
 
     /**
