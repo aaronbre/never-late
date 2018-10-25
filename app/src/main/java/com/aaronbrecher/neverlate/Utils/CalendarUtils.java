@@ -5,13 +5,13 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.provider.BaseColumns;
-import android.provider.CalendarContract.Events;
 import android.support.v4.content.ContextCompat;
 import android.util.Pair;
 
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.database.Converters;
+import com.aaronbrecher.neverlate.geofencing.AwarenessFencesCreator;
 import com.aaronbrecher.neverlate.models.Event;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -23,10 +23,8 @@ import org.threeten.bp.ZonedDateTime;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.TimeZone;
 
 
 public class CalendarUtils {
@@ -69,17 +67,18 @@ public class CalendarUtils {
      */
     private static String[] getSelectionArgs() {
         Pair dates = getDateTimes();
-        return new String[]{getTimeInMillis((LocalDateTime) dates.first), getTimeInMillis((LocalDateTime) dates.second)};
+        return new String[]{getTimeInMillis((LocalDateTime)dates.first), getTimeInMillis((LocalDateTime)dates.second)};
     }
 
     /**
      * Function to get the LocalDateTime objects to define "Today"
+     * TODO changed this to only start with current time, end time will still be tommorow midnight
      * @return a pair where the first is today midnight and second is tommorow midnight
      */
     private static Pair<LocalDateTime, LocalDateTime> getDateTimes(){
         LocalDateTime todayMidnight = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT);
         LocalDateTime tommorowMidnight = todayMidnight.plusDays(1);
-        return new Pair<>(todayMidnight, tommorowMidnight);
+        return new Pair<>(LocalDateTime.of(LocalDate.now(), LocalTime.now()), tommorowMidnight);
     }
 
     private static String getTimeInMillis(LocalDateTime dateTime){
@@ -147,7 +146,7 @@ public class CalendarUtils {
     public static HashMap<String, List<Event>> compareCalendars(List<Event> oldEventList, List<Event> newEventList){
         HashMap<String, List<Event>> map = new HashMap<>();
         //filter out events that where removed in newEventList
-        List<Event> filtered = filterOutRemovedEvents(oldEventList, newEventList);
+        oldEventList = filterAndRemoveDeletedEvents(oldEventList, newEventList);
         //need to sort the lists by id rather by time so as for both to be in sync
         //in case a new event was added in a middle time-slot
         Collections.sort(oldEventList, Event.eventIdComparator);
@@ -187,17 +186,26 @@ public class CalendarUtils {
         return map;
     }
 
-    private static List<Event> filterOutRemovedEvents(List<Event> oldEvents, List<Event> newEvents){
+    /**
+     * will return an array of old events where all deleted events where removed
+     * will also remove any geofences associated with them
+     * @param oldEvents
+     * @param newEvents
+     * @return
+     */
+    private static List<Event> filterAndRemoveDeletedEvents(List<Event> oldEvents, List<Event> newEvents){
         //TODO need to return the list of events to remove as well so as to remove fences
         List<Integer> ids = new ArrayList<>();
         List<Event> filtered = new ArrayList<>();
+        AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(null).build();
         for(Event event : newEvents){
             ids.add(event.getId());
         }
-
         for(Event event : oldEvents){
             if(ids.contains(event.getId())){
                filtered.add(event);
+            }else {
+                creator.removeFences(event);
             }
         }
         return filtered;

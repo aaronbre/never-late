@@ -13,6 +13,7 @@ import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
 import com.aaronbrecher.neverlate.database.EventsRepository;
+import com.aaronbrecher.neverlate.geofencing.AwarenessFencesCreator;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.ui.activities.EventDetailActivity;
 import com.aaronbrecher.neverlate.ui.activities.MainActivity;
@@ -46,14 +47,28 @@ public class AwarenessFenceTransitionService extends JobIntentService {
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
         FenceState fenceState = FenceState.extract(intent);
-        if (fenceState.getFenceKey().contains(Constants.AWARENESS_FENCE_NAME_PREFIX)) {
+        if (fenceState.getFenceKey().contains(Constants.AWARENESS_FENCE_PREFIX)) {
+            String fenceKey = fenceState.getFenceKey();
+            int id = Integer.valueOf(fenceState.getFenceKey().replaceAll("\\D+", ""));
+            mEvent = mEventsRepository.queryEventById(id);
             //if the fence is true then user is still in his location and needs to
             //leave to his event now.
-            if (fenceState.getCurrentState() == FenceState.TRUE) {
-                int id = Integer.valueOf(fenceState.getFenceKey().replaceAll("\\D+", ""));
-                mEvent = mEventsRepository.queryEventById(id);
+            if (fenceKey.contains(Constants.AWARENESS_FENCE_MAIN_PREFIX) && fenceState.getCurrentState() == FenceState.TRUE) {
+                //this is a sanity check in a case where the event was removed from the DB
+                //but the fence was not removed
+                if(mEvent == null) return;
                 NotificationCompat.Builder notificationBuilder = createNotificationForFence(mEvent);
                 NotificationManagerCompat.from(this).notify(mEvent.getId(), notificationBuilder.build());
+            }
+            if(fenceKey.contains(Constants.AWARENESS_FENCE_ARRIVAL_PREFIX)){
+                AwarenessFencesCreator fencesCreator = new AwarenessFencesCreator.Builder(null).build();
+                //even if event is not in DB still may need to remove it, to fit with all cases
+                //will just make a new Event with the ID to remove
+                if(mEvent == null){
+                    mEvent = new Event();
+                    mEvent.setId(id);
+                }
+                fencesCreator.removeFences(mEvent);
             }
         }
     }

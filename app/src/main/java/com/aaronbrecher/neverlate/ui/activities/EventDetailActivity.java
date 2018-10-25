@@ -68,6 +68,9 @@ public class EventDetailActivity extends AppCompatActivity{
             return;
         }
         FloatingActionButton fab = findViewById(R.id.detail_edit_fab);
+        if(mEvent.getLocation().isEmpty()){
+            fab.setVisibility(View.VISIBLE);
+        }
         setTitle(mEvent.getTitle());
         mViewModel.setEvent(mEvent);
         if(GeofenceUtils.eventIsPassedCurrentTime(mEvent.getEndTime())){
@@ -115,6 +118,12 @@ public class EventDetailActivity extends AppCompatActivity{
                 }
             });
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mInterstitialAd = null;
     }
 
     @Override

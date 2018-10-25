@@ -9,6 +9,7 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.aaronbrecher.neverlate.Constants;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 
@@ -152,8 +153,9 @@ public class Event implements Parcelable {
         this.watching = watching;
     }
 
-    @Nullable
+    @NonNull
     public Long getDistance() {
+        if(this.distance == null) return Constants.ROOM_INVALID_LONG_VALUE;
         return distance;
     }
 
@@ -161,8 +163,9 @@ public class Event implements Parcelable {
         this.distance = distance;
     }
 
-    @Nullable
+    @NonNull
     public Long getTimeTo() {
+        if (this.timeTo == null) return Constants.ROOM_INVALID_LONG_VALUE;
         return timeTo;
     }
 

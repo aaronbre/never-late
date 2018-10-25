@@ -1,15 +1,14 @@
 package com.aaronbrecher.neverlate;
 
 import android.app.Application;
-import android.location.Location;
-import android.os.Debug;
 
 import com.aaronbrecher.neverlate.dependencyinjection.AppComponent;
 import com.aaronbrecher.neverlate.dependencyinjection.AppModule;
 import com.aaronbrecher.neverlate.dependencyinjection.DaggerAppComponent;
 import com.aaronbrecher.neverlate.dependencyinjection.RoomModule;
-import com.jakewharton.threetenabp.AndroidThreeTen;
 import com.crashlytics.android.Crashlytics;
+import com.jakewharton.threetenabp.AndroidThreeTen;
+
 import io.fabric.sdk.android.Fabric;
 
 public class NeverLateApp extends Application {
@@ -26,6 +25,13 @@ public class NeverLateApp extends Application {
                 .appModule(new AppModule(this))
                 .roomModule(new RoomModule())
                 .build();
+
+//        if (LeakCanary.isInAnalyzerProcess(this)) {
+//            // This process is dedicated to LeakCanary for heap analysis.
+//            // You should not init your app in this process.
+//            return;
+//        }
+//        LeakCanary.install(this);
     }
 
     public static NeverLateApp getApp(){

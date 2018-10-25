@@ -109,24 +109,27 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
     private void setUpMap(GoogleMap googleMap) {
         if (mEventMarker != null) mEventMarker.remove();
         if (mLocationMarker != null) mLocationMarker.remove();
-        LatLng latLng = mEvent.getLocationLatlng();
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
-
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        if (latLng != null) {
-            mEventMarker = googleMap.addMarker(new MarkerOptions().position(latLng)
-                    .title(mEvent.getTitle()));
-            builder.include(latLng);
+        if(!mEvent.getLocation().isEmpty()){
+            LatLng latLng = mEvent.getLocationLatlng();
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            if (latLng != null) {
+                mEventMarker = googleMap.addMarker(new MarkerOptions().position(latLng)
+                        .title(mEvent.getTitle()));
+                builder.include(latLng);
+            }
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
+            if (mUserLocationLatLng != null) {
+                mLocationMarker = googleMap.addMarker(new MarkerOptions().position(mUserLocationLatLng)
+                        .title(getString(R.string.current_location_map_title)));
+                builder.include(mUserLocationLatLng);
+            }
+            googleMap.setOnMapLoadedCallback(() -> {
+                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(builder.build(), 200);
+                googleMap.animateCamera(cu);
+            });
+        }else if(mUserLocationLatLng != null){
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mUserLocationLatLng,10));
         }
-        if (mUserLocationLatLng != null) {
-            mLocationMarker = googleMap.addMarker(new MarkerOptions().position(mUserLocationLatLng)
-                    .title(getString(R.string.current_location_map_title)));
-            builder.include(mUserLocationLatLng);
-        }
-        googleMap.setOnMapLoadedCallback(() -> {
-            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(builder.build(), 200);
-            googleMap.animateCamera(cu);
-        });
     }
 
     @Override

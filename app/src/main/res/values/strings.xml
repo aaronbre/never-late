@@ -23,11 +23,10 @@
     <string name="launch_data_settings_button">Settings</string>
     <string name="menu_item_refresh">Refresh</string>
     <string name="driving_foreground_notification_text">Never late is tracking your location while you drive. This is being done to make sure you will make your events on time. To cancel the tracking just click cancel.</string>
-    <string name="driving_foreground_notification_title">Tracking Location</string>
+    <string name="driving_foreground_notification_title">Driving location tracking is active</string>
     <string name="no_events_error_image">No events error image</string>
-    <string name="no_events_text">Whoops looks like you don\'t have any events with a location saved, make sure your events have a location in order for it to be tracked.
-        If you would like to see events without locations and add a location please select so from the menu.</string>
-    <string name="no_events_heading">No tracked events!</string>
+    <string name="no_events_text">Whoops looks like you don\'t have any events with a location saved today. Events are updated every few minutes if you just added an event just refresh the list. If you would like to see events without locations please select so from the menu.</string>
+    <string name="no_events_heading">No tracked events for today!</string>
     <string name="no_events_button">view events without location</string>
     <string name="passed_event_heading">Event Missed</string>
     <string name="passed_event_text">Seems like this event has already passed, make sure that notifications are active so you don\'t miss any other events.</string>
@@ -53,6 +52,6 @@
     <string name="widget_header">Your next event</string>
 
     <string name="admob_id">ca-app-pub-6961678341915263~3845118420</string>
-    <string name="unable_to_get_directions_data">Geofences where not updated, unable to get directions data. Check your internet connection and try to refresh again</string>
+    <string name="unable_to_get_directions_data">Geofences were not updated, unable to get directions data. Check your internet connection and try to refresh again</string>
 
 </resources>

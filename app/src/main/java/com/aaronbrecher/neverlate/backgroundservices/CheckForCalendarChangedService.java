@@ -71,6 +71,7 @@ public class CheckForCalendarChangedService extends JobService {
         geofenceList.addAll(noGeofenceList);
         mEventsRepository.deleteAllEvents();
         mEventsRepository.insertAll(geofenceList);
+        jobFinished(job, false);
     }
 
     /**
@@ -80,14 +81,16 @@ public class CheckForCalendarChangedService extends JobService {
      */
     private void addDistanceData(List<Event> eventsToAddWithGeofences) {
         Location location = null;
+        boolean wasAdded = false;
         if(mSharedPreferences.contains(Constants.USER_LOCATION_PREFS_KEY)){
             String locationString = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");
             location = LocationUtils.locationFromLatLngString(locationString);
         }
         if(location != null){
-            DirectionsUtils.addDistanceInfoToEventList(eventsToAddWithGeofences, location);
+            wasAdded = DirectionsUtils.addDistanceInfoToEventList(eventsToAddWithGeofences, location);
         }
         AwarenessFencesCreator fencesCreator = new AwarenessFencesCreator.Builder(eventsToAddWithGeofences).build();
-        fencesCreator.buildAndSaveFences();
+        if(wasAdded) fencesCreator.buildAndSaveFences();
+        else fencesCreator.removeFences(eventsToAddWithGeofences.toArray(new Event[0]));
     }
 }

@@ -56,8 +56,14 @@ public class LocationUtils {
     public static Location locationFromLatLngString(String latLng) {
         if (latLng.isEmpty()) return null;
         String[] l = latLng.split(",");
-        double latitude = Double.valueOf(l[0]);
-        double longitude = Double.valueOf(l[1]);
+        double latitude;
+        double longitude;
+        try {
+            latitude = Double.valueOf(l[0]);
+            longitude = Double.valueOf(l[1]);
+        } catch (NumberFormatException e) {
+            return null;
+        }
         Location location = new Location("neverlate");
         location.setLatitude(latitude);
         location.setLongitude(longitude);

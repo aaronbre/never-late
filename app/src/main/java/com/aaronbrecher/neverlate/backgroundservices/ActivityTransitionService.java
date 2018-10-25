@@ -10,6 +10,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.JobIntentService;
+import android.support.v4.content.ContextCompat;
 
 import com.aaronbrecher.neverlate.AppExecutors;
 import com.aaronbrecher.neverlate.Constants;
@@ -70,16 +71,24 @@ public class ActivityTransitionService extends JobIntentService {
 
     private void setUpDrivingService() {
         Intent intent = new Intent(this, DrivingForegroundService.class);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(intent);
         } else {
-            startService(intent);
+            //TODO this may not work on > Oreo
+            stopService(intent);
         }
     }
 
     private void stopDrivingForegroundService(){
         Intent intent = new Intent(this, DrivingForegroundService.class);
-        stopService(intent);
+        intent.setAction(Constants.ACTION_CANCEL_DRIVING_SERVICE);
+        startService(intent);
     }
 
     /**

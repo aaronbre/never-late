@@ -15,12 +15,16 @@ public class Constants {
 
     //awareness constants
     public static final int AWARENESS_TRANSITION_PENDING_INTENT_CODE = 1;
-    public static final String AWARENESS_FENCE_NAME_PREFIX = "never-late-awareness";
+    public static final String AWARENESS_FENCE_PREFIX = "never-late-awareness";
+    public static final String AWARENESS_FENCE_MAIN_PREFIX = "never-late-awareness-main";
+    public static final String AWARENESS_FENCE_ARRIVAL_PREFIX = "never-late-awareness-arrived";
     public static final long TIME_TEN_MINUTES = 10 * 60 * 1000;
     public static final long TIME_FIFTEEN_MINUTES = 15 * 60 * 1000;
     public static final long ONE_HOUR = TIME_TEN_MINUTES * 6;
     public static final long LOCATION_FENCE_RADIUS = 1000;
     public static final long LOCATION_FENCE_DWELL_TIME = 10 * 1000;
+    public static final long ARRIVAL_FENCE_RADIUS = 200;
+    public static final long ARRIVAL_FENCE_DWELL_TIME = LOCATION_FENCE_DWELL_TIME;
     public static final String USER_LOCATION_PREFS_KEY = "users-location";
 
     //calendar constants

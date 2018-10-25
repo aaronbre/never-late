@@ -1,6 +1,7 @@
 package com.aaronbrecher.neverlate.geofencing;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,6 +19,7 @@ import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
 import com.aaronbrecher.neverlate.Utils.GeofenceUtils;
 import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.backgroundservices.StartJobIntentServiceBroadcastReceiver;
+import com.aaronbrecher.neverlate.database.Converters;
 import com.aaronbrecher.neverlate.database.EventsRepository;
 import com.aaronbrecher.neverlate.dependencyinjection.AppModule;
 import com.aaronbrecher.neverlate.dependencyinjection.DaggerGeofencingComponent;
@@ -31,6 +33,7 @@ import com.google.android.gms.awareness.fence.FenceUpdateRequest;
 import com.google.android.gms.awareness.fence.LocationFence;
 import com.google.android.gms.awareness.fence.TimeFence;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
@@ -94,12 +97,15 @@ public class AwarenessFencesCreator implements LocationCallback {
         List<AwarenessFenceWithName> fenceList = new ArrayList<>();
         for (Event event : mEventList) {
             //all events will start with the value set to ROOM_INVALID... as a sentinal
-            if(event.getTimeTo() == Constants.ROOM_INVALID_LONG_VALUE) continue;
-            String name = Constants.AWARENESS_FENCE_NAME_PREFIX + event.getId();
+            if (event.getTimeTo() == Constants.ROOM_INVALID_LONG_VALUE) continue;
+            String fenceName = Constants.AWARENESS_FENCE_MAIN_PREFIX + event.getId();
             long relevantTime = GeofenceUtils.determineRelevantTime(event.getStartTime(), event.getEndTime());
             long triggerTime = relevantTime - (event.getTimeTo() * 1000);
-            AwarenessFenceWithName fence = new AwarenessFenceWithName(createAwarenessFenceForEvent(triggerTime), name);
+            AwarenessFenceWithName fence = new AwarenessFenceWithName(createAwarenessFenceForEvent(triggerTime), fenceName);
             fenceList.add(fence);
+            String arrivalFenceName = Constants.AWARENESS_FENCE_ARRIVAL_PREFIX + event.getId();
+            AwarenessFenceWithName arrivalFence = new AwarenessFenceWithName(createArrivalFenceForEvent(event), arrivalFenceName);
+            fenceList.add(arrivalFence);
         }
         return fenceList;
     }
@@ -125,6 +131,31 @@ public class AwarenessFencesCreator implements LocationCallback {
         return AwarenessFence.and(locationFence, timeFence);
     }
 
+    /**
+     * This will create an additional fence for each event for arrival at event,
+     * this will be used to remove the event from tracking when the user makes it
+     *
+     * @param event the event to create fence for
+     * @return
+     */
+    private AwarenessFence createArrivalFenceForEvent(Event event) {
+        LatLng latLng = event.getLocationLatlng() != null ? event.getLocationLatlng()
+                : LocationUtils.latlngFromAddress(mApp, event.getLocation());
+        if (latLng == null) return null;
+
+        long startTime = Converters.unixFromDateTime(event.getStartTime());
+        long endTime = Converters.unixFromDateTime(event.getEndTime());
+
+        @SuppressLint("MissingPermission") AwarenessFence locationFence = LocationFence.in(latLng.latitude,
+                latLng.longitude,
+                Constants.ARRIVAL_FENCE_RADIUS,
+                Constants.ARRIVAL_FENCE_DWELL_TIME);
+        AwarenessFence timeFence = TimeFence.inInterval(startTime - Constants.TIME_TEN_MINUTES,
+                endTime);
+        return AwarenessFence.and(locationFence, timeFence);
+
+    }
+
     private FenceUpdateRequest getUpdateRequest(List<AwarenessFenceWithName> fences) {
         FenceUpdateRequest.Builder builder = new FenceUpdateRequest.Builder();
         for (AwarenessFenceWithName fence : fences) {
@@ -146,28 +177,25 @@ public class AwarenessFencesCreator implements LocationCallback {
     }
 
     private void updateFences() {
-        mAppExecutors.networkIO().execute(()->{
+        mAppExecutors.networkIO().execute(() -> {
             final List<AwarenessFenceWithName> fencelist = createFences();
-            if(fencelist.size() == 0) return;
+            if (fencelist.size() == 0) return;
             FenceUpdateRequest request = getUpdateRequest(fencelist);
-            mFenceClient.updateFences(request).addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void aVoid) {
-                    Toast.makeText(mApp, R.string.geofence_added_success, Toast.LENGTH_SHORT).show();
-                }
-            }).addOnFailureListener(e -> {
-                Toast.makeText(mApp, R.string.geofence_added_failed, Toast.LENGTH_SHORT).show();
-                //reschedule job
-            });
+            mFenceClient.updateFences(request).addOnSuccessListener(aVoid ->
+                            Toast.makeText(mApp, R.string.geofence_added_success, Toast.LENGTH_SHORT).show())
+                    .addOnFailureListener(e ->
+                            Toast.makeText(mApp, R.string.geofence_added_failed, Toast.LENGTH_SHORT).show());
         });
     }
 
-    public void removeFences(Event... events){
-        FenceUpdateRequest.Builder builder = new FenceUpdateRequest.Builder();
-        for (Event event : events){
-            builder.removeFence(Constants.AWARENESS_FENCE_NAME_PREFIX + event.getId());
-        }
-        mFenceClient.updateFences(builder.build());
+    public void removeFences(Event... events) {
+        mAppExecutors.diskIO().execute(() -> {
+            FenceUpdateRequest.Builder builder = new FenceUpdateRequest.Builder();
+            for (Event event : events) {
+                builder.removeFence(Constants.AWARENESS_FENCE_MAIN_PREFIX + event.getId());
+            }
+            mFenceClient.updateFences(builder.build());
+        });
     }
 
     @Override

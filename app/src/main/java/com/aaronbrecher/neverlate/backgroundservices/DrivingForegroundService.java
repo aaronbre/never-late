@@ -1,6 +1,7 @@
 package com.aaronbrecher.neverlate.backgroundservices;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -28,6 +29,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
 
@@ -60,6 +62,7 @@ public class DrivingForegroundService extends Service {
         mDefaultSpeed = mSharedPreferences.getFloat(Constants.KM_PER_MINUTE_PREFS_KEY, .5f);
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent.getAction() != null && intent.getAction().equals(Constants.ACTION_CANCEL_DRIVING_SERVICE)) {
@@ -75,10 +78,6 @@ public class DrivingForegroundService extends Service {
                 mEventList = mEventsRepository.queryAllCurrentEventsSync();
                 createLocationRequest();
                 createLocationCallback();
-                if (ActivityCompat.checkSelfPermission(DrivingForegroundService.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                        ActivityCompat.checkSelfPermission(DrivingForegroundService.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    return;
-                }
                 mLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationCallback, getMainLooper());
             });
         }
@@ -96,6 +95,7 @@ public class DrivingForegroundService extends Service {
                 .setOngoing(true)
                 .setSmallIcon(R.drawable.ic_geofence_car)
                 .setContentTitle(getString(R.string.driving_foreground_notification_title))
+                .setContentText(getString(R.string.driving_foreground_notification_text))
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(getString(R.string.driving_foreground_notification_text)))
                 .addAction(R.drawable.ic_cancel_black_24dp, getString(R.string.foreground_notification_cancel), mCancelIntent)
                 .build();
@@ -117,12 +117,13 @@ public class DrivingForegroundService extends Service {
             public void onLocationResult(LocationResult locationResult) {
                 if (locationResult == null) return;
                 Location location = locationResult.getLastLocation();
+                if(location == null) return;
                 for (Event event : mEventList) {
                     int distance = determineDistanceToEvent(event, location);
                     if (distance != -1) {
                         //determine driving speed to event based on the data from the DistanceMatrix, will use
                         //the distance/driving time to get a decent representation, otherwise will assume an average speed
-                        double speed = event.getTimeTo() != null && event.getDistance() != null ? (event.getTimeTo() / 60) / (event.getDistance() / 1000) : mDefaultSpeed;
+                        double speed = event.getTimeTo() != -1 && event.getDistance() != -1 ? (event.getTimeTo() / 60) / (event.getDistance() / 1000) : mDefaultSpeed;
                         //calculate time for current distance
                         int drivingTimeToEventMillis = (int) (distance / 1000 * speed) * 60 * 1000;
                         //deterimine time of arrival to location
@@ -146,7 +147,8 @@ public class DrivingForegroundService extends Service {
      * determine the current distance to the event, this will be done using the location.distance method.
      * This will be an "as the crow flies" distance which is not as accurate as DistanceMatrix data but
      * making an API call for each event each time is not financially possible...
-      * @param event current event
+     *
+     * @param event    current event
      * @param location the users current location as of triggering the location request
      * @return
      */
@@ -155,10 +157,15 @@ public class DrivingForegroundService extends Service {
         String latLngString = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");
         if (!latLngString.equals("")) {
             Location previousLocation = LocationUtils.locationFromLatLngString(latLngString);
-            if (previousLocation.distanceTo(location) < Constants.LOCATION_FENCE_RADIUS/2)
+            if (previousLocation != null && previousLocation.distanceTo(location) < Constants.LOCATION_FENCE_RADIUS / 2)
                 return -1;
         }
 
+        //sanity check in case the event does not have a latlng, in that case will try to
+        //get it here if not don't track
+        LatLng eventLatlng = event.getLocationLatlng() != null ? event.getLocationLatlng()
+                : LocationUtils.latlngFromAddress(this, event.getLocation());
+        if(eventLatlng == null) return -1;
         Location eventLocation = new Location("");
         eventLocation.setLatitude(event.getLocationLatlng().latitude);
         eventLocation.setLongitude(event.getLocationLatlng().longitude);
@@ -196,6 +203,7 @@ public class DrivingForegroundService extends Service {
     @Override
     public boolean stopService(Intent name) {
         mLocationProviderClient.removeLocationUpdates(mLocationCallback);
+        stopForeground(true);
         return super.stopService(name);
     }
 }
