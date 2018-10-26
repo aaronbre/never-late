@@ -22,7 +22,6 @@ public class BootCompletedJobService extends JobIntentService {
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
         FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(NeverLateApp.getApp()));
-        Job recurringJob  = BackgroundUtils.setUpPeriodicCalendarChecks(dispatcher);
-        dispatcher.mustSchedule(recurringJob);
+         dispatcher.mustSchedule(BackgroundUtils.setUpPeriodicCalendarChecks(dispatcher));
     }
 }
