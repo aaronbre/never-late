@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.JobIntentService;
 
 import com.aaronbrecher.neverlate.Constants;
+import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.Utils.BackgroundUtils;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
@@ -20,11 +21,8 @@ public class BootCompletedJobService extends JobIntentService {
     }
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
-        boolean wasSet = BackgroundUtils.setAlarmManager(this);
-        if(wasSet){
-            PreferenceManager.getDefaultSharedPreferences(this)
-                    .edit().putBoolean(Constants.ALARM_STATUS_KEY, true)
-                    .apply();
-        }
+        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(NeverLateApp.getApp()));
+        Job recurringJob  = BackgroundUtils.setUpPeriodicCalendarChecks(dispatcher);
+        dispatcher.mustSchedule(recurringJob);
     }
 }

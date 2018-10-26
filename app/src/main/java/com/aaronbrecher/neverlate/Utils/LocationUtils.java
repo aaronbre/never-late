@@ -27,7 +27,7 @@ public class LocationUtils {
         LatLng latLng = null;
         try {
             addresses = geocoder.getFromLocationName(address, 1);
-            if (addresses == null) return null;
+            if (addresses == null || addresses.size() == 0) return null;
             Address location = addresses.get(0);
             latLng = new LatLng(location.getLatitude(), location.getLongitude());
 
@@ -37,12 +37,13 @@ public class LocationUtils {
         return latLng;
     }
 
-    public static double kmToMiles(float kilometers) {
+    static double kmToMiles(float kilometers) {
         return kilometers * .621;
     }
 
     //Convert a Location object to a string representation
     public static String locationToLatLngString(Location location) {
+        if(location == null) return "";
         return location.getLatitude() + "," + location.getLongitude();
     }
 

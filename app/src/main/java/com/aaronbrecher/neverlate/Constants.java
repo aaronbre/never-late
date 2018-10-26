@@ -44,6 +44,7 @@ public class Constants {
     public static final int CALENDAR_ALARM_SERVICE_REQUEST_CODE = 102;
     public static final int ACTIVITY_TRANSITION_PENDING_INTENT_CODE = 2;
     public static final String FIREBASE_JOB_SERVICE_CHECK_CALENDAR_CHANGED = "check-calendar-change";
+    public static final String FIREBASE_JOB_SERVICE_CHECK_CALENDAR_CHANGED_ONE_TIME = "check-calendar-change-one-time";
     public static final int CHECK_CALENDAR_START_WINDOW = 60*60;
     public static final int CHECK_CALENDAR_END_WINDOW = CHECK_CALENDAR_START_WINDOW + 600;
 

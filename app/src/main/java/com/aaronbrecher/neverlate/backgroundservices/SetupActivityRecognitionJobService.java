@@ -40,7 +40,7 @@ public class SetupActivityRecognitionJobService extends JobService {
      * The job to be run on a separate thread this will set up the app to monitor if the user
      * has begun driving or if they have stopped driving
      *
-     * @param job
+     * @param job the job params to be used to call jobFinished
      */
     public void doWork(final JobParameters job) {
         List<ActivityTransition> transitions = new ArrayList<>();

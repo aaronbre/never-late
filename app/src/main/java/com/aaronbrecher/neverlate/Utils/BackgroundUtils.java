@@ -79,7 +79,7 @@ public class BackgroundUtils {
     public static Job setUpPeriodicCalendarChecks(FirebaseJobDispatcher dispatcher){
         return dispatcher.newJobBuilder()
                 .setService(CheckForCalendarChangedService.class)
-                .setLifetime(Lifetime.FOREVER)
+                .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
                 .setTag(Constants.FIREBASE_JOB_SERVICE_CHECK_CALENDAR_CHANGED)
                 .setRecurring(true)
                 .setTrigger(Trigger.executionWindow(Constants.CHECK_CALENDAR_START_WINDOW, Constants.CHECK_CALENDAR_END_WINDOW))
@@ -88,6 +88,20 @@ public class BackgroundUtils {
                 .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
                 .build();
     }
+
+    public static Job oneTimeCalendarUpdate(FirebaseJobDispatcher dispatcher){
+        return dispatcher.newJobBuilder()
+                .setService(CheckForCalendarChangedService.class)
+                .setTag(Constants.FIREBASE_JOB_SERVICE_CHECK_CALENDAR_CHANGED_ONE_TIME)
+                .setRecurring(false)
+                .setReplaceCurrent(true)
+                .setTrigger(Trigger.NOW)
+                .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR)
+                .setConstraints(Constraint.ON_ANY_NETWORK)
+                .build();
+    }
+
+
 
     /**
      * get the user last known location and send it back to provided callback

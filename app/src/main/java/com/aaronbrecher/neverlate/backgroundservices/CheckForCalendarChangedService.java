@@ -1,8 +1,11 @@
 package com.aaronbrecher.neverlate.backgroundservices;
 
 
+import android.Manifest;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.Location;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.aaronbrecher.neverlate.AppExecutors;
@@ -16,9 +19,8 @@ import com.aaronbrecher.neverlate.geofencing.AwarenessFencesCreator;
 import com.aaronbrecher.neverlate.models.Event;
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
+import com.google.android.gms.location.FusedLocationProviderClient;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -36,6 +38,9 @@ public class CheckForCalendarChangedService extends JobService {
     SharedPreferences mSharedPreferences;
     @Inject
     AppExecutors mAppExecutors;
+
+    @Inject
+    FusedLocationProviderClient mLocationProviderClient;
 
     @Override
     public void onCreate() {
@@ -65,7 +70,7 @@ public class CheckForCalendarChangedService extends JobService {
         List<Event> noGeofenceList = listsToAdd.get(Constants.LIST_NO_FENCE_UPDATE);
 
         if (geofenceList.size() > 0) {
-            addDistanceData(geofenceList);
+            addDistanceDataAndCreateFences(geofenceList);
         }
         //combine the lists
         geofenceList.addAll(noGeofenceList);
@@ -76,21 +81,43 @@ public class CheckForCalendarChangedService extends JobService {
 
     /**
      * Add the provided events to the database as well as create fences for
-     * said events
+     * said events, in the event that location data cannot be added will remove old fences
+     * as they are no longer relevant
      * @param eventsToAddWithGeofences list of events to add to DB and fences
      */
-    private void addDistanceData(List<Event> eventsToAddWithGeofences) {
+    private void addDistanceDataAndCreateFences(List<Event> eventsToAddWithGeofences) {
         Location location = null;
-        boolean wasAdded = false;
-        if(mSharedPreferences.contains(Constants.USER_LOCATION_PREFS_KEY)){
+        if (mSharedPreferences.contains(Constants.USER_LOCATION_PREFS_KEY)) {
             String locationString = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");
             location = LocationUtils.locationFromLatLngString(locationString);
         }
-        if(location != null){
-            wasAdded = DirectionsUtils.addDistanceInfoToEventList(eventsToAddWithGeofences, location);
+        if (location != null) {
+            setOrRemoveFences(eventsToAddWithGeofences, location);
         }
-        AwarenessFencesCreator fencesCreator = new AwarenessFencesCreator.Builder(eventsToAddWithGeofences).build();
-        if(wasAdded) fencesCreator.buildAndSaveFences();
+        //if there is no location will try to get it here
+        //TODO there is a bug here that the callback will be executed on the main thread
+        //TODO also the callback will happen after the db was already updated need to fix
+        else {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) return;
+            mLocationProviderClient.getLastLocation().addOnSuccessListener(newLocation -> {
+                if(newLocation != null){
+                    mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(newLocation)).apply();
+                }
+                setOrRemoveFences(eventsToAddWithGeofences, newLocation);
+            });
+        }
+    }
+
+    private void setOrRemoveFences(List<Event> eventsToAddWithGeofences, Location location) {
+        boolean wasAdded = false;
+        AwarenessFencesCreator fencesCreator = new AwarenessFencesCreator.Builder(null).build();
+        wasAdded = DirectionsUtils.addDistanceInfoToEventList(eventsToAddWithGeofences, location);
+        if (wasAdded){
+            fencesCreator.setEventList(eventsToAddWithGeofences);
+            fencesCreator.buildAndSaveFences();
+        }
         else fencesCreator.removeFences(eventsToAddWithGeofences.toArray(new Event[0]));
     }
 }

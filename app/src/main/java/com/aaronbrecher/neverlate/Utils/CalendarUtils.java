@@ -24,6 +24,7 @@ import org.threeten.bp.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 
@@ -142,42 +143,47 @@ public class CalendarUtils {
      * @param newEventList the new list
      * @return a Hashmap of Lists one called needsGeoChanged and another noGeoChange - events without
      * any change will be put in noGeoChange to make it easier when inserting events
+     *
+     * TODO there is a bug here if an added event has an earlier ID will cause all this code to fail
+     * as sorting will not help and the lists will be off need to fix both adding an event to
      */
     public static HashMap<String, List<Event>> compareCalendars(List<Event> oldEventList, List<Event> newEventList){
         HashMap<String, List<Event>> map = new HashMap<>();
-        //filter out events that where removed in newEventList
-        oldEventList = filterAndRemoveDeletedEvents(oldEventList, newEventList);
+        //filter out events from the old events that where removed in newEventList
+        filterAndRemoveDeletedEvents(oldEventList, newEventList);
+        //filter out any events in the new list that did not exist in old it will be
+        //the base list to add geofences
+        List<Event> eventsToAddWithGeofences = filterOutNewEvents(oldEventList, newEventList);
+        List<Event> eventsToAddNoGeofences = new ArrayList<>();
+
         //need to sort the lists by id rather by time so as for both to be in sync
         //in case a new event was added in a middle time-slot
         Collections.sort(oldEventList, Event.eventIdComparator);
         Collections.sort(newEventList, Event.eventIdComparator);
-
-        List<Event> eventsToAddWithGeofences = new ArrayList<>();
-        List<Event> eventsToAddNoGeofences = new ArrayList<>();
-
-
-        if (newEventList.size() > oldEventList.size()) {
-            eventsToAddWithGeofences.addAll(newEventList.subList(oldEventList.size(), newEventList.size()));
-        }
 
         // For each event check if it was changed and add it to the corresponding list
         // events with only a title or description change do not need new fences
         for (int i = 0, listLength = oldEventList.size(); i < listLength; i++) {
             Event newEvent = newEventList.get(i);
             Event oldEvent = oldEventList.get(i);
-            Event.Change change = Event.eventChanged(oldEvent, newEvent);
-            switch (change) {
-                case DESCRIPTION_CHANGE:
-                    //add the old event as it contains the duration and distance data
-                    oldEvent.setTitle(newEvent.getTitle());
-                    oldEvent.setDescription(newEvent.getDescription());
-                    eventsToAddNoGeofences.add(oldEvent);
-                    break;
-                case GEOFENCE_CHANGE:
-                    eventsToAddWithGeofences.add(newEvent);
-                    break;
-                case SAME:
-                    eventsToAddNoGeofences.add(oldEvent);
+            if(oldEvent.getTimeTo() == Constants.ROOM_INVALID_LONG_VALUE){
+                eventsToAddWithGeofences.add(newEvent);
+            }
+            else{
+                Event.Change change = Event.eventChanged(oldEvent, newEvent);
+                switch (change) {
+                    case DESCRIPTION_CHANGE:
+                        //add the old event as it contains the duration and distance data
+                        oldEvent.setTitle(newEvent.getTitle());
+                        oldEvent.setDescription(newEvent.getDescription());
+                        eventsToAddNoGeofences.add(oldEvent);
+                        break;
+                    case GEOFENCE_CHANGE:
+                        eventsToAddWithGeofences.add(newEvent);
+                        break;
+                    case SAME:
+                        eventsToAddNoGeofences.add(oldEvent);
+                }
             }
         }
         map.put(Constants.LIST_NEEDS_FENCE_UPDATE, eventsToAddWithGeofences);
@@ -188,27 +194,43 @@ public class CalendarUtils {
 
     /**
      * will return an array of old events where all deleted events where removed
-     * will also remove any geofences associated with them
-     * @param oldEvents
-     * @param newEvents
-     * @return
+     * will also remove any geofences associated with them.
+     * TODO both this function and the next would be made much easier by using java stream
+     * which is not available below API 24
+     * @return a list with all deleted events filtered out
      */
-    private static List<Event> filterAndRemoveDeletedEvents(List<Event> oldEvents, List<Event> newEvents){
-        //TODO need to return the list of events to remove as well so as to remove fences
-        List<Integer> ids = new ArrayList<>();
-        List<Event> filtered = new ArrayList<>();
+    private static void filterAndRemoveDeletedEvents(List<Event> oldEvents, List<Event> newEvents){
+        List<Integer> ids = mapToIds(newEvents);
+        List<Event> toRemove = new ArrayList<>();
         AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(null).build();
-        for(Event event : newEvents){
-            ids.add(event.getId());
-        }
+
         for(Event event : oldEvents){
-            if(ids.contains(event.getId())){
-               filtered.add(event);
-            }else {
-                creator.removeFences(event);
+            if(!ids.contains(event.getId())){
+               toRemove.add(event);
             }
         }
-        return filtered;
+        oldEvents.removeAll(toRemove);
+    }
+
+    private static List<Event> filterOutNewEvents(List<Event> oldEvents, List<Event> newEvents){
+        List<Event> toRemove = new ArrayList<>();
+        List<Integer> ids = mapToIds(oldEvents);
+
+        for(Event event : newEvents){
+            if(!ids.contains(event.getId())){
+                toRemove.add(event);
+            }
+        }
+        newEvents.removeAll(toRemove);
+        return toRemove;
+    }
+
+    private static List<Integer> mapToIds(List<Event> eventList){
+        List<Integer> ids = new ArrayList<>();
+        for(Event event : eventList){
+            ids.add(event.getId());
+        }
+        return ids;
     }
 
 

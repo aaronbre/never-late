@@ -46,6 +46,9 @@ import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
 import com.aaronbrecher.neverlate.ui.fragments.EventListFragment;
 import com.aaronbrecher.neverlate.ui.fragments.NoEventsFragment;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
+import com.firebase.jobdispatcher.Job;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -54,6 +57,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -65,7 +69,7 @@ import javax.inject.Inject;
 
 import static com.aaronbrecher.neverlate.Constants.PERMISSIONS_REQUEST_CODE;
 
-public class MainActivity extends AppCompatActivity implements ListItemClickListener, LocationCallback {
+public class MainActivity extends AppCompatActivity implements ListItemClickListener{
     //TODO possibly cap the number of refreshes...
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String SHOW_ALL_EVENTS_KEY = "should-show-all-events";
@@ -79,15 +83,12 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     @Inject
     AppExecutors mAppExecutors;
 
-    private FirebaseAnalytics mFirebaseAnalytics;
-
     private List<Event> mEventList = new ArrayList<>();
     private List<Event> mOldList;
     MainActivityViewModel mViewModel;
     private FragmentManager mFragmentManager;
     private FrameLayout mListContainer;
     private ProgressBar mLoadingIcon;
-    private SearchView mSearchView;
     private boolean shouldShowAllEvents = false;
 
     @Override
@@ -100,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         setUpNotificationChannel();
         mViewModel = ViewModelProviders.of(this, mViewModelFactory)
                 .get(MainActivityViewModel.class);
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         if(savedInstanceState != null && savedInstanceState.containsKey(SHOW_ALL_EVENTS_KEY)){
             shouldShowAllEvents = savedInstanceState.getBoolean(SHOW_ALL_EVENTS_KEY, false);
@@ -117,11 +118,12 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         if (!SystemUtils.hasPermissions(this)) {
             SystemUtils.requestCalendarAndLocationPermissions(this, findViewById(R.id.main_container));
         } else {
-            setUpAlarmManager();
+            createRecurringCalendarCheck();
         }
         checkLocationSettings();
 
         mViewModel.getAllCurrentEvents().observe(this, events -> {
+            hideLoadingIcon();
             if (events == null || events.size() < 1) {
                 loadNoEventsFragment();
             } else {
@@ -164,14 +166,19 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     }
 
 
+    @SuppressLint({"MissingPermission", "ApplySharedPref"})
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PERMISSIONS_REQUEST_CODE) {
             //if permissions are granted for the first time, assume data was not loaded into room and
             //do so now...
             if (SystemUtils.verifyPermissions(grantResults)) {
-                setUpAlarmManager();
-//              mViewModel.insertEvents(CalendarUtils.getCalendarEventsForToday(this));
+                mLocationProviderClient.getLastLocation().addOnSuccessListener(location -> {
+                    mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location)).commit();
+                    FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
+                    dispatcher.mustSchedule(BackgroundUtils.oneTimeCalendarUpdate(dispatcher));
+                    createRecurringCalendarCheck();
+                });
             } else {
                 SystemUtils.requestCalendarAndLocationPermissions(this, findViewById(R.id.main_container));
                 // TODO change this to Show image showing error with button to rerequest permissions...
@@ -194,15 +201,10 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
     //This will only set the alarm if it wasn't already set there will be a
     //seperate broadcast reciever to schedule alarm after boot...
-    private void setUpAlarmManager() {
-        boolean alarmSet = false;
-        if (mSharedPreferences.contains(Constants.ALARM_STATUS_KEY)) {
-            alarmSet = mSharedPreferences.getBoolean(Constants.ALARM_STATUS_KEY, true);
-        }
-        if (alarmSet) return;
-
-        boolean wasSet = BackgroundUtils.setAlarmManager(this);
-        if (wasSet) mSharedPreferences.edit().putBoolean(Constants.ALARM_STATUS_KEY, true).apply();
+    private void createRecurringCalendarCheck() {
+        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(NeverLateApp.getApp()));
+        Job recurringCheckJob = BackgroundUtils.setUpPeriodicCalendarChecks(dispatcher);
+        dispatcher.mustSchedule(recurringCheckJob);
     }
 
     @Override
@@ -210,11 +212,11 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.main_activity_menu, menu);
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        mSearchView = (SearchView) menu.findItem(R.id.main_activity_menu_search).getActionView();
-        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        mSearchView.setMaxWidth(Integer.MAX_VALUE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.main_activity_menu_search).getActionView();
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setMaxWidth(Integer.MAX_VALUE);
 
-        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 EventListFragment fragment = (EventListFragment) mFragmentManager.findFragmentByTag(Constants.EVENT_LIST_TAG);
@@ -242,10 +244,8 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                 if (SystemUtils.isConnected(this)) {
                     showLoadingIcon();
                     mOldList = mEventList;
-                    mAppExecutors.diskIO().execute(() -> {
-                        mEventList = CalendarUtils.getCalendarEventsForToday(MainActivity.this);
-                        BackgroundUtils.getLocation(MainActivity.this, MainActivity.this, mLocationProviderClient);
-                    });
+                    FirebaseJobDispatcher jobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
+                    jobDispatcher.mustSchedule(BackgroundUtils.oneTimeCalendarUpdate(jobDispatcher));
                 } else {
                     showNoConnectionSnackbar();
                 }
@@ -285,79 +285,6 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, Event.convertEventToJson(event));
             startActivity(intent);
         }
-    }
-
-    @SuppressLint("ApplySharedPref")
-    @Override
-    public void getLocationSuccessCallback(final Location location) {
-        mAppExecutors.networkIO().execute(() -> {
-            Location oldLocation = getOldLocation();
-            AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(null).build();
-            mSharedPreferences.edit().
-                    putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location))
-                    .commit();
-            if (mEventList == null || mEventList.size() < 1){
-                mViewModel.deleteAllEvents();
-                mAppExecutors.mainThread().execute(this::hideLoadingIcon);
-                return;
-            }
-
-            //if the location changed significantly need to update everything
-            if(oldLocation == null || oldLocation.distanceTo(location) >= Constants.LOCATION_FENCE_RADIUS){
-                addDistanceDataAndUpdateFences(location, creator, mEventList);
-                mViewModel.deleteAllEvents();
-                mViewModel.insertEvents(mEventList);
-                mAppExecutors.mainThread().execute(this::hideLoadingIcon);
-                return;
-            }
-
-            //if the users location did not change only update geofences that need to be updated
-            HashMap<String, List<Event>> eventLists = CalendarUtils.compareCalendars(mOldList,mEventList);
-            List<Event> noGeofenceList = eventLists.get(Constants.LIST_NO_FENCE_UPDATE);
-            List<Event> geofenceList = eventLists.get(Constants.LIST_NEEDS_FENCE_UPDATE);
-
-            if(geofenceList.size() > 0){
-                addDistanceDataAndUpdateFences(location, creator, geofenceList);
-            }
-
-            //combine both lists now that data was added so as to make one DB update
-            geofenceList.addAll(noGeofenceList);
-            mViewModel.deleteAllEvents();
-            mViewModel.insertEvents(geofenceList);
-            mAppExecutors.mainThread().execute(this::hideLoadingIcon);
-        });
-    }
-
-    private void addDistanceDataAndUpdateFences(Location location, AwarenessFencesCreator creator, List<Event> eventList) {
-        boolean wasAdded = DirectionsUtils.addDistanceInfoToEventList(eventList, location);
-        creator.setEventList(eventList);
-        if(wasAdded){
-            creator.buildAndSaveFences();
-        }else {
-            //if the relevant info was changed but was not able to get directions data, then
-            //remove the geofences until the data can be retrieved as the fence will not be accurate
-            creator.removeFences(eventList.toArray(new Event[0]));
-            mAppExecutors.mainThread().execute(()-> Toast.makeText(MainActivity.this,
-                    R.string.unable_to_get_directions_data, Toast.LENGTH_LONG).show());
-        }
-    }
-
-    private Location getOldLocation() {
-        Location location = null;
-        if (mSharedPreferences.contains(Constants.USER_LOCATION_PREFS_KEY)) {
-            String loc = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");
-            location = LocationUtils.locationFromLatLngString(loc);
-        }
-        return location;
-    }
-
-    @Override
-    public void getLocationFailedCallback() {
-        mAppExecutors.diskIO().execute(() -> {
-            mViewModel.deleteAllEvents();
-            mViewModel.insertEvents(mEventList);
-        });
-        //TODO find out why it failed? Location is needed for the app to operate...
     }
 
     private void hideLoadingIcon(){
