@@ -11,7 +11,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
-import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.CalendarContract;
@@ -27,20 +26,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.aaronbrecher.neverlate.AppExecutors;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.BackgroundUtils;
-import com.aaronbrecher.neverlate.Utils.CalendarUtils;
-import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
 import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.Utils.SystemUtils;
-import com.aaronbrecher.neverlate.geofencing.AwarenessFencesCreator;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
-import com.aaronbrecher.neverlate.interfaces.LocationCallback;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
 import com.aaronbrecher.neverlate.ui.fragments.EventListFragment;
@@ -57,12 +51,10 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -70,9 +62,10 @@ import javax.inject.Inject;
 import static com.aaronbrecher.neverlate.Constants.PERMISSIONS_REQUEST_CODE;
 
 public class MainActivity extends AppCompatActivity implements ListItemClickListener{
-    //TODO possibly cap the number of refreshes...
+    //TODO with current refactoring need to figure out where to set up ActivityRecoginition
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String SHOW_ALL_EVENTS_KEY = "should-show-all-events";
+
 
     @Inject
     ViewModelProvider.Factory mViewModelFactory;
@@ -84,11 +77,11 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     AppExecutors mAppExecutors;
 
     private List<Event> mEventList = new ArrayList<>();
-    private List<Event> mOldList;
     MainActivityViewModel mViewModel;
     private FragmentManager mFragmentManager;
     private FrameLayout mListContainer;
     private ProgressBar mLoadingIcon;
+    private FirebaseJobDispatcher mFirebaseJobDispatcher;
     private boolean shouldShowAllEvents = false;
 
     @Override
@@ -101,8 +94,11 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         setUpNotificationChannel();
         mViewModel = ViewModelProviders.of(this, mViewModelFactory)
                 .get(MainActivityViewModel.class);
-        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        mFirebaseJobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
+        //TODO find a better place for this - this will execute every time the activity is open, and will not do anything if the activity is not loaded
+        mFirebaseJobDispatcher.mustSchedule(BackgroundUtils.setUpActivityRecognitionJob(mFirebaseJobDispatcher));
         if(savedInstanceState != null && savedInstanceState.containsKey(SHOW_ALL_EVENTS_KEY)){
             shouldShowAllEvents = savedInstanceState.getBoolean(SHOW_ALL_EVENTS_KEY, false);
             mViewModel.setShouldShowAllEvents(shouldShowAllEvents);
@@ -175,8 +171,8 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             if (SystemUtils.verifyPermissions(grantResults)) {
                 mLocationProviderClient.getLastLocation().addOnSuccessListener(location -> {
                     mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location)).commit();
-                    FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
-                    dispatcher.mustSchedule(BackgroundUtils.oneTimeCalendarUpdate(dispatcher));
+
+                    mFirebaseJobDispatcher.mustSchedule(BackgroundUtils.oneTimeCalendarUpdate(mFirebaseJobDispatcher));
                     createRecurringCalendarCheck();
                 });
             } else {
@@ -202,9 +198,8 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     //This will only set the alarm if it wasn't already set there will be a
     //seperate broadcast reciever to schedule alarm after boot...
     private void createRecurringCalendarCheck() {
-        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(NeverLateApp.getApp()));
-        Job recurringCheckJob = BackgroundUtils.setUpPeriodicCalendarChecks(dispatcher);
-        dispatcher.mustSchedule(recurringCheckJob);
+        Job recurringCheckJob = BackgroundUtils.setUpPeriodicCalendarChecks(mFirebaseJobDispatcher);
+        mFirebaseJobDispatcher.mustSchedule(recurringCheckJob);
     }
 
     @Override
@@ -243,9 +238,8 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             case R.id.main_activity_menu_sync:
                 if (SystemUtils.isConnected(this)) {
                     showLoadingIcon();
-                    mOldList = mEventList;
-                    FirebaseJobDispatcher jobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
-                    jobDispatcher.mustSchedule(BackgroundUtils.oneTimeCalendarUpdate(jobDispatcher));
+                    List<Event> oldList = mEventList;
+                    mFirebaseJobDispatcher.mustSchedule(BackgroundUtils.oneTimeCalendarUpdate(mFirebaseJobDispatcher));
                 } else {
                     showNoConnectionSnackbar();
                 }

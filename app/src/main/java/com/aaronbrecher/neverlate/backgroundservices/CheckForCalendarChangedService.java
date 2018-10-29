@@ -123,7 +123,10 @@ public class CheckForCalendarChangedService extends JobService {
 
     /**
      * add the distance data to the list and if all good update fences,
-     * if unable to get data then remove the fences as no longer relevant
+     * if unable to get data then remove the fences as no longer relevant,
+     * NOTE - need to set distance data here even thought the creator does it in the
+     * event that there is no location. That is only a fix if there is no location however
+     * here it is needed because the event information changed
      * @param eventsToAddWithGeofences
      * @param location
      */

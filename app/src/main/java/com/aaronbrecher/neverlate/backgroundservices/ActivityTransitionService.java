@@ -65,8 +65,8 @@ public class ActivityTransitionService extends JobIntentService {
             if(event.getActivityType() != DetectedActivity.IN_VEHICLE) return;
 
             if (event.getTransitionType() == ActivityTransition.ACTIVITY_TRANSITION_EXIT) {
-                stopDrivingForegroundService();
                 setUpFences();
+                stopDrivingForegroundService();
             } else if (event.getTransitionType() == ActivityTransition.ACTIVITY_TRANSITION_ENTER) {
                 setUpDrivingService();
             }
@@ -89,10 +89,15 @@ public class ActivityTransitionService extends JobIntentService {
         }
     }
 
+    //TODO this is making errors on android P need to figure it out
     private void stopDrivingForegroundService(){
         Intent intent = new Intent(this, DrivingForegroundService.class);
         intent.setAction(Constants.ACTION_CANCEL_DRIVING_SERVICE);
-        stopService(intent);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            startForegroundService(intent);
+        }else {
+            startService(intent);
+        }
     }
 
     /**

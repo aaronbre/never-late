@@ -201,6 +201,7 @@ public class AwarenessFencesCreator implements LocationCallback {
     @Override
     public void getLocationSuccessCallback(final Location location) {
         mAppExecutors.diskIO().execute(() -> {
+            if(location == null) return;
             //if location was not saved need to update distance and time to event
             mSharedPreferences.edit()
                     .putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location))
