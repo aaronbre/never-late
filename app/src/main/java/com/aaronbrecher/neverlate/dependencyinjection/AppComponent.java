@@ -1,8 +1,9 @@
 package com.aaronbrecher.neverlate.dependencyinjection;
 
-import com.aaronbrecher.neverlate.backgroundservices.ActivityTransitionService;
-import com.aaronbrecher.neverlate.backgroundservices.CalendarAlarmService;
-import com.aaronbrecher.neverlate.backgroundservices.AwarenessFenceTransitionService;
+import com.aaronbrecher.neverlate.backgroundservices.broadcastreceivers.DrivingLocationHelper;
+import com.aaronbrecher.neverlate.backgroundservices.jobintentservices.ActivityTransitionService;
+import com.aaronbrecher.neverlate.backgroundservices.jobintentservices.CalendarAlarmService;
+import com.aaronbrecher.neverlate.backgroundservices.jobintentservices.AwarenessFenceTransitionService;
 import com.aaronbrecher.neverlate.backgroundservices.CheckForCalendarChangedService;
 import com.aaronbrecher.neverlate.backgroundservices.DrivingForegroundService;
 import com.aaronbrecher.neverlate.ui.activities.EventDetailActivity;
@@ -28,4 +29,5 @@ public interface AppComponent {
     void inject(DrivingForegroundService service);
     void inject(NeverLateWidget widget);
     void inject(CheckForCalendarChangedService service);
+    void inject(DrivingLocationHelper helper);
 }

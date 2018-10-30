@@ -78,9 +78,6 @@ public class CheckForCalendarChangedService extends JobService {
         List<Event> noGeofenceList = listsToAdd.get(Constants.LIST_NO_FENCE_UPDATE);
 
         //remove all old events and insert all events that do not need new fences
-        mEventsRepository.deleteAllEvents();
-        mEventsRepository.insertAll(noGeofenceList);
-
         if (geofenceList.size() > 0) {
             //get the location saved to shared prefs, if it is a valid location
             //add the info from distanceMatrix and save the new fences
@@ -99,6 +96,10 @@ public class CheckForCalendarChangedService extends JobService {
                     }
                     mAppExecutors.networkIO().execute(()-> {
                         setOrRemoveFences(geofenceList, newLocation);
+                        //delete old events
+                        mEventsRepository.deleteAllEvents();
+                        //combine lists to make one upload
+                        geofenceList.addAll(noGeofenceList);
                         mEventsRepository.insertAll(geofenceList);
                         jobFinished(mJobParameters, false);
                     });
@@ -106,6 +107,8 @@ public class CheckForCalendarChangedService extends JobService {
             }
             // if there is no geofence list finish job
         }else {
+            mEventsRepository.deleteAllEvents();
+            mEventsRepository.insertAll(noGeofenceList);
             jobFinished(mJobParameters, false);
         }
     }

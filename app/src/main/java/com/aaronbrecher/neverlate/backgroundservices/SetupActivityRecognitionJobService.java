@@ -2,19 +2,15 @@ package com.aaronbrecher.neverlate.backgroundservices;
 
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.support.annotation.NonNull;
 
 import com.aaronbrecher.neverlate.Constants;
-import com.aaronbrecher.neverlate.NeverLateApp;
-import com.crashlytics.android.Crashlytics;
+import com.aaronbrecher.neverlate.backgroundservices.broadcastreceivers.StartJobIntentServiceBroadcastReceiver;
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
 import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.ActivityTransition;
 import com.google.android.gms.location.ActivityTransitionRequest;
 import com.google.android.gms.location.DetectedActivity;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
 import java.util.List;

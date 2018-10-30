@@ -52,7 +52,7 @@
             android:value="@string/admob_id" />
 
         <service
-            android:name=".backgroundservices.CalendarAlarmService"
+            android:name=".backgroundservices.jobintentservices.CalendarAlarmService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
             android:name=".backgroundservices.SetupActivityRecognitionJobService"
@@ -63,30 +63,37 @@
             </intent-filter>
         </service>
         <service
-            android:name=".backgroundservices.AwarenessFenceTransitionService"
+            android:name=".backgroundservices.jobintentservices.AwarenessFenceTransitionService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
-            android:name=".backgroundservices.ActivityTransitionService"
+            android:name=".backgroundservices.jobintentservices.ActivityTransitionService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
-            android:name=".backgroundservices.BootCompletedJobService"
+            android:name=".backgroundservices.jobintentservices.BootCompletedJobService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service android:name=".backgroundservices.DrivingForegroundService" />
         <service android:name=".backgroundservices.CheckForCalendarChangedService" />
 
         <receiver
-            android:name=".backgroundservices.BootCompletedBroadcast"
+            android:name=".backgroundservices.broadcastreceivers.BootCompletedBroadcast"
             android:directBootAware="true"
             android:enabled="true"
             android:exported="true"
             tools:targetApi="n">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".backgroundservices.StartJobIntentServiceBroadcastReceiver"/>
+        <receiver android:name=".backgroundservices.broadcastreceivers.StartJobIntentServiceBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.aaronbrecher.neverlate.action.START_ACTIVITY_TRANSITION_SERVICE"/>
+            </intent-filter>
+        </receiver>
         <!--android:process=":remote" -->
 
         <receiver android:name=".ui.widget.NeverLateWidget">
@@ -97,6 +104,7 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/never_late_widget_info" />
         </receiver>
+        <receiver android:name=".backgroundservices.broadcastreceivers.DrivingLocationUpdatesBroadcastReceiver"/>
 
         <meta-data
             android:name="io.fabric.ApiKey"

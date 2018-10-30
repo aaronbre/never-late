@@ -1,22 +1,20 @@
-package com.aaronbrecher.neverlate.backgroundservices;
+package com.aaronbrecher.neverlate.backgroundservices.jobintentservices;
 
-import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.JobIntentService;
-import android.support.v4.content.ContextCompat;
 
 import com.aaronbrecher.neverlate.AppExecutors;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
 import com.aaronbrecher.neverlate.Utils.LocationUtils;
+import com.aaronbrecher.neverlate.Utils.SystemUtils;
+import com.aaronbrecher.neverlate.backgroundservices.broadcastreceivers.DrivingLocationUpdatesBroadcastReceiver;
 import com.aaronbrecher.neverlate.database.EventsRepository;
 import com.aaronbrecher.neverlate.geofencing.AwarenessFencesCreator;
 import com.aaronbrecher.neverlate.models.Event;
@@ -25,7 +23,7 @@ import com.google.android.gms.location.ActivityTransitionEvent;
 import com.google.android.gms.location.ActivityTransitionResult;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.location.LocationRequest;
 
 import java.util.List;
 
@@ -49,7 +47,7 @@ public class ActivityTransitionService extends JobIntentService {
         NeverLateApp.getApp().getAppComponent().inject(this);
     }
 
-    static void enqueueWork(Context context, Intent work) {
+    public static void enqueueWork(Context context, Intent work) {
         enqueueWork(context, ActivityTransitionService.class, JOB_ID, work);
     }
 
@@ -66,48 +64,51 @@ public class ActivityTransitionService extends JobIntentService {
 
             if (event.getTransitionType() == ActivityTransition.ACTIVITY_TRANSITION_EXIT) {
                 setUpFences();
-                stopDrivingForegroundService();
+                stopLocationUpdates();
             } else if (event.getTransitionType() == ActivityTransition.ACTIVITY_TRANSITION_ENTER) {
-                setUpDrivingService();
+                requestLocationUpdates();
             }
         }
+        //TODO for testing remove
+        requestLocationUpdates();
     }
 
-    private void setUpDrivingService() {
-        Intent intent = new Intent(this, DrivingForegroundService.class);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(intent);
-        } else {
-            //TODO this may not work on > Oreo
-            stopService(intent);
-        }
+
+    @SuppressLint("MissingPermission")
+    private void requestLocationUpdates() {
+        if(!SystemUtils.hasLocationPermissions(this)) return;
+        mLocationProviderClient.requestLocationUpdates(createLocationRequest(), getPendingIntent());
     }
 
-    //TODO this is making errors on android P need to figure it out
-    private void stopDrivingForegroundService(){
-        Intent intent = new Intent(this, DrivingForegroundService.class);
-        intent.setAction(Constants.ACTION_CANCEL_DRIVING_SERVICE);
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            startForegroundService(intent);
-        }else {
-            startService(intent);
-        }
+    private LocationRequest createLocationRequest(){
+        LocationRequest request = new LocationRequest();
+        request.setInterval(Constants.TIME_FIVE_MINUTES)
+                .setFastestInterval(Constants.TIME_FIVE_MINUTES)
+                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        return request;
     }
+
+
+    private void stopLocationUpdates(){
+        mLocationProviderClient.removeLocationUpdates(getPendingIntent());
+    }
+
+    private PendingIntent getPendingIntent(){
+        Intent intent = new Intent(this, DrivingLocationUpdatesBroadcastReceiver.class);
+        intent.setAction(Constants.ACTION_PROCESS_LOCATION_UPDATE);
+        return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
 
     /**
      * If user has stopped driving assume he will remain in this location and update the
      * eventList with the distance info. Reset the AwarenessFences using the current
      * location information and current Location
      */
+    @SuppressLint("MissingPermission")
     private void setUpFences() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+        if (!SystemUtils.hasLocationPermissions(this)) {
             return;
         }
 
@@ -123,5 +124,31 @@ public class ActivityTransitionService extends JobIntentService {
                     .apply();
         }));
     }
+
+//    @Deprecated
+//    private void setUpDrivingService() {
+//        Intent intent = new Intent(this, DrivingForegroundService.class);
+//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+//                != PackageManager.PERMISSION_GRANTED &&
+//                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+//                        != PackageManager.PERMISSION_GRANTED) {
+//            return;
+//        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            startForegroundService(intent);
+//        } else {
+//            stopService(intent);
+//        }
+//    }
+//
+//    private void stopDrivingForegroundService(){
+//        Intent intent = new Intent(this, DrivingForegroundService.class);
+//        intent.setAction(Constants.ACTION_CANCEL_DRIVING_SERVICE);
+//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+//            startForegroundService(intent);
+//        }else {
+//            startService(intent);
+//        }
+//    }
 
 }

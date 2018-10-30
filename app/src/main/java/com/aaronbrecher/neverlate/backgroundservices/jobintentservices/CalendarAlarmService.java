@@ -1,4 +1,4 @@
-package com.aaronbrecher.neverlate.backgroundservices;
+package com.aaronbrecher.neverlate.backgroundservices.jobintentservices;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,7 +9,6 @@ import android.support.v4.app.JobIntentService;
 import android.util.Log;
 
 import com.aaronbrecher.neverlate.AppExecutors;
-import com.aaronbrecher.neverlate.BuildConfig;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.Utils.BackgroundUtils;
@@ -24,7 +23,6 @@ import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
 import com.firebase.jobdispatcher.Job;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.gson.Gson;
 
 import java.util.List;
 
@@ -53,7 +51,7 @@ public class CalendarAlarmService extends JobIntentService implements LocationCa
     public CalendarAlarmService() {
     }
 
-    static void enqueueWork(Context context, Intent work) {
+    public static void enqueueWork(Context context, Intent work) {
         enqueueWork(context, CalendarAlarmService.class, JOB_ID, work);
     }
 

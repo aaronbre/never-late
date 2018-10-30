@@ -11,7 +11,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -19,7 +18,6 @@ import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.GeofenceUtils;
-import com.aaronbrecher.neverlate.backgroundservices.StartJobIntentServiceBroadcastReceiver;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
 import com.aaronbrecher.neverlate.ui.fragments.PassedEventFragment;

@@ -18,7 +18,7 @@ import com.aaronbrecher.neverlate.Utils.BackgroundUtils;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
 import com.aaronbrecher.neverlate.Utils.GeofenceUtils;
 import com.aaronbrecher.neverlate.Utils.LocationUtils;
-import com.aaronbrecher.neverlate.backgroundservices.StartJobIntentServiceBroadcastReceiver;
+import com.aaronbrecher.neverlate.backgroundservices.broadcastreceivers.StartJobIntentServiceBroadcastReceiver;
 import com.aaronbrecher.neverlate.database.Converters;
 import com.aaronbrecher.neverlate.database.EventsRepository;
 import com.aaronbrecher.neverlate.dependencyinjection.AppModule;
@@ -34,7 +34,6 @@ import com.google.android.gms.awareness.fence.LocationFence;
 import com.google.android.gms.awareness.fence.TimeFence;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -159,7 +158,7 @@ public class AwarenessFencesCreator implements LocationCallback {
     private FenceUpdateRequest getUpdateRequest(List<AwarenessFenceWithName> fences) {
         FenceUpdateRequest.Builder builder = new FenceUpdateRequest.Builder();
         for (AwarenessFenceWithName fence : fences) {
-            if (fence == null) continue;
+            if (fence == null || fence.fence == null) continue;
             builder.addFence(fence.name, fence.fence, getPendingIntent());
         }
         return builder.build();
@@ -193,6 +192,7 @@ public class AwarenessFencesCreator implements LocationCallback {
             FenceUpdateRequest.Builder builder = new FenceUpdateRequest.Builder();
             for (Event event : events) {
                 builder.removeFence(Constants.AWARENESS_FENCE_MAIN_PREFIX + event.getId());
+                builder.removeFence(Constants.AWARENESS_FENCE_ARRIVAL_PREFIX + event.getId());
             }
             mFenceClient.updateFences(builder.build());
         });

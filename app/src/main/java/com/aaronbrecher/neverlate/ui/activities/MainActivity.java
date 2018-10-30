@@ -97,8 +97,6 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
         FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         mFirebaseJobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
-        //TODO find a better place for this - this will execute every time the activity is open, and will not do anything if the activity is not loaded
-        mFirebaseJobDispatcher.mustSchedule(BackgroundUtils.setUpActivityRecognitionJob(mFirebaseJobDispatcher));
         if(savedInstanceState != null && savedInstanceState.containsKey(SHOW_ALL_EVENTS_KEY)){
             shouldShowAllEvents = savedInstanceState.getBoolean(SHOW_ALL_EVENTS_KEY, false);
             mViewModel.setShouldShowAllEvents(shouldShowAllEvents);
@@ -131,6 +129,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             }
         });
         fab.setOnClickListener(v -> {
+
             Intent calIntent = new Intent(Intent.ACTION_INSERT);
             calIntent.setData(CalendarContract.Events.CONTENT_URI);
             startActivity(calIntent);
@@ -174,6 +173,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
                     mFirebaseJobDispatcher.mustSchedule(BackgroundUtils.oneTimeCalendarUpdate(mFirebaseJobDispatcher));
                     createRecurringCalendarCheck();
+                    setUpActivityMonitoring();
                 });
             } else {
                 SystemUtils.requestCalendarAndLocationPermissions(this, findViewById(R.id.main_container));
@@ -181,6 +181,10 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             }
         } else
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    private void setUpActivityMonitoring() {
+        mFirebaseJobDispatcher.mustSchedule(BackgroundUtils.setUpActivityRecognitionJob(mFirebaseJobDispatcher));
     }
 
     private void setUpNotificationChannel() {

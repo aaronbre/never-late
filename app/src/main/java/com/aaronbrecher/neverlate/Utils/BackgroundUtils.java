@@ -6,13 +6,11 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.backgroundservices.CheckForCalendarChangedService;
-import com.aaronbrecher.neverlate.backgroundservices.StartJobIntentServiceBroadcastReceiver;
+import com.aaronbrecher.neverlate.backgroundservices.broadcastreceivers.StartJobIntentServiceBroadcastReceiver;
 import com.aaronbrecher.neverlate.backgroundservices.SetupActivityRecognitionJobService;
 import com.aaronbrecher.neverlate.interfaces.LocationCallback;
 import com.firebase.jobdispatcher.Constraint;
@@ -22,8 +20,6 @@ import com.firebase.jobdispatcher.Lifetime;
 import com.firebase.jobdispatcher.RetryStrategy;
 import com.firebase.jobdispatcher.Trigger;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.threeten.bp.LocalDate;
 import org.threeten.bp.LocalDateTime;
@@ -33,7 +29,7 @@ import org.threeten.bp.ZonedDateTime;
 
 public class BackgroundUtils {
     public static final int DEFAULT_JOB_TIMEFRAME = 15;
-
+    public static final int ONE_HOUR_IN_SECONDS = 60 * 60;
     /**
      * Helper function to set up an AlarmManager to be used to sync calendar
      *
@@ -58,16 +54,16 @@ public class BackgroundUtils {
     }
 
     /**
-     * Job to Setup the app to listen to activity changes this is done as a job to allow
-     * for rescheduling in the event of the request failing
+     * Job to Setup the app to listen to activity changes this is done as a job to
      */
     public static Job setUpActivityRecognitionJob(FirebaseJobDispatcher dispatcher) {
         return dispatcher.newJobBuilder()
                 .setService(SetupActivityRecognitionJobService.class)
+                .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
                 .setTag(Constants.FIREBASE_JOB_SERVICE_SETUP_ACTIVITY_RECOG)
-                .setTrigger(Trigger.NOW)
-                .setRecurring(false)
-                .setReplaceCurrent(true)
+                .setTrigger(Trigger.executionWindow(ONE_HOUR_IN_SECONDS * 23, ONE_HOUR_IN_SECONDS * 24))
+                .setRecurring(true)
+                .setReplaceCurrent(false)
                 .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
                 .setConstraints(Constraint.ON_ANY_NETWORK)
                 .build();
