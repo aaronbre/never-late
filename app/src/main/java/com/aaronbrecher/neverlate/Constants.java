@@ -46,14 +46,15 @@ public class Constants {
     public static final int ACTIVITY_TRANSITION_PENDING_INTENT_CODE = 2;
     public static final String FIREBASE_JOB_SERVICE_CHECK_CALENDAR_CHANGED = "check-calendar-change";
     public static final String FIREBASE_JOB_SERVICE_CHECK_CALENDAR_CHANGED_ONE_TIME = "check-calendar-change-one-time";
-    public static final int CHECK_CALENDAR_START_WINDOW = 60*60;
+    public static final int CHECK_CALENDAR_START_WINDOW = 20*60;
     public static final int CHECK_CALENDAR_END_WINDOW = CHECK_CALENDAR_START_WINDOW + 600;
 
     //prefs key
-    public static final String KM_PER_MINUTE_PREFS_KEY = "miles-per-minute";
-    public static final String UNIT_SYSTEM_PREFS_KEY = "unit-system";
+    public static final String KM_PER_MINUTE_PREFS_KEY = "kpm";
+    public static final String UNIT_SYSTEM_PREFS_KEY = "units";
     public static final String ALARM_STATUS_KEY = "alarm-status";
     public static final String NEXT_EVENT_KEY = "next-event";
+    public static final String ALERTS_PREFS_KEY = "alert-time";
 
 
 

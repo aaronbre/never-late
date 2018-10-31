@@ -11,6 +11,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.CalendarContract;
@@ -36,6 +38,9 @@ import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.Utils.SystemUtils;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
 import com.aaronbrecher.neverlate.models.Event;
+import com.aaronbrecher.neverlate.models.retrofitmodels.Version;
+import com.aaronbrecher.neverlate.network.AppApiService;
+import com.aaronbrecher.neverlate.network.AppApiUtils;
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
 import com.aaronbrecher.neverlate.ui.fragments.EventListFragment;
 import com.aaronbrecher.neverlate.ui.fragments.NoEventsFragment;
@@ -58,6 +63,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static com.aaronbrecher.neverlate.Constants.PERMISSIONS_REQUEST_CODE;
 
@@ -92,11 +101,16 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                 .getAppComponent()
                 .inject(this);
         setUpNotificationChannel();
+        checkIfUpdateNeeded();
+
         mViewModel = ViewModelProviders.of(this, mViewModelFactory)
                 .get(MainActivityViewModel.class);
-
         FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         mFirebaseJobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
+        mFragmentManager = getSupportFragmentManager();
+        mListContainer = findViewById(R.id.main_activity_list_fragment_container);
+        mLoadingIcon = findViewById(R.id.loading_icon);
+
         if(savedInstanceState != null && savedInstanceState.containsKey(SHOW_ALL_EVENTS_KEY)){
             shouldShowAllEvents = savedInstanceState.getBoolean(SHOW_ALL_EVENTS_KEY, false);
             mViewModel.setShouldShowAllEvents(shouldShowAllEvents);
@@ -104,9 +118,6 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             shouldShowAllEvents = false;
             mViewModel.setShouldShowAllEvents(false);
         }
-        mFragmentManager = getSupportFragmentManager();
-        mListContainer = findViewById(R.id.main_activity_list_fragment_container);
-        mLoadingIcon = findViewById(R.id.loading_icon);
         FloatingActionButton fab = findViewById(R.id.event_list_fab);
 
         if (!SystemUtils.hasPermissions(this)) {
@@ -256,6 +267,10 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                 shouldShowAllEvents = false;
                 mViewModel.setShouldShowAllEvents(false);
                 return true;
+            case R.id.main_activity_menu_settings:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -314,6 +329,45 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                 }
             }
         });
+    }
+
+    private void checkIfUpdateNeeded(){
+        try {
+            int currentVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+            AppApiService service = AppApiUtils.createService();
+            service.queryVersionNumber().enqueue(new Callback<Version>() {
+                @Override
+                public void onResponse(Call<Version> call, Response<Version> response) {
+                    Version v = response.body();
+                    if(v == null) return;
+                    int latestVersion = v.getVersion();
+                    if(currentVersion != latestVersion){
+                        showUpdateSnackbar();
+                        //response will also have a message with details of update
+                        //TODO possibly show message as well
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Version> call, Throwable t) {
+                    t.printStackTrace();
+                }
+            });
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showUpdateSnackbar(){
+        Snackbar.make(mListContainer, R.string.version_mismatch_snackbar, Snackbar.LENGTH_LONG)
+                .setAction(getString(R.string.version_mismatch_snackbar_update_button), v -> {
+                    String appPackageName = getPackageName();
+                    try {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+                    } catch (android.content.ActivityNotFoundException anfe) {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                    }
+                }).show();
     }
 
     @Override

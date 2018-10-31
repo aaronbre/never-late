@@ -20,4 +20,8 @@
         android:id="@+id/main_activity_menu_show_location_only"
         android:title="@string/menu_item_show_loc_only"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/main_activity_menu_settings"
+        android:title="@string/menu_settings"
+        app:showAsAction="never"/>
 </menu>

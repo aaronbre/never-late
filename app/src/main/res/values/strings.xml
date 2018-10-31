@@ -51,7 +51,35 @@
     <string name="leave_at_time">Time to leave - %1$s</string>
     <string name="widget_header">Your next event</string>
 
+    <string name="version_mismatch_snackbar">You do not have the latest version. Please update the app to avoid any issues</string>
+    <string name="version_mismatch_snackbar_update_button">Update</string>
+
     <string name="admob_id">ca-app-pub-6961678341915263~3845118420</string>
     <string name="unable_to_get_directions_data">Geofences were not updated, unable to get directions data. Check your internet connection and try to refresh again</string>
 
+    <!--Distance prefs strings-->
+    <string name="pref_units_title" translatable="false">Distance Units</string>
+    <string name="pref_units_key" translatable="false">units</string>
+    <string name="pref_units_metric" translatable="false">metric</string>
+    <string name="pref_units_imperial" translatable="false">imperial</string>
+    <string name="pref_units_label_metric">Metric</string>
+    <string name="pref_units_label_imperial">Imperial</string>
+
+    <!--Speed prefs strings-->
+    <string name="prefs_speed_title">Default speed per minute (KM)</string>
+    <string name="prefs_speed_key" translatable="false">kpm</string>
+    <string name="prefs_speed_default" translatable="false">0.5</string>
+    <string name="menu_settings">Settings</string>
+
+    <!--Notification alert time prefs strings-->
+    <string name="prefs_alerts_title">Alert time (minutes before)</string>
+    <string name="prefs_alerts_key" translatable="false">alert-time</string>
+    <string name="prefs_alerts_default"> 10 minutes</string>
+    <string name="prefs_alerts_5_minutes_option">5 minutes prior</string>
+    <string name="prefs_alerts_10_minutes_option">10 minutes prior</string>
+    <string name="prefs_alerts_15_minutes_option">15 minutes prior</string>
+    <string name="prefs_alerts_5_minutes_value">5</string>
+    <string name="prefs_alerts_10_minutes_value">10</string>
+    <string name="prefs_alerts_15_minutes_value">15</string>
+    <string name="prefs_alert_title">Alert time</string>
 </resources>

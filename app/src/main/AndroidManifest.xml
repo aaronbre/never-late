@@ -82,33 +82,36 @@
             tools:targetApi="n">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED"/>
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
-
-        <receiver android:name=".backgroundservices.broadcastreceivers.StartJobIntentServiceBroadcastReceiver"
+        <receiver
+            android:name=".backgroundservices.broadcastreceivers.StartJobIntentServiceBroadcastReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.aaronbrecher.neverlate.action.START_ACTIVITY_TRANSITION_SERVICE"/>
+                <action android:name="com.aaronbrecher.neverlate.action.START_ACTIVITY_TRANSITION_SERVICE" />
             </intent-filter>
         </receiver>
-        <!--android:process=":remote" -->
+        <!-- android:process=":remote" -->
 
         <receiver android:name=".ui.widget.NeverLateWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
+
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/never_late_widget_info" />
         </receiver>
-        <receiver android:name=".backgroundservices.broadcastreceivers.DrivingLocationUpdatesBroadcastReceiver"/>
+        <receiver android:name=".backgroundservices.broadcastreceivers.DrivingLocationUpdatesBroadcastReceiver" />
 
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="8da9a19591e925fea9caed84c077bfe36abf2b5e" />
+
+        <activity android:name=".ui.activities.SettingsActivity"></activity>
     </application>
 
 </manifest>

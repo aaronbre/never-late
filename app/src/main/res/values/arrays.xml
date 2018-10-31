@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_units_options">
+        <item>@string/pref_units_label_metric</item>
+        <item>@string/pref_units_label_imperial</item>
+    </string-array>
+
+    <string-array name="pref_units_values">
+        <item>@string/pref_units_metric</item>
+        <item>@string/pref_units_imperial</item>
+    </string-array>
+
+    <string-array name="pref_alert_options">
+        <item>@string/prefs_alerts_5_minutes_option</item>
+        <item>@string/prefs_alerts_10_minutes_option</item>
+        <item>@string/prefs_alerts_15_minutes_option</item>
+    </string-array>
+
+    <string-array name="pref_alert_values">
+        <item>@string/prefs_alerts_5_minutes_value</item>
+        <item>@string/prefs_alerts_10_minutes_value</item>
+        <item>@string/prefs_alerts_15_minutes_value</item>
+    </string-array>
+</resources>

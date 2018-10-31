@@ -10,8 +10,8 @@ import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.models.retrofitmodels.DistanceMatrix;
 import com.aaronbrecher.neverlate.models.retrofitmodels.Element;
-import com.aaronbrecher.neverlate.network.DistanceMatrixApiUtils;
-import com.aaronbrecher.neverlate.network.DistanceMatrixService;
+import com.aaronbrecher.neverlate.network.AppApiUtils;
+import com.aaronbrecher.neverlate.network.AppApiService;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
@@ -68,7 +68,7 @@ public class DirectionsUtils {
     private static boolean executeQuery(List<Event> events, Location location, int numTries) {
         String destinations = getDestinationsAsString(events);
         String origin = location.getLatitude() + "," + location.getLongitude();
-        DistanceMatrixService service = DistanceMatrixApiUtils.createService();
+        AppApiService service = AppApiUtils.createService();
         Call<DistanceMatrix> request = service.queryDistanceMatrix(origin, destinations);
         try{
             Response<DistanceMatrix> response = request.execute();
