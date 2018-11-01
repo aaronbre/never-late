@@ -60,15 +60,26 @@
     <!--Distance prefs strings-->
     <string name="pref_units_title" translatable="false">Distance Units</string>
     <string name="pref_units_key" translatable="false">units</string>
-    <string name="pref_units_metric" translatable="false">metric</string>
-    <string name="pref_units_imperial" translatable="false">imperial</string>
-    <string name="pref_units_label_metric">Metric</string>
-    <string name="pref_units_label_imperial">Imperial</string>
+    <string name="pref_units_metric" translatable="false">km</string>
+    <string name="pref_units_imperial" translatable="false">miles</string>
+    <string name="pref_units_label_metric">Kilometers</string>
+    <string name="pref_units_label_imperial">Miles</string>
 
     <!--Speed prefs strings-->
-    <string name="prefs_speed_title">Default speed per minute (KM)</string>
+    <string name="prefs_speed_title">Default speed (kph)</string>
     <string name="prefs_speed_key" translatable="false">kpm</string>
-    <string name="prefs_speed_default" translatable="false">0.5</string>
+    <string name="prefs_speed_very_slow_option">30 Kilometers per hour</string>
+    <string name="prefs_speed_slow_option">40 Kilometers per hour</string>
+    <string name="prefs_speed_medium_option">50 Kilometers per hour</string>
+    <string name="prefs_speed_fast_option">60 Kilometers per hour</string>
+    <string name="prefs_speed_very_fast_option">70 Kilometers per hour</string>
+    <string name="prefs_speed_very_slow_value">0.5</string>
+    <string name="prefs_speed_slow_value">0.666667</string>
+    <string name="prefs_speed_medium_value">833333</string>
+    <string name="prefs_speed_fast_value">1</string>
+    <string name="prefs_speed_very_fast_value">1.166667</string>
+
+    <string name="prefs_speed_default" translatable="false">@string/prefs_speed_slow_value</string>
     <string name="menu_settings">Settings</string>
 
     <!--Notification alert time prefs strings-->
@@ -82,4 +93,6 @@
     <string name="prefs_alerts_10_minutes_value">10</string>
     <string name="prefs_alerts_15_minutes_value">15</string>
     <string name="prefs_alert_title">Alert time</string>
+
+
 </resources>

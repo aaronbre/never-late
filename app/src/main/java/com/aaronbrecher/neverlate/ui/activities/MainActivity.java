@@ -341,7 +341,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                     Version v = response.body();
                     if(v == null) return;
                     int latestVersion = v.getVersion();
-                    if(currentVersion != latestVersion){
+                    if(currentVersion < latestVersion){
                         showUpdateSnackbar();
                         //response will also have a message with details of update
                         //TODO possibly show message as well

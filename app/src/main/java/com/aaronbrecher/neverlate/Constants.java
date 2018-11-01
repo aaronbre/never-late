@@ -55,6 +55,9 @@ public class Constants {
     public static final String ALARM_STATUS_KEY = "alarm-status";
     public static final String NEXT_EVENT_KEY = "next-event";
     public static final String ALERTS_PREFS_KEY = "alert-time";
+    public static final String ALERT_TIME_SHORT = "5";
+    public static final String ALERT_TIME_MEDIUM = "10";
+    public static final String ALERT_TIME_LONG = "15";
 
 
 

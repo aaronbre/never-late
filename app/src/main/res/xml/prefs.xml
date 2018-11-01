@@ -10,11 +10,11 @@
         android:key="@string/pref_units_key"
         android:title="@string/pref_units_title"/>
 
-    <EditTextPreference
+    <ListPreference
         android:title="@string/prefs_speed_title"
         android:key="@string/prefs_speed_key"
-        android:inputType="numberDecimal"
-        android:singleLine="true"
+        android:entries="@array/pref_speed_options"
+        android:entryValues="@array/pref_speed_values"
         android:defaultValue="@string/prefs_speed_default"
         />
 

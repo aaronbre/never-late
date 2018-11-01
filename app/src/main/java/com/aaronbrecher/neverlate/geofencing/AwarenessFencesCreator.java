@@ -56,6 +56,7 @@ public class AwarenessFencesCreator implements LocationCallback {
     private List<Event> mEventList;
     private Location mLocation = null;
     private PendingIntent mPendingIntent;
+    private long mAlertTime;
 
     public List<Event> getEventList() {
         return mEventList;
@@ -78,6 +79,21 @@ public class AwarenessFencesCreator implements LocationCallback {
         }
         mFenceClient = Awareness.getFenceClient(mApp);
         mEventList = eventList;
+        mAlertTime = getAlertTime();
+    }
+
+    private long getAlertTime() {
+        String alertTime = mSharedPreferences.getString(Constants.ALERTS_PREFS_KEY, "");
+        switch (alertTime) {
+            case Constants.ALERT_TIME_SHORT:
+                return Constants.TIME_FIVE_MINUTES;
+            case Constants.ALERT_TIME_MEDIUM:
+                return Constants.TIME_TEN_MINUTES;
+            case Constants.ALERT_TIME_LONG:
+                return Constants.TIME_FIFTEEN_MINUTES;
+            default:
+                return Constants.TIME_TEN_MINUTES;
+        }
     }
 
     /**
@@ -114,7 +130,7 @@ public class AwarenessFencesCreator implements LocationCallback {
      * of the event - the time it takes to drive there. The location will be the users current location which is
      * saved in the app class
      *
-     * @param triggerTime
+     * @param triggerTime the triggerTime will either be the event start or end
      * @return
      */
     private AwarenessFence createAwarenessFenceForEvent(long triggerTime) {
@@ -126,7 +142,7 @@ public class AwarenessFencesCreator implements LocationCallback {
                 Constants.LOCATION_FENCE_RADIUS,
                 Constants.LOCATION_FENCE_DWELL_TIME);
         //TODO the end time is such for testing purposes in reality possibly will end the time before this
-        AwarenessFence timeFence = TimeFence.inInterval(triggerTime - Constants.TIME_TEN_MINUTES, triggerTime + Constants.TIME_FIFTEEN_MINUTES);
+        AwarenessFence timeFence = TimeFence.inInterval(triggerTime - mAlertTime, triggerTime + Constants.TIME_FIFTEEN_MINUTES);
         return AwarenessFence.and(locationFence, timeFence);
     }
 
@@ -181,7 +197,7 @@ public class AwarenessFencesCreator implements LocationCallback {
             if (fencelist.size() == 0) return;
             FenceUpdateRequest request = getUpdateRequest(fencelist);
             mFenceClient.updateFences(request).addOnSuccessListener(aVoid ->
-                            Toast.makeText(mApp, R.string.geofence_added_success, Toast.LENGTH_SHORT).show())
+                    Toast.makeText(mApp, R.string.geofence_added_success, Toast.LENGTH_SHORT).show())
                     .addOnFailureListener(e ->
                             Toast.makeText(mApp, R.string.geofence_added_failed, Toast.LENGTH_SHORT).show());
         });
@@ -201,7 +217,7 @@ public class AwarenessFencesCreator implements LocationCallback {
     @Override
     public void getLocationSuccessCallback(final Location location) {
         mAppExecutors.diskIO().execute(() -> {
-            if(location == null) return;
+            if (location == null) return;
             //if location was not saved need to update distance and time to event
             mSharedPreferences.edit()
                     .putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location))

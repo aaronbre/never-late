@@ -1,6 +1,7 @@
 package com.aaronbrecher.neverlate.network;
 
 public class AppApiUtils {
+    public static final String DIRECTION_MATRIX_API_ENDPOINT = "directionmatrix";
     static final String DISTANCE_API_ENDPOINT = "distancematrix";
     static final String VERSION_ENDPOINT = "current-version";
     private static final String BASE_URL = "https://never-late-api.herokuapp.com/";

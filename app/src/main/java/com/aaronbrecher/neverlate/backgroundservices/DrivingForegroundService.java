@@ -63,7 +63,13 @@ public class DrivingForegroundService extends Service {
     public void onCreate() {
         super.onCreate();
         NeverLateApp.getApp().getAppComponent().inject(this);
-        mDefaultSpeed = mSharedPreferences.getFloat(Constants.KM_PER_MINUTE_PREFS_KEY, .5f);
+        String speedString = mSharedPreferences.getString(getString(R.string.prefs_speed_key), "");
+        try{
+            mDefaultSpeed = Double.parseDouble(speedString);
+        } catch (NumberFormatException e){
+            mDefaultSpeed = .5;
+        }
+
     }
 
     @SuppressLint("MissingPermission")

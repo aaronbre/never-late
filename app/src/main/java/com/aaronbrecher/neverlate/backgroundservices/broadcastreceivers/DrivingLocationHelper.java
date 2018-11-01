@@ -44,7 +44,12 @@ public class DrivingLocationHelper {
         NeverLateApp.getApp().getAppComponent().inject(this);
         this.mLocation = location;
         this.mContext = context;
-        mDefaultSpeed = mSharedPreferences.getFloat(Constants.KM_PER_MINUTE_PREFS_KEY, .5f);
+        String speedString = mSharedPreferences.getString(context.getString(R.string.prefs_speed_key), "");
+        try{
+            mDefaultSpeed = Double.parseDouble(speedString);
+        } catch (NumberFormatException e){
+            mDefaultSpeed = .5;
+        }
     }
 
     public void checkAllEvents(){
