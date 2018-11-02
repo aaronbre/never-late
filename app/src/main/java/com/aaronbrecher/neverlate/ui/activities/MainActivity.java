@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.SearchManager;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.ComponentName;
@@ -61,6 +63,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
@@ -74,7 +77,17 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     //TODO with current refactoring need to figure out where to set up ActivityRecoginition
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String SHOW_ALL_EVENTS_KEY = "should-show-all-events";
+    private static MutableLiveData<Boolean> finishedLoading;
 
+    public static void setFinishedLoading(boolean finished) {
+        if(finishedLoading == null) finishedLoading = new MutableLiveData<>();
+        finishedLoading.setValue(finished);
+    }
+
+    public static MutableLiveData<Boolean> getFinishedLoading(){
+        if(finishedLoading == null) finishedLoading = new MutableLiveData<>();
+        return finishedLoading;
+    }
 
     @Inject
     ViewModelProvider.Factory mViewModelFactory;
@@ -147,6 +160,9 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         });
 
         MobileAds.initialize(this, getString(R.string.admob_id));
+        getFinishedLoading().observe(this, finishedLoading ->{
+            if(finishedLoading != null && finishedLoading) hideLoadingIcon();
+        });
     }
 
     public void loadNoEventsFragment() {

@@ -19,6 +19,7 @@ import com.aaronbrecher.neverlate.Utils.SystemUtils;
 import com.aaronbrecher.neverlate.database.EventsRepository;
 import com.aaronbrecher.neverlate.geofencing.AwarenessFencesCreator;
 import com.aaronbrecher.neverlate.models.Event;
+import com.aaronbrecher.neverlate.ui.activities.MainActivity;
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -107,11 +108,15 @@ public class CheckForCalendarChangedService extends JobService {
                 });
             }
             // if there is no geofence list finish job
-        }else {
+        }else if(noGeofenceList.size() > 0){
             mEventsRepository.deleteAllEvents();
             mEventsRepository.insertAll(noGeofenceList);
             jobFinished(mJobParameters, false);
+        } else {
+            mAppExecutors.mainThread().execute(()->{MainActivity.setFinishedLoading(true);});
+            jobFinished(mJobParameters, false);
         }
+
     }
 
 
