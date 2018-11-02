@@ -93,6 +93,7 @@
     <string name="prefs_alerts_10_minutes_value">10</string>
     <string name="prefs_alerts_15_minutes_value">15</string>
     <string name="prefs_alert_title">Alert time</string>
+    <string name="menu_privacy_policy">Privacy Policy</string>
 
 
 </resources>

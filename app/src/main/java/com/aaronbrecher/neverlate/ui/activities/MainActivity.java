@@ -286,6 +286,11 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                 Intent intent = new Intent(this, SettingsActivity.class);
                 startActivity(intent);
                 return true;
+            case R.id.main_activity_menu_privacy:
+                intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Constants.PRIVACY_POLICY_URI);
+                startActivity(intent);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
