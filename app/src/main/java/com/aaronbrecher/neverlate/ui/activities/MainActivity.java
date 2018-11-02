@@ -253,7 +253,6 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             case R.id.main_activity_menu_sync:
                 if (SystemUtils.isConnected(this)) {
                     showLoadingIcon();
-                    List<Event> oldList = mEventList;
                     mFirebaseJobDispatcher.mustSchedule(BackgroundUtils.oneTimeCalendarUpdate(mFirebaseJobDispatcher));
                 } else {
                     showNoConnectionSnackbar();

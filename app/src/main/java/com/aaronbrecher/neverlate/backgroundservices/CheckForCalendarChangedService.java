@@ -68,6 +68,7 @@ public class CheckForCalendarChangedService extends JobService {
 
     @SuppressLint("MissingPermission")
     private void doWork() {
+        Log.i(TAG, "doWork: checking for calendar changes");
         List<Event> oldList = mEventsRepository.queryAllCurrentEventsSync();
         List<Event> newList = CalendarUtils.getCalendarEventsForToday(this);
 

@@ -9,7 +9,9 @@ import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.models.retrofitmodels.DistanceMatrix;
+import com.aaronbrecher.neverlate.models.retrofitmodels.Duration;
 import com.aaronbrecher.neverlate.models.retrofitmodels.Element;
+import com.aaronbrecher.neverlate.models.retrofitmodels.MapboxDirectionMatrix;
 import com.aaronbrecher.neverlate.network.AppApiUtils;
 import com.aaronbrecher.neverlate.network.AppApiService;
 
@@ -45,11 +47,11 @@ public class DirectionsUtils {
         if (events.size() > MAX_QUERY_SIZE) {
             List<List<Event>> lists = splitList(events);
             for (List<Event> list : lists) {
-                wasAdded = wasAdded || executeQuery(list, location, 0);
+                wasAdded = wasAdded || executeMapboxQuery(list, location, 0);
             }
             return wasAdded;
         } else {
-            return executeQuery(events, location, 0);
+            return executeMapboxQuery(events, location, 0);
         }
     }
 
@@ -67,34 +69,72 @@ public class DirectionsUtils {
         return lists;
     }
 
-    private static boolean executeQuery(List<Event> events, Location location, int numTries) {
-        String destinations = getDestinationsAsString(events);
-        String origin = location.getLatitude() + "," + location.getLongitude();
-//        for mapbox need to use this option
-//        String origin  location.getLongitude() + "," + location.getLatitude();
+//    private static boolean executeQuery(List<Event> events, Location location, int numTries) {
+//        String destinations = getDestinationsAsString(events);
+//        String origin = location.getLatitude() + "," + location.getLongitude();
+////        for mapbox need to use this option
+////        String origin  location.getLongitude() + "," + location.getLatitude();
+//        AppApiService service = AppApiUtils.createService();
+//        Call<DistanceMatrix> request = service.queryDistanceMatrix(origin, destinations);
+//        try {
+//            Response<DistanceMatrix> response = request.execute();
+//            DistanceMatrix distanceMatrix = response.body();
+//            if (distanceMatrix == null || distanceMatrix.getRows() == null || distanceMatrix.getRows().get(0) == null)
+//                return false;
+//            List<Element> elements = distanceMatrix.getRows().get(0).getElements();
+//            if (elements.size() < 1) return false;
+//            for (int i = 0, j = elements.size(); i < j; i++) {
+//                Element element = elements.get(i);
+//                if (element.getStatus().equals(NOT_FOUND)) continue;
+//                Event event = events.get(i);
+//                event.setDistance(element.getDistance().getValue());
+//                //if there is a relative traffic time rather use that
+//                long timeTo = element.getDurationInTraffic() != null ? element.getDurationInTraffic().getValue() : element.getDuration().getValue();
+//                event.setTimeTo(timeTo);
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            if (e instanceof SocketTimeoutException && numTries < 2) {
+//                //TODO if there is a recursion problem it is from here!!!!
+//                return executeQuery(events, location, numTries + 1);
+//            } else {
+//                return false;
+//            }
+//        }
+//        return true;
+//    }
+
+    private static boolean executeMapboxQuery(List<Event> events, Location location, int numTries) {
+        String destinations = getDestinationsLngLatAsString(events);
+        String origin = location.getLongitude() + "," + location.getLatitude();
         AppApiService service = AppApiUtils.createService();
-        Call<DistanceMatrix> request = service.queryDistanceMatrix(origin, destinations);
+        Call<MapboxDirectionMatrix> request = service.queryMapboxDirectionMatrix(origin, destinations, events.size());
         try {
-            Response<DistanceMatrix> response = request.execute();
-            DistanceMatrix distanceMatrix = response.body();
-            if (distanceMatrix == null || distanceMatrix.getRows() == null || distanceMatrix.getRows().get(0) == null)
+            Response<MapboxDirectionMatrix> response = request.execute();
+            MapboxDirectionMatrix directionMatrix = response.body();
+            //Sanity check to make sure everything is good
+            if (directionMatrix == null || directionMatrix.getDurations() == null || directionMatrix.getDurations().size() < 1)
                 return false;
-            List<Element> elements = distanceMatrix.getRows().get(0).getElements();
-            if (elements.size() < 1) return false;
-            for (int i = 0, j = elements.size(); i < j; i++) {
-                Element element = elements.get(i);
-                if (element.getStatus().equals(NOT_FOUND)) continue;
+
+            //get the list of distances and durations these will always be the same size
+            List<Double> durations = directionMatrix.getDurations().get(0);
+            List<Double> distances = directionMatrix.getDistances().get(0);
+            if (durations.size() < 1 || distances.size() < 1) return false;
+            for (int i = 0, j = durations.size(); i < j; i++) {
+                Double distance = distances.get(i);
+                Double duration = durations.get(i);
+                //if this particular route failed skip it
+                if (distance == null || duration == null) continue;
                 Event event = events.get(i);
-                event.setDistance(element.getDistance().getValue());
+                event.setDistance(distance.longValue());
                 //if there is a relative traffic time rather use that
-                long timeTo = element.getDurationInTraffic() != null ? element.getDurationInTraffic().getValue() : element.getDuration().getValue();
-                event.setTimeTo(timeTo);
+                event.setTimeTo(duration.longValue());
             }
         } catch (IOException e) {
             e.printStackTrace();
             if (e instanceof SocketTimeoutException && numTries < 2) {
                 //TODO if there is a recursion problem it is from here!!!!
-                return executeQuery(events, location, numTries + 1);
+                return executeMapboxQuery(events, location, numTries + 1);
             } else {
                 return false;
             }

@@ -14,7 +14,7 @@ public class MapboxDirectionMatrix {
     private List<Coordinate> destinations = null;
     @SerializedName("distances")
     @Expose
-    private List<List<Integer>> distances = null;
+    private List<List<Double>> distances = null;
     @SerializedName("durations")
     @Expose
     private List<List<Double>> durations = null;
@@ -38,11 +38,11 @@ public class MapboxDirectionMatrix {
         this.destinations = destinations;
     }
 
-    public List<List<Integer>> getDistances() {
+    public List<List<Double>> getDistances() {
         return distances;
     }
 
-    public void setDistances(List<List<Integer>> distances) {
+    public void setDistances(List<List<Double>> distances) {
         this.distances = distances;
     }
 
