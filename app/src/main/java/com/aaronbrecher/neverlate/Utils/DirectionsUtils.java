@@ -174,6 +174,7 @@ public class DirectionsUtils {
     private static String getDestinationsLngLatAsString(List<Event> events){
         ArrayList<String> dest = new ArrayList<>();
         for(Event event : events){
+            if(event.getLocationLatlng() == null) continue;
             String lngLatString = event.getLocationLatlng().longitude + "," + event.getLocationLatlng().latitude;
             dest.add(lngLatString);
         }
