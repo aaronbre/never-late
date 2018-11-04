@@ -13,6 +13,10 @@ public class Version {
     @Expose
     private String message;
 
+    @SerializedName("needsUpdate")
+    @Expose
+    private Boolean needsUpdate;
+
     public int getVersion() {
         return version;
     }
@@ -27,5 +31,13 @@ public class Version {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public Boolean getNeedsUpdate() {
+        return needsUpdate;
+    }
+
+    public void setNeedsUpdate(Boolean needsUpdate) {
+        this.needsUpdate = needsUpdate;
     }
 }

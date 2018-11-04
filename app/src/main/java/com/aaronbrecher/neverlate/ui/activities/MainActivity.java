@@ -355,7 +355,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         try {
             int currentVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
             AppApiService service = AppApiUtils.createService();
-            service.queryVersionNumber().enqueue(new Callback<Version>() {
+            service.queryVersionNumber(currentVersion).enqueue(new Callback<Version>() {
                 @Override
                 public void onResponse(Call<Version> call, Response<Version> response) {
                     Version v = response.body();
@@ -363,8 +363,11 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                     int latestVersion = v.getVersion();
                     if(currentVersion < latestVersion){
                         showUpdateSnackbar();
-                        //response will also have a message with details of update
-                        //TODO possibly show message as well
+                    }else if(getString(R.string.version_invalid).equals(v.getMessage()) || v.getNeedsUpdate()){
+                        mFirebaseJobDispatcher.cancel(Constants.FIREBASE_JOB_SERVICE_CHECK_CALENDAR_CHANGED);
+                        mFirebaseJobDispatcher.cancel(Constants.FIREBASE_JOB_SERVICE_SETUP_ACTIVITY_RECOG);
+                        Intent intent = new Intent(MainActivity.this, NeedUpdateActivity.class);
+                        startActivity(intent);
                     }
                 }
 
@@ -384,7 +387,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                     String appPackageName = getPackageName();
                     try {
                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
-                    } catch (android.content.ActivityNotFoundException anfe) {
+                    } catch (android.content.ActivityNotFoundException e) {
                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
                     }
                 }).show();

@@ -51,8 +51,10 @@
     <string name="leave_at_time">Time to leave - %1$s</string>
     <string name="widget_header">Your next event</string>
 
+    <!--update strings-->
     <string name="version_mismatch_snackbar">You do not have the latest version. Please update the app to avoid any issues</string>
     <string name="version_mismatch_snackbar_update_button">Update</string>
+    <string name="version_invalid">Invalid Version</string>
 
     <string name="admob_id">ca-app-pub-6961678341915263~3845118420</string>
     <string name="unable_to_get_directions_data">Geofences were not updated, unable to get directions data. Check your internet connection and try to refresh again</string>
@@ -94,6 +96,10 @@
     <string name="prefs_alerts_15_minutes_value">15</string>
     <string name="prefs_alert_title">Alert time</string>
     <string name="menu_privacy_policy">Privacy Policy</string>
+    <string name="app_needs_update_graphic">App needs update graphic</string>
+    <string name="needs_update_header">Version Not Supported</string>
+    <string name="need_update_text">Your version is not up to date and is no longer supported. Please download the newest version from the Playstore (enabling automatic updates is extremely recommended</string>
+    <string name="needs_update_button">Go to Play Store</string>
 
 
 </resources>

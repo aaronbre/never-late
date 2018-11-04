@@ -111,7 +111,8 @@
             android:name="io.fabric.ApiKey"
             android:value="8da9a19591e925fea9caed84c077bfe36abf2b5e" />
 
-        <activity android:name=".ui.activities.SettingsActivity"></activity>
+        <activity android:name=".ui.activities.SettingsActivity" />
+        <activity android:name=".ui.activities.NeedUpdateActivity"></activity>
     </application>
 
 </manifest>

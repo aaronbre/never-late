@@ -116,8 +116,9 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
                 mEventMarker = googleMap.addMarker(new MarkerOptions().position(latLng)
                         .title(mEvent.getTitle()));
                 builder.include(latLng);
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
             }
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
+
             if (mUserLocationLatLng != null) {
                 mLocationMarker = googleMap.addMarker(new MarkerOptions().position(mUserLocationLatLng)
                         .title(getString(R.string.current_location_map_title)));

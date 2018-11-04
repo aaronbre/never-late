@@ -17,5 +17,5 @@ public interface AppApiService {
     Call<MapboxDirectionMatrix> queryMapboxDirectionMatrix(@Query("origin")String origin, @Query("destinations")String destinations, @Query("destinationsize") int size);
 
     @GET(AppApiUtils.VERSION_ENDPOINT)
-    Call<Version> queryVersionNumber();
+    Call<Version> queryVersionNumber(@Query("usersversion")int version);
 }
