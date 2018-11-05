@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -62,7 +63,13 @@ public class DrivingForegroundService extends Service {
     public void onCreate() {
         super.onCreate();
         NeverLateApp.getApp().getAppComponent().inject(this);
-        mDefaultSpeed = mSharedPreferences.getFloat(Constants.KM_PER_MINUTE_PREFS_KEY, .5f);
+        String speedString = mSharedPreferences.getString(getString(R.string.prefs_speed_key), "");
+        try{
+            mDefaultSpeed = Double.parseDouble(speedString);
+        } catch (NumberFormatException e){
+            mDefaultSpeed = .5;
+        }
+
     }
 
     @SuppressLint("MissingPermission")
@@ -70,9 +77,14 @@ public class DrivingForegroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent.getAction() != null && intent.getAction().equals(Constants.ACTION_CANCEL_DRIVING_SERVICE)) {
-            mLocationProviderClient.removeLocationUpdates(mCancelIntent);
-            stopForeground(true);
-            stopSelf();
+            //TODO add code here to startForeground service for use in Android O
+            if((Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)){
+
+            }else{
+                mLocationProviderClient.removeLocationUpdates(mCancelIntent);
+                stopForeground(true);
+                stopSelf();
+            }
         } else {
             Intent i = new Intent(this, DrivingForegroundService.class);
             intent.setAction(Constants.ACTION_CANCEL_DRIVING_SERVICE);

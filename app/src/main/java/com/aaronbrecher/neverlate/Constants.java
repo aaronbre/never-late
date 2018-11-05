@@ -18,8 +18,9 @@ public class Constants {
     public static final String AWARENESS_FENCE_PREFIX = "never-late-awareness";
     public static final String AWARENESS_FENCE_MAIN_PREFIX = "never-late-awareness-main";
     public static final String AWARENESS_FENCE_ARRIVAL_PREFIX = "never-late-awareness-arrived";
-    public static final long TIME_TEN_MINUTES = 10 * 60 * 1000;
-    public static final long TIME_FIFTEEN_MINUTES = 15 * 60 * 1000;
+    public static final long TIME_FIVE_MINUTES = 5 * 60 * 1000;
+    public static final long TIME_TEN_MINUTES = TIME_FIVE_MINUTES * 2;
+    public static final long TIME_FIFTEEN_MINUTES = TIME_FIVE_MINUTES * 3;
     public static final long ONE_HOUR = TIME_TEN_MINUTES * 6;
     public static final long LOCATION_FENCE_RADIUS = 1000;
     public static final long LOCATION_FENCE_DWELL_TIME = 10 * 1000;
@@ -44,14 +45,19 @@ public class Constants {
     public static final int CALENDAR_ALARM_SERVICE_REQUEST_CODE = 102;
     public static final int ACTIVITY_TRANSITION_PENDING_INTENT_CODE = 2;
     public static final String FIREBASE_JOB_SERVICE_CHECK_CALENDAR_CHANGED = "check-calendar-change";
-    public static final int CHECK_CALENDAR_START_WINDOW = 60*60;
-    public static final int CHECK_CALENDAR_END_WINDOW = CHECK_CALENDAR_START_WINDOW + 600;
+    public static final String FIREBASE_JOB_SERVICE_CHECK_CALENDAR_CHANGED_ONE_TIME = "check-calendar-change-one-time";
+    public static final int CHECK_CALENDAR_START_WINDOW = 15*60;
+    public static final int CHECK_CALENDAR_END_WINDOW = CHECK_CALENDAR_START_WINDOW + 120;
 
     //prefs key
-    public static final String KM_PER_MINUTE_PREFS_KEY = "miles-per-minute";
-    public static final String UNIT_SYSTEM_PREFS_KEY = "unit-system";
+    public static final String KM_PER_MINUTE_PREFS_KEY = "kpm";
+    public static final String UNIT_SYSTEM_PREFS_KEY = "units";
     public static final String ALARM_STATUS_KEY = "alarm-status";
     public static final String NEXT_EVENT_KEY = "next-event";
+    public static final String ALERTS_PREFS_KEY = "alert-time";
+    public static final String ALERT_TIME_SHORT = "5";
+    public static final String ALERT_TIME_MEDIUM = "10";
+    public static final String ALERT_TIME_LONG = "15";
 
 
 
@@ -61,7 +67,10 @@ public class Constants {
     public static final String ACTION_ADD_CALENDAR_EVENTS = "com.aaronbrecher.neverlate.action.RETRIEVE_CALENDAR_EVENTS";
     public static final String ACTION_START_AWARENESS_FENCE_SERVICE = "com.aaronbrecher.neverlate.action.START_AWARENESS_FENCE_SERVICE";
     public static final String ACTION_START_ACTIVITY_TRANSITION_SERVICE = "com.aaronbrecher.neverlate.action.START_ACTIVITY_TRANSITION_SERVICE";
+    public static final String ACTION_PROCESS_LOCATION_UPDATE = "com.aaronbrecher.neverlate.action.TRACK_CURRENT_LOCATION";
 
     public static final long ROOM_INVALID_LONG_VALUE = -1;
     public static final String ACTION_CANCEL_DRIVING_SERVICE = "com.aaronbrecher.neverlate.action.CANCEL_DRIVING_SERVICE";
+
+    public static final Uri PRIVACY_POLICY_URI = Uri.parse("https://never-late-api.herokuapp.com/privacy-policy");
 }

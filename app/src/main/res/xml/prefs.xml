@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ListPreference
+        android:defaultValue="@string/pref_units_imperial"
+        android:entries="@array/pref_units_options"
+        android:entryValues="@array/pref_units_values"
+        android:key="@string/pref_units_key"
+        android:title="@string/pref_units_title"/>
+
+    <ListPreference
+        android:title="@string/prefs_speed_title"
+        android:key="@string/prefs_speed_key"
+        android:entries="@array/pref_speed_options"
+        android:entryValues="@array/pref_speed_values"
+        android:defaultValue="@string/prefs_speed_default"
+        />
+
+    <ListPreference
+        android:title="@string/prefs_alert_title"
+        android:entries="@array/pref_alert_options"
+        android:entryValues="@array/pref_alert_values"
+        android:defaultValue="@string/prefs_alerts_10_minutes_value"
+        android:key="@string/prefs_alerts_key"/>
+
+</PreferenceScreen>

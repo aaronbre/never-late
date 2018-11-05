@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_units_options">
+        <item>@string/pref_units_label_metric</item>
+        <item>@string/pref_units_label_imperial</item>
+    </string-array>
+
+    <string-array name="pref_units_values">
+        <item>@string/pref_units_metric</item>
+        <item>@string/pref_units_imperial</item>
+    </string-array>
+
+    <string-array name="pref_alert_options">
+        <item>@string/prefs_alerts_5_minutes_option</item>
+        <item>@string/prefs_alerts_10_minutes_option</item>
+        <item>@string/prefs_alerts_15_minutes_option</item>
+    </string-array>
+
+    <string-array name="pref_alert_values">
+        <item>@string/prefs_alerts_5_minutes_value</item>
+        <item>@string/prefs_alerts_10_minutes_value</item>
+        <item>@string/prefs_alerts_15_minutes_value</item>
+    </string-array>
+
+    <string-array name="pref_speed_options">
+        <item>@string/prefs_speed_very_slow_option</item>
+        <item>@string/prefs_speed_slow_option</item>
+        <item>@string/prefs_speed_medium_option</item>
+        <item>@string/prefs_speed_fast_option</item>
+        <item>@string/prefs_speed_very_fast_option</item>
+    </string-array>
+
+    <string-array name="pref_speed_values">
+        <item>@string/prefs_speed_very_slow_value</item>
+        <item>@string/prefs_speed_slow_value</item>
+        <item>@string/prefs_speed_medium_value</item>
+        <item>@string/prefs_speed_fast_value</item>
+        <item>@string/prefs_speed_very_fast_value</item>
+    </string-array>
+
+</resources>

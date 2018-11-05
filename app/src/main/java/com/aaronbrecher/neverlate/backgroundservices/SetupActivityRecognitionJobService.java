@@ -2,19 +2,15 @@ package com.aaronbrecher.neverlate.backgroundservices;
 
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.support.annotation.NonNull;
 
 import com.aaronbrecher.neverlate.Constants;
-import com.aaronbrecher.neverlate.NeverLateApp;
-import com.crashlytics.android.Crashlytics;
+import com.aaronbrecher.neverlate.backgroundservices.broadcastreceivers.StartJobIntentServiceBroadcastReceiver;
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
 import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.ActivityTransition;
 import com.google.android.gms.location.ActivityTransitionRequest;
 import com.google.android.gms.location.DetectedActivity;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +36,7 @@ public class SetupActivityRecognitionJobService extends JobService {
      * The job to be run on a separate thread this will set up the app to monitor if the user
      * has begun driving or if they have stopped driving
      *
-     * @param job
+     * @param job the job params to be used to call jobFinished
      */
     public void doWork(final JobParameters job) {
         List<ActivityTransition> transitions = new ArrayList<>();

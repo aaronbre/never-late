@@ -1,4 +1,4 @@
-package com.aaronbrecher.neverlate.backgroundservices;
+package com.aaronbrecher.neverlate.backgroundservices.jobintentservices;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -33,7 +33,7 @@ public class AwarenessFenceTransitionService extends JobIntentService {
 
     public static final int JOB_ID = 1002;
 
-    static void enqueueWork(Context context, Intent work) {
+    public static void enqueueWork(Context context, Intent work) {
         enqueueWork(context, AwarenessFenceTransitionService.class, JOB_ID, work);
     }
 
@@ -52,7 +52,10 @@ public class AwarenessFenceTransitionService extends JobIntentService {
             int id = Integer.valueOf(fenceKey.replaceAll("\\D+", ""));
             mEvent = mEventsRepository.queryEventById(id);
 
-            if(mEvent == null || fenceKey.contains(Constants.AWARENESS_FENCE_ARRIVAL_PREFIX)){
+            //if the event was deleted then need to remove the fence, or if the user is triggering the arrival fence
+            //then the user has arrived at the event and need to remove it so it doesn't bother the user again.
+            //TODO possibly give the user the option here to delete the event from the calendar
+            if(mEvent == null || (fenceKey.contains(Constants.AWARENESS_FENCE_ARRIVAL_PREFIX) && fenceState.getCurrentState() == FenceState.TRUE)){
                 mEvent = mEvent != null ? mEvent : new Event();
                 mEvent.setId(id);
                 AwarenessFencesCreator fencesCreator = new AwarenessFencesCreator.Builder(null).build();

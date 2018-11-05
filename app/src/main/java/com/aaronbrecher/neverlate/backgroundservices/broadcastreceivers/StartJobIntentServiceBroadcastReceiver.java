@@ -1,4 +1,4 @@
-package com.aaronbrecher.neverlate.backgroundservices;
+package com.aaronbrecher.neverlate.backgroundservices.broadcastreceivers;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.aaronbrecher.neverlate.Constants;
+import com.aaronbrecher.neverlate.backgroundservices.jobintentservices.CalendarAlarmService;
+import com.aaronbrecher.neverlate.backgroundservices.jobintentservices.ActivityTransitionService;
+import com.aaronbrecher.neverlate.backgroundservices.jobintentservices.AwarenessFenceTransitionService;
 
 public class StartJobIntentServiceBroadcastReceiver extends BroadcastReceiver {
     private static final String TAG = "NeverLateBroadcast";
