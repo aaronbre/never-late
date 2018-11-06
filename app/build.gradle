@@ -111,6 +111,9 @@ dependencies {
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.2'
     // Optional, if you use support library fragments:
     debugImplementation 'com.squareup.leakcanary:leakcanary-support-fragment:1.6.2'
+
+    //billing
+    implementation 'com.android.billingclient:billing:1.2'
 }
 
 apply plugin: 'com.google.gms.google-services'
