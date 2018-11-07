@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.v4.app.ActivityCompat;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.aaronbrecher.neverlate.AppExecutors;
@@ -111,16 +112,21 @@ public class AwarenessFencesCreator implements LocationCallback {
     private List<AwarenessFenceWithName> createFences() {
         List<AwarenessFenceWithName> fenceList = new ArrayList<>();
         for (Event event : mEventList) {
-            //all events will start with the value set to ROOM_INVALID... as a sentinal
-            if (event.getTimeTo() == Constants.ROOM_INVALID_LONG_VALUE) continue;
-            String fenceName = Constants.AWARENESS_FENCE_MAIN_PREFIX + event.getId();
-            long relevantTime = GeofenceUtils.determineRelevantTime(event.getStartTime(), event.getEndTime());
-            long triggerTime = relevantTime - (event.getTimeTo() * 1000);
-            AwarenessFenceWithName fence = new AwarenessFenceWithName(createAwarenessFenceForEvent(triggerTime), fenceName);
-            fenceList.add(fence);
-            String arrivalFenceName = Constants.AWARENESS_FENCE_ARRIVAL_PREFIX + event.getId();
-            AwarenessFenceWithName arrivalFence = new AwarenessFenceWithName(createArrivalFenceForEvent(event), arrivalFenceName);
-            fenceList.add(arrivalFence);
+            //added try/catch if creating a fence fails
+            try {
+                //all events will start with the value set to ROOM_INVALID... as a sentinal
+                if (event.getTimeTo() == Constants.ROOM_INVALID_LONG_VALUE) continue;
+                String fenceName = Constants.AWARENESS_FENCE_MAIN_PREFIX + event.getId();
+                long relevantTime = GeofenceUtils.determineRelevantTime(event.getStartTime(), event.getEndTime());
+                long triggerTime = relevantTime - (event.getTimeTo() * 1000);
+                AwarenessFenceWithName fence = new AwarenessFenceWithName(createAwarenessFenceForEvent(triggerTime), fenceName);
+                String arrivalFenceName = Constants.AWARENESS_FENCE_ARRIVAL_PREFIX + event.getId();
+                AwarenessFenceWithName arrivalFence = new AwarenessFenceWithName(createArrivalFenceForEvent(event), arrivalFenceName);
+                fenceList.add(arrivalFence);
+                fenceList.add(fence);
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            }
         }
         return fenceList;
     }
@@ -174,7 +180,8 @@ public class AwarenessFencesCreator implements LocationCallback {
     private FenceUpdateRequest getUpdateRequest(List<AwarenessFenceWithName> fences) {
         FenceUpdateRequest.Builder builder = new FenceUpdateRequest.Builder();
         for (AwarenessFenceWithName fence : fences) {
-            if (fence == null || fence.fence == null) continue;
+            if (fence == null || fence.fence == null || fence.name == null || TextUtils.isEmpty(fence.name))
+                continue;
             builder.addFence(fence.name, fence.fence, getPendingIntent());
         }
         return builder.build();
@@ -196,10 +203,14 @@ public class AwarenessFencesCreator implements LocationCallback {
             final List<AwarenessFenceWithName> fencelist = createFences();
             if (fencelist.size() == 0) return;
             FenceUpdateRequest request = getUpdateRequest(fencelist);
-            mFenceClient.updateFences(request).addOnSuccessListener(aVoid ->
-                    Toast.makeText(mApp, R.string.geofence_added_success, Toast.LENGTH_SHORT).show())
-                    .addOnFailureListener(e ->
-                            Toast.makeText(mApp, R.string.geofence_added_failed, Toast.LENGTH_SHORT).show());
+            if (request == null) return;
+            mFenceClient.updateFences(request).addOnSuccessListener(aVoid -> {
+                if (fencelist.size() < mEventList.size())
+                    Toast.makeText(mApp, R.string.geofence_added_partial_success, Toast.LENGTH_LONG).show();
+                else
+                    Toast.makeText(mApp, R.string.geofence_added_success, Toast.LENGTH_SHORT).show();
+            }).addOnFailureListener(e ->
+                    Toast.makeText(mApp, R.string.geofence_added_failed, Toast.LENGTH_SHORT).show());
         });
     }
 

@@ -25,13 +25,6 @@ public class NeverLateApp extends Application {
                 .appModule(new AppModule(this))
                 .roomModule(new RoomModule())
                 .build();
-
-//        if (LeakCanary.isInAnalyzerProcess(this)) {
-//            // This process is dedicated to LeakCanary for heap analysis.
-//            // You should not init your app in this process.
-//            return;
-//        }
-//        LeakCanary.install(this);
     }
 
     public static NeverLateApp getApp(){

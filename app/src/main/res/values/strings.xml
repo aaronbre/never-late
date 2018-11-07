@@ -4,7 +4,8 @@
     <string name="notification_channel_description">Notifications for entering or leaving geofences created by Never Late</string>
     <string name="permissions_explanation_text">In order for Never Late to properly work access to your location and to calendar events is needed. Please grant the required permissions</string>
     <string name="ok">OK</string>
-    <string name="geofence_added_success">Geofences were successfully updated, notifications will be sent if you will not make it to your event</string>
+    <string name="geofence_added_success">Geofences were successfully updated, notifications will be sent when it is time to leave</string>
+    <string name="geofence_added_partial_success">Geofences were successfully updated, notifications will be sent when it is time to leave, some geofences failed to load, will try those again on the next scheduled update</string>
     <string name="geofence_added_failed">failed to load the geofences, will try again on the next scheduled update</string>
     <string name="exiting_geofence_notification_content_with_time">In order to make it in time for your event you need to start driving now to %1$s, Estimated time to arrival is %2$s</string>
     <string name="exiting_geofence_notification_content">In order to make it in time for your event you need to start driving now to %1$s.</string>
