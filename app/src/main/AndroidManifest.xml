@@ -114,6 +114,9 @@
 
         <activity android:name=".ui.activities.SettingsActivity" />
         <activity android:name=".ui.activities.NeedUpdateActivity"></activity>
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
     </application>
 
 </manifest>
