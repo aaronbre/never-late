@@ -111,16 +111,21 @@ public class AwarenessFencesCreator implements LocationCallback {
     private List<AwarenessFenceWithName> createFences() {
         List<AwarenessFenceWithName> fenceList = new ArrayList<>();
         for (Event event : mEventList) {
-            //all events will start with the value set to ROOM_INVALID... as a sentinal
-            if (event.getTimeTo() == Constants.ROOM_INVALID_LONG_VALUE) continue;
-            String fenceName = Constants.AWARENESS_FENCE_MAIN_PREFIX + event.getId();
-            long relevantTime = GeofenceUtils.determineRelevantTime(event.getStartTime(), event.getEndTime());
-            long triggerTime = relevantTime - (event.getTimeTo() * 1000);
-            AwarenessFenceWithName fence = new AwarenessFenceWithName(createAwarenessFenceForEvent(triggerTime), fenceName);
-            fenceList.add(fence);
-            String arrivalFenceName = Constants.AWARENESS_FENCE_ARRIVAL_PREFIX + event.getId();
-            AwarenessFenceWithName arrivalFence = new AwarenessFenceWithName(createArrivalFenceForEvent(event), arrivalFenceName);
-            fenceList.add(arrivalFence);
+            //added try/catch if creating a fence fails
+            try {
+                //all events will start with the value set to ROOM_INVALID... as a sentinal
+                if (event.getTimeTo() == Constants.ROOM_INVALID_LONG_VALUE) continue;
+                String fenceName = Constants.AWARENESS_FENCE_MAIN_PREFIX + event.getId();
+                long relevantTime = GeofenceUtils.determineRelevantTime(event.getStartTime(), event.getEndTime());
+                long triggerTime = relevantTime - (event.getTimeTo() * 1000);
+                AwarenessFenceWithName fence = new AwarenessFenceWithName(createAwarenessFenceForEvent(triggerTime), fenceName);
+                String arrivalFenceName = Constants.AWARENESS_FENCE_ARRIVAL_PREFIX + event.getId();
+                AwarenessFenceWithName arrivalFence = new AwarenessFenceWithName(createArrivalFenceForEvent(event), arrivalFenceName);
+                fenceList.add(arrivalFence);
+                fenceList.add(fence);
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            }
         }
         return fenceList;
     }
