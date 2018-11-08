@@ -8,10 +8,12 @@ buildscript {
     }
 }
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 apply plugin: 'io.fabric'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
+    mavenCentral()
 }
 
 
@@ -104,13 +106,17 @@ dependencies {
 
     //firebase crashlytics and performance
     implementation 'com.google.firebase:firebase-core:16.0.4'
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.5'
-    implementation 'com.google.firebase:firebase-perf:16.1.2'
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.6'
+    implementation 'com.google.firebase:firebase-perf:16.2.0'
 
     //leak canary
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.2'
     // Optional, if you use support library fragments:
     debugImplementation 'com.squareup.leakcanary:leakcanary-support-fragment:1.6.2'
+
+    //billing
+    implementation 'com.android.billingclient:billing:1.2'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 apply plugin: 'com.google.gms.google-services'

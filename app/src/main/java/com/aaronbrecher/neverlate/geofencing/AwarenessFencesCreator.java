@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.v4.app.ActivityCompat;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.aaronbrecher.neverlate.AppExecutors;
@@ -179,7 +180,8 @@ public class AwarenessFencesCreator implements LocationCallback {
     private FenceUpdateRequest getUpdateRequest(List<AwarenessFenceWithName> fences) {
         FenceUpdateRequest.Builder builder = new FenceUpdateRequest.Builder();
         for (AwarenessFenceWithName fence : fences) {
-            if (fence == null || fence.fence == null) continue;
+            if (fence == null || fence.fence == null || fence.name == null || TextUtils.isEmpty(fence.name))
+                continue;
             builder.addFence(fence.name, fence.fence, getPendingIntent());
         }
         return builder.build();
@@ -201,10 +203,14 @@ public class AwarenessFencesCreator implements LocationCallback {
             final List<AwarenessFenceWithName> fencelist = createFences();
             if (fencelist.size() == 0) return;
             FenceUpdateRequest request = getUpdateRequest(fencelist);
-            mFenceClient.updateFences(request).addOnSuccessListener(aVoid ->
-                    Toast.makeText(mApp, R.string.geofence_added_success, Toast.LENGTH_SHORT).show())
-                    .addOnFailureListener(e ->
-                            Toast.makeText(mApp, R.string.geofence_added_failed, Toast.LENGTH_SHORT).show());
+            if (request == null) return;
+            mFenceClient.updateFences(request).addOnSuccessListener(aVoid -> {
+                if (fencelist.size() < mEventList.size())
+                    Toast.makeText(mApp, R.string.geofence_added_partial_success, Toast.LENGTH_LONG).show();
+                else
+                    Toast.makeText(mApp, R.string.geofence_added_success, Toast.LENGTH_SHORT).show();
+            }).addOnFailureListener(e ->
+                    Toast.makeText(mApp, R.string.geofence_added_failed, Toast.LENGTH_SHORT).show());
         });
     }
 

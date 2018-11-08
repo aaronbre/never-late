@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.SearchManager;
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
@@ -63,7 +62,6 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
@@ -153,7 +151,6 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             }
         });
         fab.setOnClickListener(v -> {
-
             Intent calIntent = new Intent(Intent.ACTION_INSERT);
             calIntent.setData(CalendarContract.Events.CONTENT_URI);
             startActivity(calIntent);
