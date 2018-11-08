@@ -86,6 +86,10 @@ public class CheckForCalendarChangedService extends JobService {
             Location location = getLocation();
             if(location != null){
                 setOrRemoveFences(geofenceList, location);
+                //delete old events
+                mEventsRepository.deleteAllEvents();
+                //combine lists to make one upload
+                geofenceList.addAll(noGeofenceList);
                 mEventsRepository.insertAll(geofenceList);
                 jobFinished(mJobParameters, false);
             }else {
@@ -113,6 +117,7 @@ public class CheckForCalendarChangedService extends JobService {
             mEventsRepository.insertAll(noGeofenceList);
             jobFinished(mJobParameters, false);
         } else {
+            mEventsRepository.deleteAllEvents();
             mAppExecutors.mainThread().execute(()->{MainActivity.setFinishedLoading(true);});
             jobFinished(mJobParameters, false);
         }
