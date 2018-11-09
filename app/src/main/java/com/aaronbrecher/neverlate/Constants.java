@@ -26,7 +26,6 @@ public class Constants {
     public static final long LOCATION_FENCE_DWELL_TIME = 10 * 1000;
     public static final long ARRIVAL_FENCE_RADIUS = 200;
     public static final long ARRIVAL_FENCE_DWELL_TIME = LOCATION_FENCE_DWELL_TIME;
-    public static final String USER_LOCATION_PREFS_KEY = "users-location";
 
     //calendar constants
     public static final String CALENDAR_EVENTS_TITLE = Events.TITLE;
@@ -58,6 +57,8 @@ public class Constants {
     public static final String ALERT_TIME_SHORT = "5";
     public static final String ALERT_TIME_MEDIUM = "10";
     public static final String ALERT_TIME_LONG = "15";
+    public static final String USER_LOCATION_PREFS_KEY = "users-location";
+
 
 
 

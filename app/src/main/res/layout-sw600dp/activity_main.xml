@@ -19,4 +19,12 @@
         android:id="@+id/main_activity_detail_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/event_list_fab"
+        android:layout_width="@dimen/material_component_floating_action_button_size"
+        android:layout_height="@dimen/material_component_floating_action_button_size"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="@dimen/material_component_floating_action_button_margin"
+        android:src="@drawable/ic_add_white_24dp" />
 </android.support.constraint.ConstraintLayout>

@@ -335,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         SettingsClient settingsClient = LocationServices.getSettingsClient(this);
         Task<LocationSettingsResponse> task = settingsClient.checkLocationSettings(builder.build());
         task.addOnSuccessListener(locationSettingsResponse -> {
-
+            
         }).addOnFailureListener(e -> {
             if (e instanceof ResolvableApiException) {
                 try {
