@@ -118,6 +118,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                 .get(MainActivityViewModel.class);
         FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         mFirebaseJobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
+        setUpActivityMonitoring();
         mFragmentManager = getSupportFragmentManager();
         mListContainer = findViewById(R.id.main_activity_list_fragment_container);
         mLoadingIcon = findViewById(R.id.loading_icon);
@@ -194,7 +195,6 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             if (SystemUtils.verifyPermissions(grantResults)) {
                 mLocationProviderClient.getLastLocation().addOnSuccessListener(location -> {
                     mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location)).commit();
-
                     mFirebaseJobDispatcher.mustSchedule(BackgroundUtils.oneTimeCalendarUpdate(mFirebaseJobDispatcher));
                     createRecurringCalendarCheck();
                     setUpActivityMonitoring();

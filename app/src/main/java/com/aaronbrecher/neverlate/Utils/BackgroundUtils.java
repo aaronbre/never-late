@@ -1,16 +1,12 @@
 package com.aaronbrecher.neverlate.Utils;
 
 import android.Manifest;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.backgroundservices.CheckForCalendarChangedService;
-import com.aaronbrecher.neverlate.backgroundservices.broadcastreceivers.StartJobIntentServiceBroadcastReceiver;
 import com.aaronbrecher.neverlate.backgroundservices.SetupActivityRecognitionJobService;
 import com.aaronbrecher.neverlate.interfaces.LocationCallback;
 import com.firebase.jobdispatcher.Constraint;
@@ -21,37 +17,9 @@ import com.firebase.jobdispatcher.RetryStrategy;
 import com.firebase.jobdispatcher.Trigger;
 import com.google.android.gms.location.FusedLocationProviderClient;
 
-import org.threeten.bp.LocalDate;
-import org.threeten.bp.LocalDateTime;
-import org.threeten.bp.LocalTime;
-import org.threeten.bp.ZoneId;
-import org.threeten.bp.ZonedDateTime;
-
 public class BackgroundUtils {
     public static final int DEFAULT_JOB_TIMEFRAME = 15;
     public static final int ONE_HOUR_IN_SECONDS = 60 * 60;
-    /**
-     * Helper function to set up an AlarmManager to be used to sync calendar
-     *
-     * @param context context to be used to set up alarm and intents
-     * @return boolean if alarm was set will be true
-     */
-    public static boolean setAlarmManager(Context context) {
-        //get the time of midnight today will be the initial trigger
-        LocalDateTime midnight = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT);
-        ZonedDateTime zdt = midnight.atZone(ZoneId.systemDefault());
-
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(context, StartJobIntentServiceBroadcastReceiver.class);
-        intent.setAction(Constants.ACTION_ADD_CALENDAR_EVENTS);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, Constants.CALENDAR_ALARM_SERVICE_REQUEST_CODE, intent, 0);
-        if (alarmManager != null) {
-            alarmManager.setRepeating(AlarmManager.RTC,
-                    zdt.toInstant().toEpochMilli(), AlarmManager.INTERVAL_DAY, pendingIntent);
-            return true;
-        }
-        return false;
-    }
 
     /**
      * Job to Setup the app to listen to activity changes this is done as a job to

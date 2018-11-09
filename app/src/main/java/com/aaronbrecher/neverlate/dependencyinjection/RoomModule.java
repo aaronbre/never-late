@@ -32,6 +32,7 @@ public class RoomModule {
         return Room.databaseBuilder(application,
                 EventsDatabase.class,
                 DATABASE_NAME)
+                .fallbackToDestructiveMigration()
                 .build();
     }
 

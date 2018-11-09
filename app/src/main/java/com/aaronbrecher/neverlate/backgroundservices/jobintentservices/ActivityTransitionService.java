@@ -60,7 +60,7 @@ public class ActivityTransitionService extends JobIntentService {
             List<ActivityTransitionEvent> events = result.getTransitionEvents();
             ActivityTransitionEvent event = events.get(events.size() - 1);
             //only execute code for the in-vehicle activity
-            if(event.getActivityType() != DetectedActivity.IN_VEHICLE) return;
+            if (event.getActivityType() != DetectedActivity.IN_VEHICLE) return;
 
             if (event.getTransitionType() == ActivityTransition.ACTIVITY_TRANSITION_EXIT) {
                 setUpFences();
@@ -69,18 +69,16 @@ public class ActivityTransitionService extends JobIntentService {
                 requestLocationUpdates();
             }
         }
-        //TODO for testing remove
-        requestLocationUpdates();
     }
 
 
     @SuppressLint("MissingPermission")
     private void requestLocationUpdates() {
-        if(!SystemUtils.hasLocationPermissions(this)) return;
+        if (!SystemUtils.hasLocationPermissions(this)) return;
         mLocationProviderClient.requestLocationUpdates(createLocationRequest(), getPendingIntent());
     }
 
-    private LocationRequest createLocationRequest(){
+    private LocationRequest createLocationRequest() {
         LocationRequest request = new LocationRequest();
         request.setInterval(Constants.TIME_FIVE_MINUTES)
                 .setFastestInterval(Constants.TIME_FIVE_MINUTES)
@@ -89,11 +87,11 @@ public class ActivityTransitionService extends JobIntentService {
     }
 
 
-    private void stopLocationUpdates(){
+    private void stopLocationUpdates() {
         mLocationProviderClient.removeLocationUpdates(getPendingIntent());
     }
 
-    private PendingIntent getPendingIntent(){
+    private PendingIntent getPendingIntent() {
         Intent intent = new Intent(this, DrivingLocationUpdatesBroadcastReceiver.class);
         intent.setAction(Constants.ACTION_PROCESS_LOCATION_UPDATE);
         return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -112,7 +110,7 @@ public class ActivityTransitionService extends JobIntentService {
             return;
         }
 
-        mLocationProviderClient.getLastLocation().addOnSuccessListener(location -> mAppExecutors.diskIO().execute(() -> {
+        mLocationProviderClient.getLastLocation().addOnSuccessListener(mAppExecutors.diskIO(), location ->{
             List<Event> eventList = mEventsRepository.queryAllCurrentEventsSync();
             DirectionsUtils.addDistanceInfoToEventList(eventList, location);
             AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(eventList).build();
@@ -122,33 +120,6 @@ public class ActivityTransitionService extends JobIntentService {
             mSharedPreferences.edit()
                     .putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location))
                     .apply();
-        }));
+        });
     }
-
-//    @Deprecated
-//    private void setUpDrivingService() {
-//        Intent intent = new Intent(this, DrivingForegroundService.class);
-//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-//                != PackageManager.PERMISSION_GRANTED &&
-//                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-//                        != PackageManager.PERMISSION_GRANTED) {
-//            return;
-//        }
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            startForegroundService(intent);
-//        } else {
-//            stopService(intent);
-//        }
-//    }
-//
-//    private void stopDrivingForegroundService(){
-//        Intent intent = new Intent(this, DrivingForegroundService.class);
-//        intent.setAction(Constants.ACTION_CANCEL_DRIVING_SERVICE);
-//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-//            startForegroundService(intent);
-//        }else {
-//            startService(intent);
-//        }
-//    }
-
 }

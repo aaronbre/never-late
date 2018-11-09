@@ -53,9 +53,6 @@
             android:value="@string/admob_id" />
 
         <service
-            android:name=".backgroundservices.jobintentservices.CalendarAlarmService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-        <service
             android:name=".backgroundservices.SetupActivityRecognitionJobService"
             android:permission="android.permission.BIND_JOB_SERVICE"
             tools:ignore="ExportedService">

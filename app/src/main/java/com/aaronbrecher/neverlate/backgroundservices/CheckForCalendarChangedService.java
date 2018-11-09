@@ -84,7 +84,7 @@ public class CheckForCalendarChangedService extends JobService {
             //get the location saved to shared prefs, if it is a valid location
             //add the info from distanceMatrix and save the new fences
             Location location = getLocation();
-            if(location != null){
+            if (location != null) {
                 setOrRemoveFences(geofenceList, location);
                 //delete old events
                 mEventsRepository.deleteAllEvents();
@@ -92,43 +92,42 @@ public class CheckForCalendarChangedService extends JobService {
                 geofenceList.addAll(noGeofenceList);
                 mEventsRepository.insertAll(geofenceList);
                 jobFinished(mJobParameters, false);
-            }else {
+            } else {
                 //if the location is not there or not valid try to get the location and
                 //do the same work as before
                 if (!SystemUtils.hasLocationPermissions(this)) return;
-                mLocationProviderClient.getLastLocation().addOnSuccessListener(newLocation -> {
-                    if(newLocation != null){
+                mLocationProviderClient.getLastLocation().addOnSuccessListener(mAppExecutors.diskIO(), newLocation -> {
+                    if (newLocation != null) {
                         mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(newLocation)).apply();
                     }
-                    mAppExecutors.networkIO().execute(()-> {
-                        setOrRemoveFences(geofenceList, newLocation);
-                        //delete old events
-                        mEventsRepository.deleteAllEvents();
-                        //combine lists to make one upload
-                        geofenceList.addAll(noGeofenceList);
-                        mEventsRepository.insertAll(geofenceList);
-                        jobFinished(mJobParameters, false);
-                    });
+                    setOrRemoveFences(geofenceList, newLocation);
+                    //delete old events
+                    mEventsRepository.deleteAllEvents();
+                    //combine lists to make one upload
+                    geofenceList.addAll(noGeofenceList);
+                    mEventsRepository.insertAll(geofenceList);
+                    jobFinished(mJobParameters, false);
                 });
             }
             // if there is no geofence list finish job
-        }else if(noGeofenceList.size() > 0){
+        } else if (noGeofenceList.size() > 0) {
             mEventsRepository.deleteAllEvents();
             mEventsRepository.insertAll(noGeofenceList);
             jobFinished(mJobParameters, false);
         } else {
             mEventsRepository.deleteAllEvents();
-            mAppExecutors.mainThread().execute(()->{MainActivity.setFinishedLoading(true);});
+            mAppExecutors.mainThread().execute(() -> {
+                MainActivity.setFinishedLoading(true);
+            });
             jobFinished(mJobParameters, false);
         }
 
     }
 
 
-
-    private Location getLocation(){
+    private Location getLocation() {
         Location location = null;
-        if(mSharedPreferences.contains(Constants.USER_LOCATION_PREFS_KEY)){
+        if (mSharedPreferences.contains(Constants.USER_LOCATION_PREFS_KEY)) {
             String locationString = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");
             location = LocationUtils.locationFromLatLngString(locationString);
         }
@@ -141,6 +140,7 @@ public class CheckForCalendarChangedService extends JobService {
      * NOTE - need to set distance data here even thought the creator does it in the
      * event that there is no location. That is only a fix if there is no location however
      * here it is needed because the event information changed
+     *
      * @param eventsToAddWithGeofences
      * @param location
      */
@@ -148,10 +148,9 @@ public class CheckForCalendarChangedService extends JobService {
         boolean wasAdded;
         AwarenessFencesCreator fencesCreator = new AwarenessFencesCreator.Builder(null).build();
         wasAdded = DirectionsUtils.addDistanceInfoToEventList(eventsToAddWithGeofences, location);
-        if (wasAdded){
+        if (wasAdded) {
             fencesCreator.setEventList(eventsToAddWithGeofences);
             fencesCreator.buildAndSaveFences();
-        }
-        else fencesCreator.removeFences(eventsToAddWithGeofences.toArray(new Event[0]));
+        } else fencesCreator.removeFences(eventsToAddWithGeofences.toArray(new Event[0]));
     }
 }

@@ -6,13 +6,11 @@ import com.aaronbrecher.neverlate.backgroundservices.DrivingForegroundService;
 import com.aaronbrecher.neverlate.backgroundservices.broadcastreceivers.DrivingLocationHelper;
 import com.aaronbrecher.neverlate.backgroundservices.jobintentservices.ActivityTransitionService;
 import com.aaronbrecher.neverlate.backgroundservices.jobintentservices.AwarenessFenceTransitionService;
-import com.aaronbrecher.neverlate.backgroundservices.jobintentservices.CalendarAlarmService;
 import com.aaronbrecher.neverlate.ui.activities.EventDetailActivity;
 import com.aaronbrecher.neverlate.ui.activities.MainActivity;
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
 import com.aaronbrecher.neverlate.ui.fragments.EventListFragment;
 import com.aaronbrecher.neverlate.ui.widget.NeverLateWidget;
-import com.firebase.jobdispatcher.JobService;
 
 import javax.inject.Singleton;
 
@@ -25,7 +23,6 @@ public interface AppComponent {
     void inject(EventListFragment fragment);
     void inject(EventDetailActivity detailActivity);
     void inject(EventDetailFragment fragment);
-    void inject(CalendarAlarmService service);
     void inject(AwarenessFenceTransitionService service);
     void inject(ActivityTransitionService service);
     void inject(DrivingForegroundService service);

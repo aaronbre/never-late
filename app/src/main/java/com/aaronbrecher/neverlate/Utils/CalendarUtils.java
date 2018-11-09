@@ -143,7 +143,6 @@ public class CalendarUtils {
      * @return a Hashmap of Lists one called needsGeoChanged and another noGeoChange - events without
      * any change will be put in noGeoChange to make it easier when inserting events
      *
-     * TODO there is a bug here if an added event has an earlier ID will cause all this code to fail
      * as sorting will not help and the lists will be off need to fix both adding an event to
      */
     public static HashMap<String, List<Event>> compareCalendars(List<Event> oldEventList, List<Event> newEventList){

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.support.annotation.WorkerThread;
 import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
 import android.widget.Toast;
@@ -42,7 +43,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-public class AwarenessFencesCreator implements LocationCallback {
+@WorkerThread
+public class AwarenessFencesCreator{
     @Inject
     NeverLateApp mApp;
     @Inject
@@ -102,9 +104,20 @@ public class AwarenessFencesCreator implements LocationCallback {
      * Ideally the location will always be set by the Activity Recognition and AlarmService,
      * In edge case where it was not available then will try to update now
      */
+    @SuppressLint("MissingPermission")
+    @WorkerThread
     public void buildAndSaveFences() {
         if (mLocation == null) {
-            BackgroundUtils.getLocation(this, mApp, mLocationProviderClient);
+            mLocationProviderClient.getLastLocation().addOnSuccessListener(mAppExecutors.diskIO(), location -> {
+                if (location == null) return;
+                //if location was not saved need to update distance and time to event
+                mSharedPreferences.edit()
+                        .putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location))
+                        .apply();
+                DirectionsUtils.addDistanceInfoToEventList(mEventList, location);
+                mEventsRepository.insertAll(mEventList);
+                updateFences();
+            });
         } else {
             updateFences();
         }
@@ -200,50 +213,30 @@ public class AwarenessFencesCreator implements LocationCallback {
         return mPendingIntent;
     }
 
+
     private void updateFences() {
-        mAppExecutors.diskIO().execute(() -> {
-            final List<AwarenessFenceWithName> fencelist = createFences();
-            if (fencelist.size() == 0) return;
-            FenceUpdateRequest request = getUpdateRequest(fencelist);
-            if (request == null) return;
-            mFenceClient.updateFences(request).addOnSuccessListener(aVoid -> {
-                if (fencelist.size() < mEventList.size())
-                    Toast.makeText(mApp, R.string.geofence_added_partial_success, Toast.LENGTH_LONG).show();
-                else
-                    Toast.makeText(mApp, R.string.geofence_added_success, Toast.LENGTH_SHORT).show();
-            }).addOnFailureListener(e ->
-                    Toast.makeText(mApp, R.string.geofence_added_failed, Toast.LENGTH_SHORT).show());
-        });
+        final List<AwarenessFenceWithName> fencelist = createFences();
+        if (fencelist.size() == 0) return;
+        FenceUpdateRequest request = getUpdateRequest(fencelist);
+        if (request == null) return;
+        mFenceClient.updateFences(request).addOnSuccessListener(aVoid -> {
+            if (fencelist.size() < mEventList.size())
+                Toast.makeText(mApp, R.string.geofence_added_partial_success, Toast.LENGTH_LONG).show();
+            else
+                Toast.makeText(mApp, R.string.geofence_added_success, Toast.LENGTH_SHORT).show();
+        }).addOnFailureListener(e ->
+                Toast.makeText(mApp, R.string.geofence_added_failed, Toast.LENGTH_SHORT).show());
+
     }
 
+    @WorkerThread
     public void removeFences(Event... events) {
-        mAppExecutors.diskIO().execute(() -> {
-            FenceUpdateRequest.Builder builder = new FenceUpdateRequest.Builder();
-            for (Event event : events) {
-                builder.removeFence(Constants.AWARENESS_FENCE_MAIN_PREFIX + event.getId());
-                builder.removeFence(Constants.AWARENESS_FENCE_ARRIVAL_PREFIX + event.getId());
-            }
-            mFenceClient.updateFences(builder.build());
-        });
-    }
-
-    @Override
-    public void getLocationSuccessCallback(final Location location) {
-        mAppExecutors.diskIO().execute(() -> {
-            if (location == null) return;
-            //if location was not saved need to update distance and time to event
-            mSharedPreferences.edit()
-                    .putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location))
-                    .apply();
-            DirectionsUtils.addDistanceInfoToEventList(mEventList, location);
-            mEventsRepository.insertAll(mEventList);
-            updateFences();
-        });
-    }
-
-    @Override
-    public void getLocationFailedCallback() {
-        //TODO reschedule the fences via a jobservice
+        FenceUpdateRequest.Builder builder = new FenceUpdateRequest.Builder();
+        for (Event event : events) {
+            builder.removeFence(Constants.AWARENESS_FENCE_MAIN_PREFIX + event.getId());
+            builder.removeFence(Constants.AWARENESS_FENCE_ARRIVAL_PREFIX + event.getId());
+        }
+        mFenceClient.updateFences(builder.build());
     }
 
     public static class Builder {
