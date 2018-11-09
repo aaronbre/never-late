@@ -24,7 +24,6 @@ import org.threeten.bp.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 
@@ -122,7 +121,7 @@ public class CalendarUtils {
         event.setCalendarId(cursor.getLong(calendarIdIndex));
         event.setWatching(true);
         event.setDistance(Constants.ROOM_INVALID_LONG_VALUE);
-        event.setTimeTo(Constants.ROOM_INVALID_LONG_VALUE);
+        event.setDrivingTime(Constants.ROOM_INVALID_LONG_VALUE);
         return event;
     }
 
@@ -166,7 +165,7 @@ public class CalendarUtils {
         for (int i = 0, listLength = oldEventList.size(); i < listLength; i++) {
             Event newEvent = newEventList.get(i);
             Event oldEvent = oldEventList.get(i);
-            if(oldEvent.getTimeTo() == Constants.ROOM_INVALID_LONG_VALUE){
+            if(oldEvent.getDrivingTime() == Constants.ROOM_INVALID_LONG_VALUE){
                 eventsToAddWithGeofences.add(newEvent);
             }
             else{

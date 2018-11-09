@@ -60,7 +60,7 @@ public class Event implements Parcelable {
 
     @ColumnInfo
     @Nullable
-    private Long timeTo;
+    private Long drivingTime;
 
     @Ignore
     public Event(@NonNull int id, @NonNull long calendarId, String title, String description,
@@ -164,13 +164,13 @@ public class Event implements Parcelable {
     }
 
     @NonNull
-    public Long getTimeTo() {
-        if (this.timeTo == null) return Constants.ROOM_INVALID_LONG_VALUE;
-        return timeTo;
+    public Long getDrivingTime() {
+        if (this.drivingTime == null) return Constants.ROOM_INVALID_LONG_VALUE;
+        return drivingTime;
     }
 
-    public void setTimeTo(long timeTo) {
-        this.timeTo = timeTo;
+    public void setDrivingTime(long drivingTime) {
+        this.drivingTime = drivingTime;
     }
 
     @Ignore
@@ -192,7 +192,7 @@ public class Event implements Parcelable {
         dest.writeString(this.location);
         dest.writeByte(this.watching ? (byte) 1 : (byte) 0);
         dest.writeValue(this.distance);
-        dest.writeValue(this.timeTo);
+        dest.writeValue(this.drivingTime);
     }
 
     @Ignore
@@ -207,7 +207,7 @@ public class Event implements Parcelable {
         this.location = in.readString();
         this.watching = in.readByte() != 0;
         this.distance = (Long) in.readValue(Long.class.getClassLoader());
-        this.timeTo = (Long) in.readValue(Long.class.getClassLoader());
+        this.drivingTime = (Long) in.readValue(Long.class.getClassLoader());
     }
 
     @Ignore

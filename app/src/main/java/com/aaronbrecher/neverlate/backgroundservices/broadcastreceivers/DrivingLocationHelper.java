@@ -57,11 +57,14 @@ public class DrivingLocationHelper {
             mEvents = mEventsRepository.queryAllCurrentEventsSync();
             for(Event event : mEvents){
                 int distanceToEvent = determineDistanceToEvent(event, mLocation);
-                if(distanceToEvent != -1){
+                //if the user is within 100 meters we can assume he made the event
+                if(distanceToEvent > 100){
                     //determine driving speed to event based on the data from the DistanceMatrix, will use
                     //the distance/driving time to get a decent representation, otherwise will assume an average speed
-                    double speed = event.getTimeTo() != -1 && event.getDistance() != -1 ?
-                            (event.getTimeTo() / 60) / (event.getDistance() / 1000) : mDefaultSpeed;
+                    long drivingTime = event.getDrivingTime();
+                    long distance = event.getDistance();
+                    double speed = drivingTime > 0 && distance > 0 ?
+                            (drivingTime / 60) / (distance / 1000) : mDefaultSpeed;
                     
                     int drivingTimeToEventMillis = (int) (distanceToEvent / 1000 * speed) * 60 * 1000;
                     //deterimine time of arrival to location
@@ -74,6 +77,9 @@ public class DrivingLocationHelper {
                     } else if (arrivalTime >= bufferTime) {
                         showEventNotification(event, BUFFER_TIME, null);
                     }
+                }
+                else {
+                    //do something for user made it to event?
                 }
             }
         });

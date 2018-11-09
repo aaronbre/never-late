@@ -1,18 +1,15 @@
 package com.aaronbrecher.neverlate.backgroundservices;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
@@ -31,9 +28,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.firebase.perf.FirebasePerformance;
 import com.google.firebase.perf.metrics.AddTrace;
-import com.google.firebase.perf.metrics.Trace;
 
 import java.util.List;
 
@@ -139,7 +134,7 @@ public class DrivingForegroundService extends Service {
                     if (distance != -1) {
                         //determine driving speed to event based on the data from the DistanceMatrix, will use
                         //the distance/driving time to get a decent representation, otherwise will assume an average speed
-                        double speed = event.getTimeTo() != -1 && event.getDistance() != -1 ? (event.getTimeTo() / 60) / (event.getDistance() / 1000) : mDefaultSpeed;
+                        double speed = event.getDrivingTime() != -1 && event.getDistance() != -1 ? (event.getDrivingTime() / 60) / (event.getDistance() / 1000) : mDefaultSpeed;
                         //calculate time for current distance
                         int drivingTimeToEventMillis = (int) (distance / 1000 * speed) * 60 * 1000;
                         //deterimine time of arrival to location

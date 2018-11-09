@@ -1,8 +1,6 @@
 package com.aaronbrecher.neverlate.adapters;
 
 import android.content.Context;
-import android.location.Location;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -56,7 +54,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
         holder.binding.eventLocation.setText(event.getLocation());
         if (event.getDistance() != Constants.ROOM_INVALID_LONG_VALUE) holder.binding.eventDistance.setText(
                 DirectionsUtils.getHumanReadableDistance(mContext,event.getDistance(),  PreferenceManager.getDefaultSharedPreferences(mContext)));
-        if (event.getTimeTo() != Constants.ROOM_INVALID_LONG_VALUE) holder.binding.eventTimeTo.setText(DirectionsUtils.readableTravelTime(event.getTimeTo()));
+        if (event.getDrivingTime() != Constants.ROOM_INVALID_LONG_VALUE) holder.binding.eventTimeTo.setText(DirectionsUtils.readableTravelTime(event.getDrivingTime()));
     }
 
     @Override

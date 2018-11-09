@@ -91,9 +91,9 @@ public class AwarenessFenceTransitionService extends JobIntentService {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         String notificationText;
-        if (event.getTimeTo() != Constants.ROOM_INVALID_LONG_VALUE) {
+        if (event.getDrivingTime() != Constants.ROOM_INVALID_LONG_VALUE) {
             notificationText = getString(R.string.exiting_geofence_notification_content_with_time,
-                    event.getTitle(), DirectionsUtils.readableTravelTime(event.getTimeTo()));
+                    event.getTitle(), DirectionsUtils.readableTravelTime(event.getDrivingTime()));
         }else {
             notificationText = getString(R.string.exiting_geofence_notification_content, event.getTitle());
         }

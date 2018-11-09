@@ -37,6 +37,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -115,16 +116,17 @@ public class AwarenessFencesCreator implements LocationCallback {
             //added try/catch if creating a fence fails
             try {
                 //all events will start with the value set to ROOM_INVALID... as a sentinal
-                if (event.getTimeTo() == Constants.ROOM_INVALID_LONG_VALUE) continue;
+                if (event.getDrivingTime() == Constants.ROOM_INVALID_LONG_VALUE) continue;
                 String fenceName = Constants.AWARENESS_FENCE_MAIN_PREFIX + event.getId();
                 long relevantTime = GeofenceUtils.determineRelevantTime(event.getStartTime(), event.getEndTime());
-                long triggerTime = relevantTime - (event.getTimeTo() * 1000);
+                long triggerTime = relevantTime - (event.getDrivingTime() * 1000);
                 AwarenessFenceWithName fence = new AwarenessFenceWithName(createAwarenessFenceForEvent(triggerTime), fenceName);
                 String arrivalFenceName = Constants.AWARENESS_FENCE_ARRIVAL_PREFIX + event.getId();
                 AwarenessFenceWithName arrivalFence = new AwarenessFenceWithName(createArrivalFenceForEvent(event), arrivalFenceName);
                 fenceList.add(arrivalFence);
                 fenceList.add(fence);
-            } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException | ConcurrentModificationException e) {
+                //todo fix conccurent error
                 e.printStackTrace();
             }
         }
@@ -199,7 +201,7 @@ public class AwarenessFencesCreator implements LocationCallback {
     }
 
     private void updateFences() {
-        mAppExecutors.networkIO().execute(() -> {
+        mAppExecutors.diskIO().execute(() -> {
             final List<AwarenessFenceWithName> fencelist = createFences();
             if (fencelist.size() == 0) return;
             FenceUpdateRequest request = getUpdateRequest(fencelist);

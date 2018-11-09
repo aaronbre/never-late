@@ -5,12 +5,8 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.text.format.DateUtils;
 
-import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.models.Event;
-import com.aaronbrecher.neverlate.models.retrofitmodels.DistanceMatrix;
-import com.aaronbrecher.neverlate.models.retrofitmodels.Duration;
-import com.aaronbrecher.neverlate.models.retrofitmodels.Element;
 import com.aaronbrecher.neverlate.models.retrofitmodels.MapboxDirectionMatrix;
 import com.aaronbrecher.neverlate.network.AppApiUtils;
 import com.aaronbrecher.neverlate.network.AppApiService;
@@ -90,7 +86,7 @@ public class DirectionsUtils {
 //                event.setDistance(element.getDistance().getValue());
 //                //if there is a relative traffic time rather use that
 //                long timeTo = element.getDurationInTraffic() != null ? element.getDurationInTraffic().getValue() : element.getDuration().getValue();
-//                event.setTimeTo(timeTo);
+//                event.setDrivingTime(timeTo);
 //            }
 //        } catch (IOException e) {
 //            e.printStackTrace();
@@ -128,7 +124,7 @@ public class DirectionsUtils {
                 Event event = events.get(i);
                 event.setDistance(distance.longValue());
                 //if there is a relative traffic time rather use that
-                event.setTimeTo(duration.longValue());
+                event.setDrivingTime(duration.longValue());
             }
         } catch (IOException e) {
             e.printStackTrace();
