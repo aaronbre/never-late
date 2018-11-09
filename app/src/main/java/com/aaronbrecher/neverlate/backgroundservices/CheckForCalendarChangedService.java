@@ -81,34 +81,22 @@ public class CheckForCalendarChangedService extends JobService {
 
         //remove all old events and insert all events that do not need new fences
         if (geofenceList.size() > 0) {
-            //get the location saved to shared prefs, if it is a valid location
-            //add the info from distanceMatrix and save the new fences
-            Location location = getLocation();
-            if (location != null) {
-                setOrRemoveFences(geofenceList, location);
+            //if the location is not there or not valid try to get the location and
+            //do the same work as before
+            if (!SystemUtils.hasLocationPermissions(this)) return;
+
+            mLocationProviderClient.getLastLocation().addOnSuccessListener(mAppExecutors.diskIO(), newLocation -> {
+                //TODO possibly make a location request if location is older then 1 day due
+                //to the activity recoginition it should never be. but make a sanity check
+                setOrRemoveFences(geofenceList, newLocation);
                 //delete old events
                 mEventsRepository.deleteAllEvents();
                 //combine lists to make one upload
                 geofenceList.addAll(noGeofenceList);
                 mEventsRepository.insertAll(geofenceList);
                 jobFinished(mJobParameters, false);
-            } else {
-                //if the location is not there or not valid try to get the location and
-                //do the same work as before
-                if (!SystemUtils.hasLocationPermissions(this)) return;
-                mLocationProviderClient.getLastLocation().addOnSuccessListener(mAppExecutors.diskIO(), newLocation -> {
-                    if (newLocation != null) {
-                        mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(newLocation)).apply();
-                    }
-                    setOrRemoveFences(geofenceList, newLocation);
-                    //delete old events
-                    mEventsRepository.deleteAllEvents();
-                    //combine lists to make one upload
-                    geofenceList.addAll(noGeofenceList);
-                    mEventsRepository.insertAll(geofenceList);
-                    jobFinished(mJobParameters, false);
-                });
-            }
+            });
+
             // if there is no geofence list finish job
         } else if (noGeofenceList.size() > 0) {
             mEventsRepository.deleteAllEvents();
@@ -122,16 +110,6 @@ public class CheckForCalendarChangedService extends JobService {
             jobFinished(mJobParameters, false);
         }
 
-    }
-
-
-    private Location getLocation() {
-        Location location = null;
-        if (mSharedPreferences.contains(Constants.USER_LOCATION_PREFS_KEY)) {
-            String locationString = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");
-            location = LocationUtils.locationFromLatLngString(locationString);
-        }
-        return location;
     }
 
     /**

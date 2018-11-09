@@ -193,8 +193,8 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             //if permissions are granted for the first time, assume data was not loaded into room and
             //do so now...
             if (SystemUtils.verifyPermissions(grantResults)) {
+                //TODO this does not work need to check the current location here
                 mLocationProviderClient.getLastLocation().addOnSuccessListener(location -> {
-                    mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location)).commit();
                     mFirebaseJobDispatcher.mustSchedule(BackgroundUtils.oneTimeCalendarUpdate(mFirebaseJobDispatcher));
                     createRecurringCalendarCheck();
                     setUpActivityMonitoring();

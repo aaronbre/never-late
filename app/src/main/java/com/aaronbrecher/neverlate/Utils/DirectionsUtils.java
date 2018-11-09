@@ -43,11 +43,11 @@ public class DirectionsUtils {
         if (events.size() > MAX_QUERY_SIZE) {
             List<List<Event>> lists = splitList(events);
             for (List<Event> list : lists) {
-                wasAdded = wasAdded || executeMapboxQuery(list, location, 0);
+                wasAdded = wasAdded || executeMapboxQuery(list, location);
             }
             return wasAdded;
         } else {
-            return executeMapboxQuery(events, location, 0);
+            return executeMapboxQuery(events, location);
         }
     }
 
@@ -100,7 +100,7 @@ public class DirectionsUtils {
 //        return true;
 //    }
 
-    private static boolean executeMapboxQuery(List<Event> events, Location location, int numTries) {
+    private static boolean executeMapboxQuery(List<Event> events, Location location) {
         String destinations = getDestinationsLngLatAsString(events);
         String origin = location.getLongitude() + "," + location.getLatitude();
         AppApiService service = AppApiUtils.createService();
@@ -128,12 +128,6 @@ public class DirectionsUtils {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            if (e instanceof SocketTimeoutException && numTries < 1) {
-                //TODO if there is a recursion problem it is from here!!!!
-                return executeMapboxQuery(events, location, numTries + 1);
-            } else {
-                return false;
-            }
         }
         return true;
     }
@@ -141,7 +135,7 @@ public class DirectionsUtils {
     private static List<Event> removeEventsWithoutLocation(List<Event> eventList) {
         List<Event> filtered = new ArrayList<>();
         for (Event event : eventList) {
-            if (event.getLocation() != null && !event.getLocation().equals("")) {
+            if (event.getLocationLatlng() != null) {
                 filtered.add(event);
             }
         }
