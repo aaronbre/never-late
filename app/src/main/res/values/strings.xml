@@ -106,4 +106,7 @@
     <string name="needs_update_button">Go to Play Store</string>
     <string name="no_calendar_heading">No Compatible Calendar</string>
     <string name="no_calendar_text">There is no compatible calendar found on your device. Never Late uses the calendar to find events that need to be tracked, please install the calendar app.</string>
+    <string name="title_activity_onboarding">Onboarding</string>
+    <string name="action_settings">Settings</string>
+    <string name="section_format">Hello World from section: %1$d</string>
 </resources>

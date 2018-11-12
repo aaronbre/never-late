@@ -13,7 +13,6 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -43,7 +42,6 @@ import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.models.retrofitmodels.Version;
 import com.aaronbrecher.neverlate.network.AppApiService;
 import com.aaronbrecher.neverlate.network.AppApiUtils;
-import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
 import com.aaronbrecher.neverlate.ui.fragments.EventListFragment;
 import com.aaronbrecher.neverlate.ui.fragments.NoCalendarFragment;
 import com.aaronbrecher.neverlate.ui.fragments.NoEventsFragment;
@@ -121,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ((NeverLateApp) getApplication())

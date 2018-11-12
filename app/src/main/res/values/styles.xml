@@ -11,6 +11,10 @@
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 
+    <style name="AppTheme.Launcher">
+        <item name="android:windowBackground">@drawable/launch_screen</item>
+    </style>
+
     <style name="headline">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -28,19 +32,23 @@
         <item name="android:textStyle">bold</item>
         <item name="android:textAllCaps">true</item>
     </style>
-    
+
     <style name="eventDetailImage">
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="layout_constraintStart_toStartOf">parent</item>
-        <item name="android:layout_marginStart">@dimen/material_layout_keylines_screen_edge_margin</item>
+        <item name="android:layout_marginStart">@dimen/material_layout_keylines_screen_edge_margin
+        </item>
     </style>
 
     <style name="eventDetailDivder">
         <item name="android:layout_height">1dp</item>
         <item name="android:layout_width">0dp</item>
-        <item name="android:layout_marginStart">@dimen/material_layout_keylines_content_left_margin_from_screen_edge</item>
-        <item name="android:layout_marginEnd">@dimen/material_layout_keylines_screen_edge_margin</item>
+        <item name="android:layout_marginStart">
+            @dimen/material_layout_keylines_content_left_margin_from_screen_edge
+        </item>
+        <item name="android:layout_marginEnd">@dimen/material_layout_keylines_screen_edge_margin
+        </item>
         <item name="layout_constraintStart_toStartOf">parent</item>
         <item name="layout_constraintEnd_toEndOf">parent</item>
         <item name="android:background">@color/colorGray</item>
@@ -55,15 +63,20 @@
     <style name="eventDetailText">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginStart">@dimen/material_layout_keylines_content_left_margin_from_screen_edge</item>
-        <item name="android:layout_marginEnd">@dimen/material_layout_keylines_screen_edge_margin</item>
+        <item name="android:layout_marginStart">
+            @dimen/material_layout_keylines_content_left_margin_from_screen_edge
+        </item>
+        <item name="android:layout_marginEnd">@dimen/material_layout_keylines_screen_edge_margin
+        </item>
         <item name="layout_constrainedWidth">true</item>
         <item name="layout_constraintStart_toStartOf">parent</item>
     </style>
 
     <style name="eventDetailText.Land" parent="eventDetailText">
         <item name="layout_constraintStart_toStartOf">parent</item>
-        <item name="android:layout_marginEnd">@dimen/material_layout_vertical_spacing_between_content_areas</item>
+        <item name="android:layout_marginEnd">
+            @dimen/material_layout_vertical_spacing_between_content_areas
+        </item>
         <item name="layout_constraintEnd_toStartOf">@id/guideline</item>
     </style>
 
@@ -74,10 +87,20 @@
         <item name="android:background">#DD111111</item>
         <item name="android:gravity">center</item>
     </style>
+
     <style name="GenericProgressIndicator" parent="@android:style/Widget.ProgressBar.Large">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_gravity">center_horizontal|center_vertical</item>
     </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 </resources>
