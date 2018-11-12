@@ -34,6 +34,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -111,9 +112,11 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
         }
     }
 
+    @SuppressLint("MissingPermission")
     private void setUpMap(GoogleMap googleMap) {
         if (mEventMarker != null) mEventMarker.remove();
         if (mLocationMarker != null) mLocationMarker.remove();
+        googleMap.setMyLocationEnabled(true);
         if(!mEvent.getLocation().isEmpty()){
             LatLng latLng = mEvent.getLocationLatlng();
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
@@ -125,8 +128,6 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
             }
 
             if (mUserLocationLatLng != null) {
-                mLocationMarker = googleMap.addMarker(new MarkerOptions().position(mUserLocationLatLng)
-                        .title(getString(R.string.current_location_map_title)));
                 builder.include(mUserLocationLatLng);
             }
             googleMap.setOnMapLoadedCallback(() -> {

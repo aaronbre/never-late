@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/event_list_fab"
+        android:layout_width="@dimen/material_component_floating_action_button_size"
+        android:layout_height="@dimen/material_component_floating_action_button_size"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_margin="@dimen/material_component_floating_action_button_margin"
+        android:src="@drawable/ic_add_white_24dp" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent=".3" />
+
+    <ProgressBar
+        android:id="@+id/loading_icon"
+        style="@style/GenericProgressIndicator"
+        android:visibility="gone" />
+
+    <FrameLayout
+        android:id="@+id/main_activity_list_fragment_container"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:elevation="8dp"
+        app:layout_constraintEnd_toStartOf="@id/guideline"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <FrameLayout
+        android:id="@+id/main_activity_detail_fragment"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/guideline" />
+</android.support.constraint.ConstraintLayout>

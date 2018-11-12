@@ -69,14 +69,14 @@ public class EventDetailActivity extends AppCompatActivity{
         }
         FloatingActionButton fab = findViewById(R.id.detail_edit_fab);
         if(mEvent.getLocation().isEmpty()){
-            fab.setVisibility(View.VISIBLE);
+            fab.show();
         }
         setTitle(mEvent.getTitle());
         mViewModel.setEvent(mEvent);
         if(GeofenceUtils.eventIsPassedCurrentTime(mEvent.getEndTime())){
             //show message that event has already passed.
             PassedEventFragment passedEventFragment = new PassedEventFragment();
-            fab.setVisibility(View.GONE);
+            fab.hide();
             getSupportFragmentManager().beginTransaction().replace(R.id.event_detail_fragment_container, passedEventFragment).commit();
         }
         else {
@@ -108,7 +108,7 @@ public class EventDetailActivity extends AppCompatActivity{
         if(!eventsViewed.contains(eventId)){
            eventsViewed.add(eventId);
             mInterstitialAd = new InterstitialAd(this);
-            mInterstitialAd.setAdUnitId("ca-app-pub-6961678341915263/9541132389");
+            mInterstitialAd.setAdUnitId(getString(R.string.ad_mob_interstitial_ad_unit));
             mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
             mInterstitialAd.setAdListener(new AdListener(){
@@ -118,30 +118,6 @@ public class EventDetailActivity extends AppCompatActivity{
                 }
             });
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.detail_activity_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        switch (id){
-            case R.id.detail_activity_menu_settings:
-                Intent intent = new Intent(this, SettingsActivity.class);
-                startActivity(intent);
-                return true;
-            case R.id.detail_activity_menu_privacy:
-                intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Constants.PRIVACY_POLICY_URI);
-                startActivity(intent);
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
