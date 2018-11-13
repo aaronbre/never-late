@@ -95,12 +95,7 @@ public class DirectionsUtils {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            if (e instanceof SocketTimeoutException && numTries < 1) {
-                //TODO if there is a recursion problem it is from here!!!!
-                return executeMapboxQuery(events, location, numTries + 1);
-            } else {
-                return false;
-            }
+            return false;
         }
         return true;
     }

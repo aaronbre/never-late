@@ -55,6 +55,7 @@ public class DrivingLocationHelper {
     public void checkAllEvents(){
         mAppExecutors.diskIO().execute(()->{
             mEvents = mEventsRepository.queryAllCurrentEventsSync();
+            if(mEvents == null) return;
             for(Event event : mEvents){
                 int distanceToEvent = determineDistanceToEvent(event, mLocation);
                 //if the user is within 100 meters we can assume he made the event
