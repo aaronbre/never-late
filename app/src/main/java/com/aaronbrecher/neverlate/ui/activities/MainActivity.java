@@ -130,11 +130,19 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         ((NeverLateApp) getApplication())
                 .getAppComponent()
                 .inject(this);
-        setUpNotificationChannel();
-        checkIfUpdateNeeded();
-
+        FloatingActionButton fab = findViewById(R.id.event_list_fab);
+        mListContainer = findViewById(R.id.main_activity_fragment_container);
+        mLoadingIcon = findViewById(R.id.loading_icon);
+        mDrawerLayout = findViewById(R.id.drawer_layout);
         mViewModel = ViewModelProviders.of(this, mViewModelFactory)
                 .get(MainActivityViewModel.class);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionbar = getSupportActionBar();
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
+
         FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         mFirebaseJobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
         mFragmentManager = getSupportFragmentManager();
@@ -143,9 +151,6 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         checkIfUpdateNeeded();
         checkForCalendarApp(fab);
         setUpActivityMonitoring();
-        mFragmentManager = getSupportFragmentManager();
-        mListContainer = findViewById(R.id.main_activity_list_fragment_container);
-        mLoadingIcon = findViewById(R.id.loading_icon);
 
         if (savedInstanceState != null && savedInstanceState.containsKey(SHOW_ALL_EVENTS_KEY)) {
             shouldShowAllEvents = savedInstanceState.getBoolean(SHOW_ALL_EVENTS_KEY, false);
@@ -194,13 +199,13 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         EventListFragment listFragment = new EventListFragment();
         //TODO setting is tablet to false always for now
         if (getResources().getBoolean(R.bool.is_tablet)) {
-            EventDetailFragment eventDetailFragment = new EventDetailFragment();
-            mFragmentManager.beginTransaction().
-                    replace(R.id.main_activity_list_fragment_container,
-                            listFragment, Constants.EVENT_LIST_TAG).
-                    replace(R.id.main_activity_detail_fragment,
-                            eventDetailFragment, Constants.EVENT_DETAIL_FRAGMENT_TAG)
-                    .commit();
+//            EventDetailFragment eventDetailFragment = new EventDetailFragment();
+//            mFragmentManager.beginTransaction().
+//                    replace(R.id.main_activity_list_fragment_container,
+//                            listFragment, Constants.EVENT_LIST_TAG).
+//                    replace(R.id.main_activity_detail_fragment,
+//                            eventDetailFragment, Constants.EVENT_DETAIL_FRAGMENT_TAG)
+//                    .commit();
         } else {
             mFragmentManager.beginTransaction().replace(R.id.main_activity_fragment_container,
                     listFragment, Constants.EVENT_LIST_TAG)
@@ -363,7 +368,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         SettingsClient settingsClient = LocationServices.getSettingsClient(this);
         Task<LocationSettingsResponse> task = settingsClient.checkLocationSettings(builder.build());
         task.addOnSuccessListener(locationSettingsResponse -> {
-
+            
         }).addOnFailureListener(e -> {
             if (e instanceof ResolvableApiException) {
                 try {
@@ -406,7 +411,18 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         }
     }
 
-    private void showUpdateSnackbar(){
+    private void checkForCalendarApp(FloatingActionButton fab) {
+        Intent calIntent = new Intent(Intent.ACTION_INSERT);
+        calIntent.setData(CalendarContract.Events.CONTENT_URI);
+        if (getPackageManager().queryIntentActivities(calIntent, 0).isEmpty()) {
+            fab.hide();
+            Fragment noCalendarFrag = new NoCalendarFragment();
+            mFragmentManager.beginTransaction().replace(R.id.main_activity_fragment_container,
+                    noCalendarFrag).commit();
+        }
+    }
+
+    private void showUpdateSnackbar() {
         Snackbar.make(mListContainer, R.string.version_mismatch_snackbar, Snackbar.LENGTH_LONG)
                 .setAction(getString(R.string.version_mismatch_snackbar_update_button), v -> {
                     String appPackageName = getPackageName();
