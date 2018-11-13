@@ -11,6 +11,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -53,6 +54,8 @@ public class EventDetailActivity extends AppCompatActivity{
         ((NeverLateApp) getApplication())
                 .getAppComponent()
                 .inject(this);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         mViewModel = ViewModelProviders.of(this, mViewModelFactory).get(DetailActivityViewModel.class);
         mIntent = getIntent();
 
@@ -69,14 +72,14 @@ public class EventDetailActivity extends AppCompatActivity{
         }
         FloatingActionButton fab = findViewById(R.id.detail_edit_fab);
         if(mEvent.getLocation().isEmpty()){
-            fab.setVisibility(View.VISIBLE);
+            fab.show();
         }
         setTitle(mEvent.getTitle());
         mViewModel.setEvent(mEvent);
         if(GeofenceUtils.eventIsPassedCurrentTime(mEvent.getEndTime())){
             //show message that event has already passed.
             PassedEventFragment passedEventFragment = new PassedEventFragment();
-            fab.setVisibility(View.GONE);
+            fab.hide();
             getSupportFragmentManager().beginTransaction().replace(R.id.event_detail_fragment_container, passedEventFragment).commit();
         }
         else {
@@ -118,30 +121,6 @@ public class EventDetailActivity extends AppCompatActivity{
                 }
             });
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.detail_activity_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        switch (id){
-            case R.id.detail_activity_menu_settings:
-                Intent intent = new Intent(this, SettingsActivity.class);
-                startActivity(intent);
-                return true;
-            case R.id.detail_activity_menu_privacy:
-                intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Constants.PRIVACY_POLICY_URI);
-                startActivity(intent);
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
