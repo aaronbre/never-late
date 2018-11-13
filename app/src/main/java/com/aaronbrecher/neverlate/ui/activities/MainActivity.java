@@ -20,6 +20,7 @@ import android.provider.CalendarContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -39,15 +40,14 @@ import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.BackgroundUtils;
-import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.Utils.SystemUtils;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.models.retrofitmodels.Version;
 import com.aaronbrecher.neverlate.network.AppApiService;
 import com.aaronbrecher.neverlate.network.AppApiUtils;
-import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
 import com.aaronbrecher.neverlate.ui.fragments.EventListFragment;
+import com.aaronbrecher.neverlate.ui.fragments.NoCalendarFragment;
 import com.aaronbrecher.neverlate.ui.fragments.NoEventsFragment;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
@@ -56,7 +56,9 @@ import com.firebase.jobdispatcher.Job;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
@@ -91,6 +93,17 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         return finishedLoading;
     }
 
+    LocationCallback mLocationCallback = new LocationCallback() {
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            super.onLocationResult(locationResult);
+            Log.i(TAG, "onLocationResult: recieved");
+            mFirebaseJobDispatcher.mustSchedule(BackgroundUtils.oneTimeCalendarUpdate(mFirebaseJobDispatcher));
+            createRecurringCalendarCheck();
+            setUpActivityMonitoring();
+        }
+    };
+
     @Inject
     ViewModelProvider.Factory mViewModelFactory;
     @Inject
@@ -111,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ((NeverLateApp) getApplication())
@@ -119,21 +133,19 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         setUpNotificationChannel();
         checkIfUpdateNeeded();
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        ActionBar actionbar = getSupportActionBar();
-        actionbar.setDisplayHomeAsUpEnabled(true);
-        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
-
         mViewModel = ViewModelProviders.of(this, mViewModelFactory)
                 .get(MainActivityViewModel.class);
         FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         mFirebaseJobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
+        mFragmentManager = getSupportFragmentManager();
+
+        setUpNotificationChannel();
+        checkIfUpdateNeeded();
+        checkForCalendarApp(fab);
         setUpActivityMonitoring();
         mFragmentManager = getSupportFragmentManager();
-        mListContainer = findViewById(R.id.main_activity_fragment_container);
+        mListContainer = findViewById(R.id.main_activity_list_fragment_container);
         mLoadingIcon = findViewById(R.id.loading_icon);
-        mDrawerLayout = findViewById(R.id.drawer_layout);
 
         if (savedInstanceState != null && savedInstanceState.containsKey(SHOW_ALL_EVENTS_KEY)) {
             shouldShowAllEvents = savedInstanceState.getBoolean(SHOW_ALL_EVENTS_KEY, false);
@@ -142,8 +154,6 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             shouldShowAllEvents = false;
             mViewModel.setShouldShowAllEvents(false);
         }
-        FloatingActionButton fab = findViewById(R.id.event_list_fab);
-
         if (!SystemUtils.hasPermissions(this)) {
             SystemUtils.requestCalendarAndLocationPermissions(this, findViewById(R.id.main_container));
         } else {
@@ -182,10 +192,11 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
     private void loadListFragment() {
         EventListFragment listFragment = new EventListFragment();
+        //TODO setting is tablet to false always for now
         if (getResources().getBoolean(R.bool.is_tablet)) {
             EventDetailFragment eventDetailFragment = new EventDetailFragment();
             mFragmentManager.beginTransaction().
-                    replace(R.id.main_activity_fragment_container,
+                    replace(R.id.main_activity_list_fragment_container,
                             listFragment, Constants.EVENT_LIST_TAG).
                     replace(R.id.main_activity_detail_fragment,
                             eventDetailFragment, Constants.EVENT_DETAIL_FRAGMENT_TAG)
@@ -205,12 +216,14 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             //if permissions are granted for the first time, assume data was not loaded into room and
             //do so now...
             if (SystemUtils.verifyPermissions(grantResults)) {
-                mLocationProviderClient.getLastLocation().addOnSuccessListener(location -> {
-                    mSharedPreferences.edit().putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location)).commit();
-                    mFirebaseJobDispatcher.mustSchedule(BackgroundUtils.oneTimeCalendarUpdate(mFirebaseJobDispatcher));
-                    createRecurringCalendarCheck();
-                    setUpActivityMonitoring();
-                });
+                LocationRequest request = new LocationRequest()
+                        .setInterval(10)
+                        .setNumUpdates(1)
+                        .setExpirationDuration(15000)
+                        .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+                //TODO this does not work need to check the current location here
+                mLocationProviderClient.requestLocationUpdates(request, mLocationCallback, null);
             } else {
                 SystemUtils.requestCalendarAndLocationPermissions(this, findViewById(R.id.main_container));
                 // TODO change this to Show image showing error with button to rerequest permissions...
@@ -393,7 +406,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         }
     }
 
-    private void showUpdateSnackbar() {
+    private void showUpdateSnackbar(){
         Snackbar.make(mListContainer, R.string.version_mismatch_snackbar, Snackbar.LENGTH_LONG)
                 .setAction(getString(R.string.version_mismatch_snackbar_update_button), v -> {
                     String appPackageName = getPackageName();

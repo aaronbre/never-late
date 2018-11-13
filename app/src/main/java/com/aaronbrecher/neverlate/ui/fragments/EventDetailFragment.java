@@ -1,5 +1,6 @@
 package com.aaronbrecher.neverlate.ui.fragments;
 
+import android.annotation.SuppressLint;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
@@ -20,17 +21,20 @@ import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
 import com.aaronbrecher.neverlate.Utils.GeofenceUtils;
 import com.aaronbrecher.neverlate.Utils.LocationUtils;
+import com.aaronbrecher.neverlate.Utils.SystemUtils;
 import com.aaronbrecher.neverlate.databinding.EventDetailFragmentBinding;
 import com.aaronbrecher.neverlate.dependencyinjection.AppComponent;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.viewmodels.BaseViewModel;
 import com.aaronbrecher.neverlate.viewmodels.DetailActivityViewModel;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -46,13 +50,16 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
     ViewModelProvider.Factory mViewModelFactory;
     @Inject
     SharedPreferences mSharedPreferences;
+
+    @Inject
+    FusedLocationProviderClient mFusedLocationProviderClient;
     private BaseViewModel mViewModel;
     private EventDetailFragmentBinding mBinding;
     private SupportMapFragment mMapFragment;
     private Event mEvent;
     private Marker mEventMarker;
     private Marker mLocationMarker;
-    private LatLng mUserLocationLatLng;
+    private LatLng mUserLocationLatLng = null;
 
     private Observer<Event> mEventObserver = new Observer<Event>() {
         @Override
@@ -89,26 +96,27 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
         mMapFragment = (SupportMapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.event_detail_map);
         mViewModel.getEvent().observe(this, mEventObserver);
-
-        if(mSharedPreferences.contains(Constants.USER_LOCATION_PREFS_KEY)){
-            String latLngString = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");
-            if(!latLngString.isEmpty()){
-                Location location = LocationUtils.locationFromLatLngString(latLngString);
-                if(location != null)
-                    mUserLocationLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-            }
-        }
         return mBinding.getRoot();
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onMapReady(final GoogleMap googleMap) {
-        setUpMap(googleMap);
+        if(SystemUtils.hasLocationPermissions(getActivity())){
+            mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(location -> {
+                if (location != null) mUserLocationLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+                setUpMap(googleMap);
+            });
+        } else {
+            setUpMap(googleMap);
+        }
     }
 
+    @SuppressLint("MissingPermission")
     private void setUpMap(GoogleMap googleMap) {
         if (mEventMarker != null) mEventMarker.remove();
         if (mLocationMarker != null) mLocationMarker.remove();
+        googleMap.setMyLocationEnabled(true);
         if(!mEvent.getLocation().isEmpty()){
             LatLng latLng = mEvent.getLocationLatlng();
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
@@ -120,8 +128,6 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
             }
 
             if (mUserLocationLatLng != null) {
-                mLocationMarker = googleMap.addMarker(new MarkerOptions().position(mUserLocationLatLng)
-                        .title(getString(R.string.current_location_map_title)));
                 builder.include(mUserLocationLatLng);
             }
             googleMap.setOnMapLoadedCallback(() -> {

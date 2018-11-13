@@ -76,11 +76,6 @@ public class AwarenessFencesCreator{
                 .roomModule(new RoomModule())
                 .build()
                 .inject(this);
-
-        if (mSharedPreferences.contains(Constants.USER_LOCATION_PREFS_KEY)) {
-            String loc = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");
-            mLocation = LocationUtils.locationFromLatLngString(loc);
-        }
         mFenceClient = Awareness.getFenceClient(mApp);
         mEventList = eventList;
         mAlertTime = getAlertTime();
@@ -107,20 +102,18 @@ public class AwarenessFencesCreator{
     @SuppressLint("MissingPermission")
     @WorkerThread
     public void buildAndSaveFences() {
-        if (mLocation == null) {
             mLocationProviderClient.getLastLocation().addOnSuccessListener(mAppExecutors.diskIO(), location -> {
                 if (location == null) return;
-                //if location was not saved need to update distance and time to event
-                mSharedPreferences.edit()
-                        .putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location))
-                        .apply();
-                DirectionsUtils.addDistanceInfoToEventList(mEventList, location);
+                mLocation = location;
+                //TODO this is probably not needed, as every call to this already added distance info
+                // If the location is older then a day we can assume that distance info needs to be changed
+                //this code should not be needed due to the activity recognition
+                if(location.getTime() < System.currentTimeMillis() - Constants.ONE_DAY){
+                    DirectionsUtils.addDistanceInfoToEventList(mEventList, location);
+                }
                 mEventsRepository.insertAll(mEventList);
                 updateFences();
             });
-        } else {
-            updateFences();
-        }
     }
 
     private List<AwarenessFenceWithName> createFences() {
@@ -158,6 +151,7 @@ public class AwarenessFencesCreator{
         if (ActivityCompat.checkSelfPermission(mApp, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return null;
         }
+        if(triggerTime < System.currentTimeMillis()) return null;
         AwarenessFence locationFence = LocationFence.in(mLocation.getLatitude(),
                 mLocation.getLongitude(),
                 Constants.LOCATION_FENCE_RADIUS,
@@ -181,7 +175,7 @@ public class AwarenessFencesCreator{
 
         long startTime = Converters.unixFromDateTime(event.getStartTime());
         long endTime = Converters.unixFromDateTime(event.getEndTime());
-
+        if(startTime < System.currentTimeMillis() || endTime < System.currentTimeMillis()) return null;
         @SuppressLint("MissingPermission") AwarenessFence locationFence = LocationFence.in(latLng.latitude,
                 latLng.longitude,
                 Constants.ARRIVAL_FENCE_RADIUS,

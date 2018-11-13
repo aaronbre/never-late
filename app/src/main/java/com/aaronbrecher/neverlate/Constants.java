@@ -22,6 +22,8 @@ public class Constants {
     public static final long TIME_TEN_MINUTES = TIME_FIVE_MINUTES * 2;
     public static final long TIME_FIFTEEN_MINUTES = TIME_FIVE_MINUTES * 3;
     public static final long ONE_HOUR = TIME_TEN_MINUTES * 6;
+    public static final long ONE_DAY = ONE_HOUR * 24;
+    public static final long FIVE_HOUR = ONE_HOUR * 5;
     public static final long LOCATION_FENCE_RADIUS = 1000;
     public static final long LOCATION_FENCE_DWELL_TIME = 10 * 1000;
     public static final long ARRIVAL_FENCE_RADIUS = 200;
@@ -58,7 +60,6 @@ public class Constants {
     public static final String ALERT_TIME_MEDIUM = "10";
     public static final String ALERT_TIME_LONG = "15";
     public static final String USER_LOCATION_PREFS_KEY = "users-location";
-
 
 
 

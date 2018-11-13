@@ -82,7 +82,8 @@ public class ActivityTransitionService extends JobIntentService {
         LocationRequest request = new LocationRequest();
         request.setInterval(Constants.TIME_FIVE_MINUTES)
                 .setFastestInterval(Constants.TIME_FIVE_MINUTES)
-                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
+        .setSmallestDisplacement(Constants.LOCATION_FENCE_RADIUS/2);
         return request;
     }
 
@@ -116,10 +117,6 @@ public class ActivityTransitionService extends JobIntentService {
             AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(eventList).build();
             creator.setEventList(eventList);
             creator.buildAndSaveFences();
-            //save the new location to shared prefs
-            mSharedPreferences.edit()
-                    .putString(Constants.USER_LOCATION_PREFS_KEY, LocationUtils.locationToLatLngString(location))
-                    .apply();
         });
     }
 }

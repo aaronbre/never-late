@@ -1,5 +1,6 @@
 package com.aaronbrecher.neverlate.backgroundservices.broadcastreceivers;
 
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -14,10 +15,12 @@ import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.GeofenceUtils;
 import com.aaronbrecher.neverlate.Utils.LocationUtils;
+import com.aaronbrecher.neverlate.Utils.SystemUtils;
 import com.aaronbrecher.neverlate.database.Converters;
 import com.aaronbrecher.neverlate.database.EventsRepository;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.ui.activities.EventDetailActivity;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
@@ -33,6 +36,8 @@ public class DrivingLocationHelper {
     AppExecutors mAppExecutors;
     @Inject
     SharedPreferences mSharedPreferences;
+    @Inject
+    FusedLocationProviderClient mFusedLocationProviderClient;
 
     private Location mLocation;
     private Context mContext;
@@ -52,10 +57,11 @@ public class DrivingLocationHelper {
         }
     }
 
+    @SuppressLint("MissingPermission")
     public void checkAllEvents(){
-        mAppExecutors.diskIO().execute(()->{
-            mEvents = mEventsRepository.queryAllCurrentEventsSync();
-            if(mEvents == null) return;
+        if(!SystemUtils.hasLocationPermissions(mContext)) return;
+        mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(mAppExecutors.diskIO(), location -> {
+            mLocation = location;
             for(Event event : mEvents){
                 int distanceToEvent = determineDistanceToEvent(event, mLocation);
                 //if the user is within 100 meters we can assume he made the event
@@ -100,14 +106,6 @@ public class DrivingLocationHelper {
      * @return
      */
     private int determineDistanceToEvent(Event event, Location location) {
-        // first check if user is still within the previous fence. If so no need to do extra work
-        String latLngString = mSharedPreferences.getString(Constants.USER_LOCATION_PREFS_KEY, "");
-        if (!latLngString.equals("")) {
-            Location previousLocation = LocationUtils.locationFromLatLngString(latLngString);
-            if (previousLocation != null && previousLocation.distanceTo(location) < Constants.LOCATION_FENCE_RADIUS / 2)
-                return -1;
-        }
-
         //sanity check in case the event does not have a latlng, in that case will try to
         //get it here if not don't track
         LatLng eventLatlng = event.getLocationLatlng() != null ? event.getLocationLatlng()

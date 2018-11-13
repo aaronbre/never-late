@@ -111,7 +111,7 @@ public class EventDetailActivity extends AppCompatActivity{
         if(!eventsViewed.contains(eventId)){
            eventsViewed.add(eventId);
             mInterstitialAd = new InterstitialAd(this);
-            mInterstitialAd.setAdUnitId("ca-app-pub-6961678341915263/9541132389");
+            mInterstitialAd.setAdUnitId(getString(R.string.ad_mob_interstitial_ad_unit));
             mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
             mInterstitialAd.setAdListener(new AdListener(){
