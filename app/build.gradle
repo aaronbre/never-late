@@ -23,8 +23,8 @@ android {
         applicationId "com.aaronbrecher.neverlate"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 22
-        versionName "1.22"
+        versionCode 23
+        versionName "1.23"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "GOOGLE_API_KEY", GOOGLE_API_KEY)
@@ -122,6 +122,7 @@ dependencies {
 
     //onboarding
     implementation 'com.ramotion.paperonboarding:paper-onboarding:1.1.1'
+    implementation 'android.arch.navigation:navigation-fragment:1.0.0-alpha07'
 }
 
 apply plugin: 'com.google.gms.google-services'

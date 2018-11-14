@@ -61,6 +61,8 @@ public class DrivingLocationHelper {
     public void checkAllEvents(){
         if(!SystemUtils.hasLocationPermissions(mContext)) return;
         mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(mAppExecutors.diskIO(), location -> {
+            mEvents = mEventsRepository.queryAllCurrentEventsSync();
+            if(mEvents == null) return;
             mLocation = location;
             for(Event event : mEvents){
                 int distanceToEvent = determineDistanceToEvent(event, mLocation);
