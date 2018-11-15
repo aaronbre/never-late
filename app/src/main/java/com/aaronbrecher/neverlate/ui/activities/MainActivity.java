@@ -46,6 +46,7 @@ import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.models.retrofitmodels.Version;
 import com.aaronbrecher.neverlate.network.AppApiService;
 import com.aaronbrecher.neverlate.network.AppApiUtils;
+import com.aaronbrecher.neverlate.ui.controllers.MainActivityController;
 import com.aaronbrecher.neverlate.ui.fragments.EventListFragment;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
@@ -96,9 +97,9 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         public void onLocationResult(LocationResult locationResult) {
             super.onLocationResult(locationResult);
             Log.i(TAG, "onLocationResult: recieved");
-            mFirebaseJobDispatcher.mustSchedule(BackgroundUtils.oneTimeCalendarUpdate(mFirebaseJobDispatcher));
-            createRecurringCalendarCheck();
-            setUpActivityMonitoring();
+            mController.doCalendarUpdate();
+            mController.createRecurringCalendarCheck();
+            mController.setUpActivityMonitoring();
         }
     };
 
@@ -112,12 +113,11 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     AppExecutors mAppExecutors;
 
     MainActivityViewModel mViewModel;
-    private FragmentManager mFragmentManager;
     private FrameLayout mHostFragment;
     private ProgressBar mLoadingIcon;
     private DrawerLayout mDrawerLayout;
     private NavController mNavController;
-    private FirebaseJobDispatcher mFirebaseJobDispatcher;
+    private MainActivityController mController;
     private boolean shouldShowAllEvents = false;
 
     @Override
@@ -135,6 +135,8 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         mViewModel = ViewModelProviders.of(this, mViewModelFactory)
                 .get(MainActivityViewModel.class);
         mNavController = Navigation.findNavController(mHostFragment);
+        mController = new MainActivityController(this);
+
         setUpDrawerDestinations();
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -143,13 +145,10 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
 
         FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
-        mFirebaseJobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
-        mFragmentManager = getSupportFragmentManager();
 
-        setUpNotificationChannel();
-        checkIfUpdateNeeded();
+        mController.setUpNotificationChannel();
+        mController.checkIfUpdateNeeded();
         checkForCalendarApp(fab);
-        setUpActivityMonitoring();
 
         if (savedInstanceState != null && savedInstanceState.containsKey(SHOW_ALL_EVENTS_KEY)) {
             shouldShowAllEvents = savedInstanceState.getBoolean(SHOW_ALL_EVENTS_KEY, false);
@@ -161,9 +160,10 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         if (!SystemUtils.hasPermissions(this)) {
             SystemUtils.requestCalendarAndLocationPermissions(this, findViewById(R.id.main_container));
         } else {
-            createRecurringCalendarCheck();
+            mController.createRecurringCalendarCheck();
+            mController.setUpActivityMonitoring();
         }
-        checkLocationSettings();
+        mController.checkLocationSettings();
 
         mViewModel.getAllCurrentEvents().observe(this, events -> {
             hideLoadingIcon();
@@ -173,6 +173,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                 mNavController.navigate(R.id.eventListFragment);
             }
         });
+
         fab.setOnClickListener(v -> {
             Intent calIntent = new Intent(Intent.ACTION_INSERT);
             calIntent.setData(CalendarContract.Events.CONTENT_URI);
@@ -189,14 +190,6 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         mNavController.navigate(R.id.noEventsFragment);
     }
 
-    private void loadListFragment() {
-        EventListFragment listFragment = new EventListFragment();
-        mFragmentManager.beginTransaction().replace(R.id.main_activity_fragment_container,
-                listFragment, Constants.EVENT_LIST_TAG)
-                .commit();
-    }
-
-
     @SuppressLint({"MissingPermission", "ApplySharedPref"})
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -209,8 +202,6 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                         .setNumUpdates(1)
                         .setExpirationDuration(15000)
                         .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-                //TODO this does not work need to check the current location here
                 mLocationProviderClient.requestLocationUpdates(request, mLocationCallback, null);
             } else {
                 SystemUtils.requestCalendarAndLocationPermissions(this, findViewById(R.id.main_container));
@@ -218,29 +209,6 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             }
         } else
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-
-    private void setUpActivityMonitoring() {
-        mFirebaseJobDispatcher.mustSchedule(BackgroundUtils.setUpActivityRecognitionJob(mFirebaseJobDispatcher));
-    }
-
-    private void setUpNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence channelName = getString(R.string.notification_channel_name);
-            String description = getString(R.string.notification_channel_description);
-            int importance = NotificationManager.IMPORTANCE_HIGH;
-            NotificationChannel notificationChannel = new NotificationChannel(Constants.NOTIFICATION_CHANNEL_ID, channelName, importance);
-            notificationChannel.setDescription(description);
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(notificationChannel);
-        }
-    }
-
-    //This will only set the alarm if it wasn't already set there will be a
-    //seperate broadcast reciever to schedule alarm after boot...
-    private void createRecurringCalendarCheck() {
-        Job recurringCheckJob = BackgroundUtils.setUpPeriodicCalendarChecks(mFirebaseJobDispatcher);
-        mFirebaseJobDispatcher.mustSchedule(recurringCheckJob);
     }
 
     @Override
@@ -252,11 +220,11 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         SearchView searchView = (SearchView) menu.findItem(R.id.main_activity_menu_search).getActionView();
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setMaxWidth(Integer.MAX_VALUE);
-
+        FragmentManager fragmentManager = getSupportFragmentManager();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                EventListFragment fragment = (EventListFragment) mFragmentManager.findFragmentByTag(Constants.EVENT_LIST_TAG);
+                EventListFragment fragment = (EventListFragment) fragmentManager.findFragmentByTag(Constants.EVENT_LIST_TAG);
                 if (fragment == null) return false;
                 fragment.filter(query);
                 return false;
@@ -264,7 +232,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                EventListFragment fragment = (EventListFragment) mFragmentManager.findFragmentByTag(Constants.EVENT_LIST_TAG);
+                EventListFragment fragment = (EventListFragment) fragmentManager.findFragmentByTag(Constants.EVENT_LIST_TAG);
                 if (fragment == null) return false;
                 fragment.filter(newText);
                 return false;
@@ -273,11 +241,11 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         return true;
     }
 
-    private void setUpDrawerDestinations(){
+    private void setUpDrawerDestinations() {
         NavigationView navView = findViewById(R.id.nav_view);
         navView.setNavigationItemSelectedListener(menuItem -> {
             int id = menuItem.getItemId();
-            switch (id){
+            switch (id) {
                 case R.id.drawer_home:
                     mNavController.navigate(R.id.eventListFragment);
                     toggleOptionsMenu(true);
@@ -298,8 +266,8 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         });
     }
 
-    private void toggleOptionsMenu(boolean shouldShow){
-        if(mMenu != null){
+    private void toggleOptionsMenu(boolean shouldShow) {
+        if (mMenu != null) {
             mMenu.setGroupVisible(R.id.main_activity_menu, shouldShow);
         }
     }
@@ -314,7 +282,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             case R.id.main_activity_menu_sync:
                 if (SystemUtils.isConnected(this)) {
                     showLoadingIcon();
-                    mFirebaseJobDispatcher.mustSchedule(BackgroundUtils.oneTimeCalendarUpdate(mFirebaseJobDispatcher));
+                    mController.doCalendarUpdate();
                 } else {
                     showNoConnectionSnackbar();
                 }
@@ -347,13 +315,10 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
     @Override
     public void onListItemClick(Event event) {
-        if (getResources().getBoolean(R.bool.is_tablet)) {
-            mViewModel.setEvent(event);
-        } else {
-            Intent intent = new Intent(this, EventDetailActivity.class);
-            intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, Event.convertEventToJson(event));
-            startActivity(intent);
-        }
+        Intent intent = new Intent(this, EventDetailActivity.class);
+        intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, Event.convertEventToJson(event));
+        startActivity(intent);
+
     }
 
     private void hideLoadingIcon() {
@@ -366,57 +331,6 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         mLoadingIcon.setVisibility(View.VISIBLE);
     }
 
-    private void checkLocationSettings() {
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(new LocationRequest().setExpirationDuration(Constants.TIME_TEN_MINUTES)
-                        .setFastestInterval(Constants.TIME_TEN_MINUTES)
-                        .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY));
-        SettingsClient settingsClient = LocationServices.getSettingsClient(this);
-        Task<LocationSettingsResponse> task = settingsClient.checkLocationSettings(builder.build());
-        task.addOnSuccessListener(locationSettingsResponse -> {
-
-        }).addOnFailureListener(e -> {
-            if (e instanceof ResolvableApiException) {
-                try {
-                    ResolvableApiException resolvable = (ResolvableApiException) e;
-                    resolvable.startResolutionForResult(MainActivity.this, 1);
-                } catch (IntentSender.SendIntentException sendEx) {
-                    Log.e(TAG, "onFailure: " + sendEx);
-                }
-            }
-        });
-    }
-
-    private void checkIfUpdateNeeded() {
-        try {
-            int currentVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
-            AppApiService service = AppApiUtils.createService();
-            service.queryVersionNumber(currentVersion).enqueue(new Callback<Version>() {
-                @Override
-                public void onResponse(Call<Version> call, Response<Version> response) {
-                    Version v = response.body();
-                    if (v == null) return;
-                    int latestVersion = v.getVersion();
-                    if (currentVersion < latestVersion) {
-                        showUpdateSnackbar();
-                    } else if (getString(R.string.version_invalid).equals(v.getMessage()) || v.getNeedsUpdate()) {
-                        mFirebaseJobDispatcher.cancel(Constants.FIREBASE_JOB_SERVICE_CHECK_CALENDAR_CHANGED);
-                        mFirebaseJobDispatcher.cancel(Constants.FIREBASE_JOB_SERVICE_SETUP_ACTIVITY_RECOG);
-                        Intent intent = new Intent(MainActivity.this, NeedUpdateActivity.class);
-                        startActivity(intent);
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<Version> call, Throwable t) {
-                    t.printStackTrace();
-                }
-            });
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
     private void checkForCalendarApp(FloatingActionButton fab) {
         Intent calIntent = new Intent(Intent.ACTION_INSERT);
         calIntent.setData(CalendarContract.Events.CONTENT_URI);
@@ -426,7 +340,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         }
     }
 
-    private void showUpdateSnackbar() {
+    public void showUpdateSnackbar() {
         Snackbar.make(mHostFragment, R.string.version_mismatch_snackbar, Snackbar.LENGTH_LONG)
                 .setAction(getString(R.string.version_mismatch_snackbar_update_button), v -> {
                     String appPackageName = getPackageName();
