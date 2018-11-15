@@ -103,7 +103,7 @@ public class DirectionsUtils {
     private static List<Event> removeEventsWithoutLocation(List<Event> eventList) {
         List<Event> filtered = new ArrayList<>();
         for (Event event : eventList) {
-            if (event.getLocation() != null && !event.getLocation().equals("")) {
+            if (event.getLocationLatlng() != null) {
                 filtered.add(event);
             }
         }
@@ -168,53 +168,4 @@ public class DirectionsUtils {
         return DateUtils.getRelativeTimeSpanString(leaveTime, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS).toString();
 
     }
-
-//        private static boolean executeQuery(List<Event> events, Location location, int numTries) {
-//        String destinations = getDestinationsAsString(events);
-//        String origin = location.getLatitude() + "," + location.getLongitude();
-//        for mapbox need to use this option
-//        String origin  location.getLongitude() + "," + location.getLatitude();
-//        AppApiService service = AppApiUtils.createService();
-//        Call<DistanceMatrix> request = service.queryDistanceMatrix(origin, destinations);
-//        try {
-//            Response<DistanceMatrix> response = request.execute();
-//            DistanceMatrix distanceMatrix = response.body();
-//            if (distanceMatrix == null || distanceMatrix.getRows() == null || distanceMatrix.getRows().get(0) == null)
-//                return false;
-//            List<Element> elements = distanceMatrix.getRows().get(0).getElements();
-//            if (elements.size() < 1) return false;
-//            for (int i = 0, j = elements.size(); i < j; i++) {
-//                Element element = elements.get(i);
-//                if (element.getStatus().equals(NOT_FOUND)) continue;
-//                Event event = events.get(i);
-//                event.setDistance(element.getDistance().getValue());
-//                //if there is a relative traffic time rather use that
-//                long timeTo = element.getDurationInTraffic() != null ? element.getDurationInTraffic().getValue() : element.getDuration().getValue();
-//                event.setDrivingTime(timeTo);
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            if (e instanceof SocketTimeoutException && numTries < 2) {
-//                //TODO if there is a recursion problem it is from here!!!!
-//                return executeQuery(events, location, numTries + 1);
-//            } else {
-//                return false;
-//            }
-//        }
-//        return true;
-//    }
-
-    //    /**
-//     * Converts a list of events to a comma seperated list of the destinations
-//     * this is needed in order to query the custom API using retrofit
-//     */
-//    private static String getDestinationsAsString(List<Event> events) {
-//        ArrayList<String> dest = new ArrayList<>();
-//        for (Event event : events) {
-//            String location = event.getLocation();
-//            location = location.replaceAll(",", " ");
-//            dest.add(location);
-//        }
-//        return android.text.TextUtils.join(",", dest);
-//    }
 }
