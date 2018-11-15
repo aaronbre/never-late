@@ -73,13 +73,14 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:16.0.0'
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
     implementation 'com.google.android.gms:play-services-awareness:16.0.0'
-    implementation 'com.google.android.gms:play-services-ads:17.0.0'
+    implementation 'com.google.android.gms:play-services-ads:17.1.0'
 
     //Room live Data and view model
     def room_version = "1.1.1"
     def lifecycle_version = "1.1.1"
     implementation "android.arch.lifecycle:extensions:$lifecycle_version"
     implementation "android.arch.persistence.room:runtime:$room_version"
+    kapt "android.arch.persistence.room:compiler:1.1.1"
     annotationProcessor "android.arch.persistence.room:compiler:$room_version"
 
     //Retrofit
@@ -125,5 +126,9 @@ dependencies {
     implementation 'android.arch.navigation:navigation-fragment:1.0.0-alpha07'
 }
 
-apply plugin: 'com.google.gms.google-services'
+configurations.all(){
+    resolutionStrategy.force 'com.google.android.gms:play-services-ads:17.1.0'
+}
+
 apply plugin: 'com.google.firebase.firebase-perf'
+apply plugin: 'com.google.gms.google-services'

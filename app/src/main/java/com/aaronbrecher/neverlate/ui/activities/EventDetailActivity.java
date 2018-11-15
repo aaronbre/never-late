@@ -56,6 +56,8 @@ public class EventDetailActivity extends AppCompatActivity{
                 .inject(this);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         mViewModel = ViewModelProviders.of(this, mViewModelFactory).get(DetailActivityViewModel.class);
         mIntent = getIntent();
 

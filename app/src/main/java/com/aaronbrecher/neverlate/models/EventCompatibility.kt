@@ -1,5 +1,6 @@
 package com.aaronbrecher.neverlate.models
 
+
 class EventCompatibility {
     var startEvent: Event? = null
     var endEvent: Event? = null

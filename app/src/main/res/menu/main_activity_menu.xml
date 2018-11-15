@@ -1,31 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/main_activity_menu_search"
-        android:title="@string/search"
-        app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_search_black_24dp"
-        app:actionViewClass="android.support.v7.widget.SearchView" />
-    <item
-        android:id="@+id/main_activity_menu_sync"
-        android:title="@string/menu_item_refresh"
-        android:icon="@drawable/ic_refresh_white_24dp"
-        app:showAsAction="ifRoom"/>
-    <item
-        android:id="@+id/main_activity_menu_show_all"
-        android:title="@string/menu_item_show_all"
-        app:showAsAction="never"/>
-    <item
-        android:id="@+id/main_activity_menu_show_location_only"
-        android:title="@string/menu_item_show_loc_only"
-        app:showAsAction="never"/>
-    <item
-        android:id="@+id/main_activity_menu_settings"
-        android:title="@string/menu_settings"
-        app:showAsAction="never"/>
-    <item
-        android:id="@+id/main_activity_menu_privacy"
-        android:title="@string/menu_privacy_policy"
-        app:showAsAction="never"/>
+    <group android:id="@+id/main_activity_menu">
+        <item
+            android:id="@+id/main_activity_menu_search"
+            android:title="@string/search"
+            app:showAsAction="ifRoom"
+            android:icon="@drawable/ic_search_black_24dp"
+            app:actionViewClass="android.support.v7.widget.SearchView" />
+        <item
+            android:id="@+id/main_activity_menu_sync"
+            android:title="@string/menu_item_refresh"
+            android:icon="@drawable/ic_refresh_white_24dp"
+            app:showAsAction="ifRoom"/>
+        <item
+            android:id="@+id/main_activity_menu_show_all"
+            android:title="@string/menu_item_show_all"
+            app:showAsAction="never"/>
+        <item
+            android:id="@+id/main_activity_menu_show_location_only"
+            android:title="@string/menu_item_show_loc_only"
+            app:showAsAction="never"/>
+    </group>
 </menu>

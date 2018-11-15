@@ -9,12 +9,16 @@
         <item name="android:windowContentTransitions">true</item>
         <item name="android:windowEnterTransition">@transition/slide</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentStatus">false</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 
     <style name="AppTheme.Launcher">
         <item name="android:windowBackground">@drawable/launch_screen</item>
+    </style>
+
+    <style name="AppTheme.Drawer">
+        <item name="android:windowTranslucentStatus">true</item>
     </style>
 
     <style name="headline">
