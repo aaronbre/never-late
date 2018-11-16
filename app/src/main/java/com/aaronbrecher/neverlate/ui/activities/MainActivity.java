@@ -144,7 +144,6 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
 
-        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         mController.setUpNotificationChannel();
         mController.checkIfUpdateNeeded();

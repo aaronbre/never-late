@@ -3,6 +3,7 @@ package com.aaronbrecher.neverlate.backgroundservices;
 import android.location.Location;
 
 import com.aaronbrecher.neverlate.AppExecutors;
+import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.database.Converters;
 import com.aaronbrecher.neverlate.database.EventsRepository;
@@ -64,8 +65,8 @@ public class AnaylizeEventsJobService extends JobService {
 
     private EventCompatibility getCompatibility(Event event1, Event event2) {
         EventCompatibility eventCompatibility = new EventCompatibility();
-        eventCompatibility.setStartEvent(event1);
-        eventCompatibility.setEndEvent(event2);
+        eventCompatibility.setStartEvent(event1.getId());
+        eventCompatibility.setEndEvent(event2.getId());
 
         LatLng originLatLng = event1.getLocationLatlng();
         LatLng destinationLatLng = event2.getLocationLatlng();
@@ -75,7 +76,7 @@ public class AnaylizeEventsJobService extends JobService {
         double duration = getMapboxDrivingDuration(origin, destination) * 1000;
         if(duration < 0) eventCompatibility.setWithinDrivingDistance(EventCompatibility.Compatible.UNKNOWN);
         else {
-            determineComparabilityAndTiming(eventCompatibility, duration);
+            determineComparabilityAndTiming(event1, event2, eventCompatibility, duration);
         }
         return eventCompatibility;
     }
@@ -88,26 +89,25 @@ public class AnaylizeEventsJobService extends JobService {
         try{
             MapboxDirectionMatrix matrix = call.execute().body();
             if(matrix == null || matrix.getDurations().size() < 1) return -1;
-            double duration = matrix.getDurations().get(0).get(0);
-            return duration;
+            return matrix.getDurations().get(0).get(0);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return -1;
     }
 
-    private void determineComparabilityAndTiming(EventCompatibility eventCompatibility, double duration) {
-        long firstEventStart = Converters.unixFromDateTime(eventCompatibility.getStartEvent().getStartTime());
-        long secondEventStart = Converters.unixFromDateTime(eventCompatibility.getEndEvent().getStartTime());
+    private void determineComparabilityAndTiming(Event event1, Event event2, EventCompatibility eventCompatibility, double duration) {
+        long firstEventStart = Converters.unixFromDateTime(event1.getStartTime());
+        long secondEventStart = Converters.unixFromDateTime(event2.getStartTime());
         long arrivalTimeToSecondEvent = firstEventStart + (long)duration;
         if(arrivalTimeToSecondEvent > secondEventStart){
             eventCompatibility.setWithinDrivingDistance(EventCompatibility.Compatible.FALSE);
             eventCompatibility.setCanReturnHome(false);
             eventCompatibility.setCanReturnToWork(false);
-            return;
+            eventCompatibility.setMaxTimeAtStartEvent(Constants.ROOM_INVALID_LONG_VALUE);
         }else {
             eventCompatibility.setWithinDrivingDistance(EventCompatibility.Compatible.TRUE);
-            long maximumTimeAtEvent = (secondEventStart - arrivalTimeToSecondEvent)/1000;
+            long maximumTimeAtEvent = secondEventStart - arrivalTimeToSecondEvent;
             eventCompatibility.setMaxTimeAtStartEvent((int) maximumTimeAtEvent);
         }
 

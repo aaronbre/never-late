@@ -138,12 +138,4 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mUserLocationLatLng,10));
         }
     }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (mEvent != null) {
-            mViewModel.getGeofenceForKey(mEvent.getId()).removeObservers(this);
-        }
-    }
 }

@@ -6,6 +6,7 @@ import com.aaronbrecher.neverlate.backgroundservices.DrivingForegroundService;
 import com.aaronbrecher.neverlate.backgroundservices.broadcastreceivers.DrivingLocationHelper;
 import com.aaronbrecher.neverlate.backgroundservices.jobintentservices.ActivityTransitionService;
 import com.aaronbrecher.neverlate.backgroundservices.jobintentservices.AwarenessFenceTransitionService;
+import com.aaronbrecher.neverlate.geofencing.AwarenessFencesCreator;
 import com.aaronbrecher.neverlate.ui.activities.EventDetailActivity;
 import com.aaronbrecher.neverlate.ui.activities.MainActivity;
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
@@ -30,4 +31,5 @@ public interface AppComponent {
     void inject(CheckForCalendarChangedService service);
     void inject(AnaylizeEventsJobService service);
     void inject(DrivingLocationHelper helper);
+    void inject(AwarenessFencesCreator fencesCreator);
 }

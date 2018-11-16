@@ -6,7 +6,6 @@ import android.arch.lifecycle.MutableLiveData;
 import android.os.AsyncTask;
 
 import com.aaronbrecher.neverlate.database.EventsRepository;
-import com.aaronbrecher.neverlate.database.GeofencesRepository;
 import com.aaronbrecher.neverlate.models.Event;
 
 import java.util.ArrayList;
@@ -26,8 +25,8 @@ public class MainActivityViewModel extends BaseViewModel {
     private MutableLiveData<List<Event>> mEventsWithLocation;
 
     @Inject
-    public MainActivityViewModel(EventsRepository eventsRepository, GeofencesRepository geofencesRepository, Application application) {
-        super(eventsRepository, geofencesRepository, application);
+    public MainActivityViewModel(EventsRepository eventsRepository, Application application) {
+        super(eventsRepository, application);
     }
 
     //insert the events async using a simple async task

@@ -112,4 +112,6 @@
     <string name="drawer_analyze_title">Analyze Schedule</string>
     <string name="drawer_subscription">Subscription Status</string>
     <string name="drawer_home">Home</string>
+    <string name="maximum_time_by_event">Maximum time by event</string>
+    <string name="analyze_leave_time_label">Time to leave to next event</string>
 </resources>

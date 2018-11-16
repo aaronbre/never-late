@@ -27,6 +27,7 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -39,6 +40,7 @@ public class MainActivityController {
     public MainActivityController(MainActivity activity) {
         mActivity = activity;
         mFirebaseJobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(mActivity));
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(mActivity);
     }
 
     public void setUpActivityMonitoring() {

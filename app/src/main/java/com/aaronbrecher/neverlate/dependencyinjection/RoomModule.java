@@ -3,13 +3,12 @@ package com.aaronbrecher.neverlate.dependencyinjection;
 import android.app.Application;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.persistence.room.Room;
-import android.arch.persistence.room.RoomDatabase;
 
+import com.aaronbrecher.neverlate.database.EventCompatabilityDao;
+import com.aaronbrecher.neverlate.database.EventCompatabilityRepository;
 import com.aaronbrecher.neverlate.database.EventsDao;
 import com.aaronbrecher.neverlate.database.EventsDatabase;
 import com.aaronbrecher.neverlate.database.EventsRepository;
-import com.aaronbrecher.neverlate.database.GeofencesDao;
-import com.aaronbrecher.neverlate.database.GeofencesRepository;
 import com.aaronbrecher.neverlate.viewmodels.CustomViewModelFactory;
 
 import javax.inject.Singleton;
@@ -50,19 +49,19 @@ public class RoomModule {
 
     @Provides
     @Singleton
-    GeofencesDao provideGeofenceDao(EventsDatabase database) {
-        return database.geofencesDao();
+    EventCompatabilityDao provideCompatablityDao(EventsDatabase database) {
+        return database.compatabilityDao();
     }
 
     @Provides
     @Singleton
-    GeofencesRepository provideGeofenceRepository(GeofencesDao geofencesDao) {
-        return new GeofencesRepository(geofencesDao);
+    EventCompatabilityRepository provideCompatablityRepository(EventCompatabilityDao compatabilityDao) {
+        return new EventCompatabilityRepository(compatabilityDao);
     }
 
     @Provides
     @Singleton
-    ViewModelProvider.Factory provideViewModelFactory(EventsRepository eventsRepository, GeofencesRepository geofencesRepository, Application application) {
-        return new CustomViewModelFactory(eventsRepository, geofencesRepository, application);
+    ViewModelProvider.Factory provideViewModelFactory(EventsRepository eventsRepository, EventCompatabilityRepository compatabilityRepository, Application application) {
+        return new CustomViewModelFactory(eventsRepository, compatabilityRepository, application);
     }
 }
