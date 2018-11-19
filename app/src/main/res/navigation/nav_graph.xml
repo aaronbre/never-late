@@ -23,4 +23,9 @@
         android:id="@+id/settingsFragment"
         android:name="com.aaronbrecher.neverlate.ui.fragments.SettingsFragment"
         android:label="SettingsFragment" />
+    <fragment
+        android:id="@+id/compatabilityFragment"
+        android:name="com.aaronbrecher.neverlate.ui.fragments.CompatibilityFragment"
+        android:label="compatability_fragment"
+        tools:layout="@layout/compatability_fragment" />
 </navigation>

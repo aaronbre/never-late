@@ -23,6 +23,8 @@ import com.aaronbrecher.neverlate.database.EventsRepository;
 import com.aaronbrecher.neverlate.geofencing.AwarenessFencesCreator;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.ui.activities.MainActivity;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -103,6 +105,9 @@ public class CheckForCalendarChangedService extends JobService {
                 //combine lists to make one upload
                 geofenceList.addAll(noGeofenceList);
                 mEventsRepository.insertAll(geofenceList);
+                //if there was a change refresh the analytics
+                FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
+                dispatcher.mustSchedule(BackgroundUtils.anaylzeSchedule(dispatcher));
                 jobFinished(mJobParameters, false);
             } else if(noGeofenceList.size() > 0){
                 mEventsRepository.deleteAllEvents();

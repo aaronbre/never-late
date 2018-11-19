@@ -22,4 +22,11 @@
             android:title="@string/menu_item_show_loc_only"
             app:showAsAction="never"/>
     </group>
+    <group android:id="@+id/analyze_menu">
+        <item
+            android:id="@+id/analyze_refresh"
+            android:title="@string/menu_item_refresh"
+            app:showAsAction="ifRoom"
+            android:icon="@drawable/ic_refresh_white_24dp"/>
+    </group>
 </menu>

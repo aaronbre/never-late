@@ -72,6 +72,7 @@
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service android:name=".backgroundservices.DrivingForegroundService" />
         <service android:name=".backgroundservices.CheckForCalendarChangedService" />
+        <service android:name=".backgroundservices.AnaylizeEventsJobService" />
 
         <receiver
             android:name=".backgroundservices.broadcastreceivers.BootCompletedBroadcast"

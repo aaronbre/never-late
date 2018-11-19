@@ -75,4 +75,5 @@ public class Constants {
     public static final String ACTION_CANCEL_DRIVING_SERVICE = "com.aaronbrecher.neverlate.action.CANCEL_DRIVING_SERVICE";
 
     public static final Uri PRIVACY_POLICY_URI = Uri.parse("https://never-late-api.herokuapp.com/privacy-policy");
+    public static final String FIREBASE_JOB_SERVICE_ANALYZE_SCHEDULE_TAG = "analyze-schedule";
 }

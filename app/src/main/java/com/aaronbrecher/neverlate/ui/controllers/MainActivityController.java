@@ -58,6 +58,10 @@ public class MainActivityController {
         mFirebaseJobDispatcher.mustSchedule(BackgroundUtils.oneTimeCalendarUpdate(mFirebaseJobDispatcher));
     }
 
+    public void analyzeEvents(){
+        mFirebaseJobDispatcher.mustSchedule(BackgroundUtils.anaylzeSchedule(mFirebaseJobDispatcher));
+    }
+
     public void checkLocationSettings(){
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(new LocationRequest().setExpirationDuration(Constants.TIME_TEN_MINUTES)

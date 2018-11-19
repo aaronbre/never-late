@@ -4,8 +4,8 @@ import android.app.Application;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.persistence.room.Room;
 
-import com.aaronbrecher.neverlate.database.EventCompatabilityDao;
-import com.aaronbrecher.neverlate.database.EventCompatabilityRepository;
+import com.aaronbrecher.neverlate.database.EventCompatibilityDao;
+import com.aaronbrecher.neverlate.database.EventCompatibilityRepository;
 import com.aaronbrecher.neverlate.database.EventsDao;
 import com.aaronbrecher.neverlate.database.EventsDatabase;
 import com.aaronbrecher.neverlate.database.EventsRepository;
@@ -49,19 +49,19 @@ public class RoomModule {
 
     @Provides
     @Singleton
-    EventCompatabilityDao provideCompatablityDao(EventsDatabase database) {
+    EventCompatibilityDao provideCompatablityDao(EventsDatabase database) {
         return database.compatabilityDao();
     }
 
     @Provides
     @Singleton
-    EventCompatabilityRepository provideCompatablityRepository(EventCompatabilityDao compatabilityDao) {
-        return new EventCompatabilityRepository(compatabilityDao);
+    EventCompatibilityRepository provideCompatablityRepository(EventCompatibilityDao compatabilityDao) {
+        return new EventCompatibilityRepository(compatabilityDao);
     }
 
     @Provides
     @Singleton
-    ViewModelProvider.Factory provideViewModelFactory(EventsRepository eventsRepository, EventCompatabilityRepository compatabilityRepository, Application application) {
+    ViewModelProvider.Factory provideViewModelFactory(EventsRepository eventsRepository, EventCompatibilityRepository compatabilityRepository, Application application) {
         return new CustomViewModelFactory(eventsRepository, compatabilityRepository, application);
     }
 }

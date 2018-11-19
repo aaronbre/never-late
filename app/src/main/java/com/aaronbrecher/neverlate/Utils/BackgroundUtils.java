@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 
 import com.aaronbrecher.neverlate.Constants;
+import com.aaronbrecher.neverlate.backgroundservices.AnaylizeEventsJobService;
 import com.aaronbrecher.neverlate.backgroundservices.CheckForCalendarChangedService;
 import com.aaronbrecher.neverlate.backgroundservices.SetupActivityRecognitionJobService;
 import com.aaronbrecher.neverlate.interfaces.LocationCallback;
@@ -62,6 +63,16 @@ public class BackgroundUtils {
                 .setTrigger(Trigger.NOW)
                 .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR)
                 .setConstraints(Constraint.ON_ANY_NETWORK)
+                .build();
+    }
+
+    public static Job anaylzeSchedule(FirebaseJobDispatcher dispatcher){
+        return dispatcher.newJobBuilder()
+                .setService(AnaylizeEventsJobService.class)
+                .setTag(Constants.FIREBASE_JOB_SERVICE_ANALYZE_SCHEDULE_TAG)
+                .setRecurring(false)
+                .setTrigger(Trigger.NOW)
+                .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR)
                 .build();
     }
 

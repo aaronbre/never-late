@@ -115,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     MainActivityViewModel mViewModel;
     private FrameLayout mHostFragment;
     private ProgressBar mLoadingIcon;
+    private FloatingActionButton mFab;
     private DrawerLayout mDrawerLayout;
     private NavController mNavController;
     private MainActivityController mController;
@@ -128,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         ((NeverLateApp) getApplication())
                 .getAppComponent()
                 .inject(this);
-        FloatingActionButton fab = findViewById(R.id.event_list_fab);
+        mFab = findViewById(R.id.event_list_fab);
         mHostFragment = findViewById(R.id.nav_host_fragment);
         mLoadingIcon = findViewById(R.id.loading_icon);
         mDrawerLayout = findViewById(R.id.drawer_layout);
@@ -147,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
         mController.setUpNotificationChannel();
         mController.checkIfUpdateNeeded();
-        checkForCalendarApp(fab);
+        checkForCalendarApp();
 
         if (savedInstanceState != null && savedInstanceState.containsKey(SHOW_ALL_EVENTS_KEY)) {
             shouldShowAllEvents = savedInstanceState.getBoolean(SHOW_ALL_EVENTS_KEY, false);
@@ -173,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             }
         });
 
-        fab.setOnClickListener(v -> {
+        mFab.setOnClickListener(v -> {
             Intent calIntent = new Intent(Intent.ACTION_INSERT);
             calIntent.setData(CalendarContract.Events.CONTENT_URI);
             startActivity(calIntent);
@@ -248,11 +249,19 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                 case R.id.drawer_home:
                     mNavController.navigate(R.id.eventListFragment);
                     toggleOptionsMenu(true);
+                    mFab.show();
                     mDrawerLayout.closeDrawers();
                     return true;
                 case R.id.drawer_settings:
                     mNavController.navigate(R.id.settingsFragment);
                     toggleOptionsMenu(false);
+                    mDrawerLayout.closeDrawers();
+                    mFab.hide();
+                    return true;
+                case R.id.drawer_analyze:
+                    mNavController.navigate(R.id.compatabilityFragment);
+                    showAnalyzeMenu();
+                    mFab.hide();
                     mDrawerLayout.closeDrawers();
                     return true;
                 case R.id.drawer_privacy:
@@ -268,6 +277,14 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     private void toggleOptionsMenu(boolean shouldShow) {
         if (mMenu != null) {
             mMenu.setGroupVisible(R.id.main_activity_menu, shouldShow);
+            mMenu.setGroupVisible(R.id.analyze_menu, false);
+        }
+    }
+
+    private void showAnalyzeMenu(){
+        if(mMenu != null){
+            toggleOptionsMenu(false);
+            mMenu.setGroupVisible(R.id.analyze_menu, true);
         }
     }
 
@@ -294,6 +311,12 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                 shouldShowAllEvents = false;
                 mViewModel.setShouldShowAllEvents(false);
                 return true;
+            case R.id.analyze_refresh:
+                if(SystemUtils.isConnected(this)){
+                    showLoadingIcon();
+                    mController.analyzeEvents();
+                    return true;
+                }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -330,11 +353,11 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         mLoadingIcon.setVisibility(View.VISIBLE);
     }
 
-    private void checkForCalendarApp(FloatingActionButton fab) {
+    private void checkForCalendarApp() {
         Intent calIntent = new Intent(Intent.ACTION_INSERT);
         calIntent.setData(CalendarContract.Events.CONTENT_URI);
         if (getPackageManager().queryIntentActivities(calIntent, 0).isEmpty()) {
-            fab.hide();
+            mFab.hide();
             mNavController.navigate(R.id.noCalendarFragment);
         }
     }

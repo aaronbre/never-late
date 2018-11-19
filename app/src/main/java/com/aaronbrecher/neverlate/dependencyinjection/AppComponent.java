@@ -9,6 +9,7 @@ import com.aaronbrecher.neverlate.backgroundservices.jobintentservices.Awareness
 import com.aaronbrecher.neverlate.geofencing.AwarenessFencesCreator;
 import com.aaronbrecher.neverlate.ui.activities.EventDetailActivity;
 import com.aaronbrecher.neverlate.ui.activities.MainActivity;
+import com.aaronbrecher.neverlate.ui.fragments.CompatibilityFragment;
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
 import com.aaronbrecher.neverlate.ui.fragments.EventListFragment;
 import com.aaronbrecher.neverlate.ui.widget.NeverLateWidget;
@@ -32,4 +33,5 @@ public interface AppComponent {
     void inject(AnaylizeEventsJobService service);
     void inject(DrivingLocationHelper helper);
     void inject(AwarenessFencesCreator fencesCreator);
+    void inject(CompatibilityFragment fragment);
 }

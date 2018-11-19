@@ -6,7 +6,6 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -15,12 +14,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
 import com.aaronbrecher.neverlate.Utils.GeofenceUtils;
-import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.Utils.SystemUtils;
 import com.aaronbrecher.neverlate.databinding.EventDetailFragmentBinding;
 import com.aaronbrecher.neverlate.dependencyinjection.AppComponent;
@@ -34,7 +31,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -58,7 +54,6 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
     private SupportMapFragment mMapFragment;
     private Event mEvent;
     private Marker mEventMarker;
-    private Marker mLocationMarker;
     private LatLng mUserLocationLatLng = null;
 
     private Observer<Event> mEventObserver = new Observer<Event>() {
@@ -115,7 +110,6 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
     @SuppressLint("MissingPermission")
     private void setUpMap(GoogleMap googleMap) {
         if (mEventMarker != null) mEventMarker.remove();
-        if (mLocationMarker != null) mLocationMarker.remove();
         googleMap.setMyLocationEnabled(true);
         if(!mEvent.getLocation().isEmpty()){
             LatLng latLng = mEvent.getLocationLatlng();

@@ -5,7 +5,7 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
-import com.aaronbrecher.neverlate.database.EventCompatabilityRepository;
+import com.aaronbrecher.neverlate.database.EventCompatibilityRepository;
 import com.aaronbrecher.neverlate.database.EventsRepository;
 
 import javax.inject.Inject;
@@ -18,7 +18,7 @@ public class CustomViewModelFactory implements ViewModelProvider.Factory {
     private Application mApplication;
 
     @Inject
-    public CustomViewModelFactory(EventsRepository eventsRepository, EventCompatabilityRepository compatabilityRepository, Application application) {
+    public CustomViewModelFactory(EventsRepository eventsRepository, EventCompatibilityRepository compatabilityRepository, Application application) {
         this.mEventsRepository = eventsRepository;
         this.mApplication = application;
     }
