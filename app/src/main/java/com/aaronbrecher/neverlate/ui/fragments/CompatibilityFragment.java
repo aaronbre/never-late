@@ -16,7 +16,6 @@ import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.adapters.CompatibilityListAdapter;
 import com.aaronbrecher.neverlate.database.EventCompatibilityRepository;
 import com.aaronbrecher.neverlate.database.EventsRepository;
-import com.aaronbrecher.neverlate.ui.activities.MainActivity;
 
 import javax.inject.Inject;
 
@@ -37,7 +36,7 @@ public class CompatibilityFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.compatability_fragment, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_compatability, container, false);
         mRecyclerView = rootView.findViewById(R.id.compatibility_list_rv);
         mAdapter = new CompatibilityListAdapter(null, null, getActivity());
         mRecyclerView.setAdapter(mAdapter);

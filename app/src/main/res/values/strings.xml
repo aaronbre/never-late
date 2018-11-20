@@ -114,4 +114,15 @@
     <string name="drawer_home">Home</string>
     <string name="maximum_time_by_event">Maximum time by event</string>
     <string name="analyze_leave_time_label">Time to leave to next event</string>
+    <string name="subscription_heading">Subscription</string>
+    <string name="subscription_main_body">In order to provide our users with the most relevant travel
+        time data we use the Mapbox API to get driving time data. In order to uset this data a subscription is necessary as the costs
+        can be quite high. if you would rather use more basic data you can, and no subscription is needed.
+        Subscription will also unlock additional features as well.</string>
+    <string name="subscription_initial_launch_notice">Subscription features are enabled for all users during initial launch</string>
+    <string name="subscription_bullet_list"><b><big>Premium Features</big></b>
+        \n <li>Ads are removed</li>
+        \n <li>Allow different modes of transport, Walking, Cycling, Public Transportation</li>
+        \n <li>Use of schedule analyzer to analyze your day to make sure all events are within drivable distance to each other</li></string>
+    <string name="subscription_button">Subscribe</string>
 </resources>

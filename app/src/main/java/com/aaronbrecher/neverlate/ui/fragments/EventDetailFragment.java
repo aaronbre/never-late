@@ -19,7 +19,7 @@ import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
 import com.aaronbrecher.neverlate.Utils.GeofenceUtils;
 import com.aaronbrecher.neverlate.Utils.SystemUtils;
-import com.aaronbrecher.neverlate.databinding.EventDetailFragmentBinding;
+import com.aaronbrecher.neverlate.databinding.FragmentEventDetailBinding;
 import com.aaronbrecher.neverlate.dependencyinjection.AppComponent;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.viewmodels.BaseViewModel;
@@ -50,7 +50,7 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
     @Inject
     FusedLocationProviderClient mFusedLocationProviderClient;
     private BaseViewModel mViewModel;
-    private EventDetailFragmentBinding mBinding;
+    private FragmentEventDetailBinding mBinding;
     private SupportMapFragment mMapFragment;
     private Event mEvent;
     private Marker mEventMarker;
@@ -85,7 +85,7 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mBinding = EventDetailFragmentBinding.inflate(inflater, container, false);
+        mBinding = FragmentEventDetailBinding.inflate(inflater, container, false);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM d  h:mm a");
         mBinding.setFormatter(formatter);
         mMapFragment = (SupportMapFragment) getChildFragmentManager()

@@ -18,7 +18,7 @@ import android.view.ViewGroup;
 
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.adapters.EventListAdapter;
-import com.aaronbrecher.neverlate.databinding.MainActivityListFragmentBinding;
+import com.aaronbrecher.neverlate.databinding.FragmentMainActivityListBinding;
 import com.aaronbrecher.neverlate.dependencyinjection.AppComponent;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
 import com.aaronbrecher.neverlate.models.Event;
@@ -44,7 +44,7 @@ public class EventListFragment extends Fragment {
 
     private MainActivityViewModel mViewModel;
     private EventListAdapter mListAdapter;
-    private MainActivityListFragmentBinding mBinding;
+    private FragmentMainActivityListBinding mBinding;
     private MainActivity mActivity;
 
     @SuppressLint("MissingPermission")
@@ -68,7 +68,7 @@ public class EventListFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mBinding = MainActivityListFragmentBinding.inflate(inflater, container,false);
+        mBinding = FragmentMainActivityListBinding.inflate(inflater, container,false);
         mBinding.eventListRv.setAdapter(mListAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(mActivity);
         mBinding.eventListRv.setLayoutManager(layoutManager);

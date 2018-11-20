@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/subscription_heading"
+        style="@style/TextAppearance.MaterialComponents.Headline3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/material_layout_keylines_screen_edge_margin"
+        android:layout_marginTop="@dimen/small_margin"
+        android:text="@string/subscription_heading"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/subscription_main_body"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/small_margin"
+        android:layout_marginEnd="@dimen/material_layout_keylines_screen_edge_margin"
+        android:text="@string/subscription_main_body"
+        android:lineSpacingExtra="2dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/subscription_heading"
+        app:layout_constraintTop_toBottomOf="@id/subscription_heading" />
+
+    <TextView
+        android:id="@+id/subscription_bullet_list"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:lineSpacingExtra="4dp"
+        app:layout_constraintStart_toStartOf="@id/subscription_heading"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/subscription_main_body"
+        android:layout_marginEnd="@dimen/material_layout_keylines_screen_edge_margin"
+        android:layout_marginTop="@dimen/vertical_content_spacing_x_2" />
+
+    <Button
+        android:id="@+id/subscribe_button"
+        android:layout_width="180dp"
+        android:layout_height="45dp"
+        android:layout_marginBottom="@dimen/material_layout_vertical_spacing_between_content_areas"
+        android:background="#FFE288"
+        android:enabled="false"
+        android:text="@string/subscription_button"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toTopOf="@id/subscription_notice"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/subscription_notice"
+        style="@style/smallSubHeading"
+        android:layout_width="0dp"
+        android:layout_marginStart="@dimen/material_layout_keylines_screen_edge_margin"
+        android:layout_marginEnd="@dimen/material_layout_keylines_screen_edge_margin"
+        android:layout_marginBottom="@dimen/vertical_content_spacing_x_2"
+        android:text="@string/subscription_initial_launch_notice"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+</android.support.constraint.ConstraintLayout>

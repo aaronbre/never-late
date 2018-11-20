@@ -9,7 +9,7 @@
         android:id="@+id/noCalendarFragment"
         android:name="com.aaronbrecher.neverlate.ui.fragments.NoCalendarFragment"
         android:label="no_calendar_fragment"
-        tools:layout="@layout/no_calendar_fragment" />
+        tools:layout="@layout/fragment_no_calendar" />
     <fragment
         android:id="@+id/eventListFragment"
         android:name="com.aaronbrecher.neverlate.ui.fragments.EventListFragment"
@@ -18,7 +18,7 @@
         android:id="@+id/noEventsFragment"
         android:name="com.aaronbrecher.neverlate.ui.fragments.NoEventsFragment"
         android:label="no_events_fragment"
-        tools:layout="@layout/no_events_fragment" />
+        tools:layout="@layout/fragment_no_events" />
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.aaronbrecher.neverlate.ui.fragments.SettingsFragment"
@@ -27,5 +27,10 @@
         android:id="@+id/compatabilityFragment"
         android:name="com.aaronbrecher.neverlate.ui.fragments.CompatibilityFragment"
         android:label="compatability_fragment"
-        tools:layout="@layout/compatability_fragment" />
+        tools:layout="@layout/fragment_compatability" />
+    <fragment
+        android:id="@+id/subscriptionFragment"
+        android:name="com.aaronbrecher.neverlate.ui.fragments.SubscriptionFragment"
+        android:label="fragment_subscription"
+        tools:layout="@layout/fragment_subscription" />
 </navigation>

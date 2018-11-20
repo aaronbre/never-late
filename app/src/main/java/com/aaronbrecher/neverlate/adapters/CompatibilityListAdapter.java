@@ -3,14 +3,11 @@ package com.aaronbrecher.neverlate.adapters;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.text.format.DateUtils;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
-import com.aaronbrecher.neverlate.database.Converters;
 import com.aaronbrecher.neverlate.databinding.CompatibilityLastListItemBinding;
 import com.aaronbrecher.neverlate.databinding.CompatibilityListItemBinding;
 import com.aaronbrecher.neverlate.models.Event;
@@ -18,10 +15,9 @@ import com.aaronbrecher.neverlate.models.EventCompatibility;
 
 import org.threeten.bp.format.DateTimeFormatter;
 
-import java.text.DateFormat;
 import java.util.List;
 
-import static com.aaronbrecher.neverlate.models.EventCompatibility.*;
+import static com.aaronbrecher.neverlate.models.EventCompatibility.Compatible;
 
 public class CompatibilityListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int REGULAR_VIEW_HOLDER = 1;
@@ -58,9 +54,13 @@ public class CompatibilityListAdapter extends RecyclerView.Adapter<RecyclerView.
             CompatibilityViewHolder holder = (CompatibilityViewHolder) viewHolder;
             holder.binding.setEvent(event);
             holder.binding.setFormatter(formatter);
-            CharSequence time = DateUtils.formatSameDayTime(Converters.unixFromDateTime(event.getStartTime()) + compatibility.getMaxTimeAtStartEvent(),
-                    System.currentTimeMillis(), DateFormat.DEFAULT, DateFormat.DEFAULT);
-            holder.binding.listItemLeaveTime.setText(time);
+            String leaveTimeString;
+            if(compatibility.getWithinDrivingDistance() != Compatible.TRUE){
+                leaveTimeString = "Not applicable";
+            } else {
+                leaveTimeString = compatibility.getMaxTimeAtStartEvent()/60000 + " Minutes";
+            }
+            holder.binding.listItemLeaveTime.setText(leaveTimeString);
             holder.binding.listItemMaxTime.setText(DirectionsUtils.readableTravelTime(compatibility.getMaxTimeAtStartEvent()/1000));
             if(compatibility.getWithinDrivingDistance() == Compatible.TRUE){
                 holder.binding.listItemConnectionImage.setImageDrawable(mContext.getDrawable(R.drawable.is_compatible));
@@ -73,9 +73,13 @@ public class CompatibilityListAdapter extends RecyclerView.Adapter<RecyclerView.
             holder.binding.setEvent2(getEventForId(compatibility.getEndEvent()));
             holder.binding.setEvent(event);
             holder.binding.setFormatter(formatter);
-            CharSequence time = DateUtils.formatSameDayTime(Converters.unixFromDateTime(event.getStartTime()) + compatibility.getMaxTimeAtStartEvent(),
-                    System.currentTimeMillis(), DateFormat.DEFAULT, DateFormat.DEFAULT);
-            holder.binding.listItemLeaveTime.setText(time);
+            String leaveTimeString;
+            if(compatibility.getWithinDrivingDistance() != Compatible.TRUE){
+                leaveTimeString = "Not applicable";
+            } else {
+                leaveTimeString = compatibility.getMaxTimeAtStartEvent()/60000 + " Minutes";
+            }
+            holder.binding.listItemLeaveTime.setText(leaveTimeString);
             holder.binding.listItemMaxTime.setText(DirectionsUtils.readableTravelTime(compatibility.getMaxTimeAtStartEvent()/1000));
             if(compatibility.getWithinDrivingDistance() == Compatible.TRUE){
                 holder.binding.listItemConnectionImage.setImageDrawable(mContext.getDrawable(R.drawable.is_compatible));

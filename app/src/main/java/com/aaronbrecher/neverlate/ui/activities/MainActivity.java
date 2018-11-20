@@ -249,19 +249,21 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                 case R.id.drawer_home:
                     mNavController.navigate(R.id.eventListFragment);
                     toggleOptionsMenu(true);
-                    mFab.show();
                     mDrawerLayout.closeDrawers();
                     return true;
                 case R.id.drawer_settings:
                     mNavController.navigate(R.id.settingsFragment);
                     toggleOptionsMenu(false);
                     mDrawerLayout.closeDrawers();
-                    mFab.hide();
                     return true;
                 case R.id.drawer_analyze:
                     mNavController.navigate(R.id.compatabilityFragment);
                     showAnalyzeMenu();
-                    mFab.hide();
+                    mDrawerLayout.closeDrawers();
+                    return true;
+                case R.id.drawer_subscription:
+                    mNavController.navigate(R.id.subscriptionFragment);
+                    toggleOptionsMenu(false);
                     mDrawerLayout.closeDrawers();
                     return true;
                 case R.id.drawer_privacy:
@@ -278,6 +280,8 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         if (mMenu != null) {
             mMenu.setGroupVisible(R.id.main_activity_menu, shouldShow);
             mMenu.setGroupVisible(R.id.analyze_menu, false);
+            if(shouldShow) mFab.show();
+            else mFab.hide();
         }
     }
 
