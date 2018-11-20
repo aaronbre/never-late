@@ -17,8 +17,10 @@ public class SubscriptionFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_subscription,container, false);
-        TextView bulletList = rootView.findViewById(R.id.subscription_bullet_list);
-        bulletList.setText(R.string.subscription_bullet_list);
+        TextView premiumList = rootView.findViewById(R.id.subscription_bullet_list);
+        TextView standardList = rootView.findViewById(R.id.standard_bullet_list);
+        premiumList.setText(R.string.subscription_bullet_list);
+        standardList.setText(R.string.standard_bullet_list);
         return rootView;
     }
 }

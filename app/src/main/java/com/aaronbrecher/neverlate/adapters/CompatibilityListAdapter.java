@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
+import com.aaronbrecher.neverlate.database.Converters;
 import com.aaronbrecher.neverlate.databinding.CompatibilityLastListItemBinding;
 import com.aaronbrecher.neverlate.databinding.CompatibilityListItemBinding;
 import com.aaronbrecher.neverlate.models.Event;
@@ -15,6 +16,8 @@ import com.aaronbrecher.neverlate.models.EventCompatibility;
 
 import org.threeten.bp.format.DateTimeFormatter;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import static com.aaronbrecher.neverlate.models.EventCompatibility.Compatible;
@@ -58,7 +61,8 @@ public class CompatibilityListAdapter extends RecyclerView.Adapter<RecyclerView.
             if(compatibility.getWithinDrivingDistance() != Compatible.TRUE){
                 leaveTimeString = "Not applicable";
             } else {
-                leaveTimeString = compatibility.getMaxTimeAtStartEvent()/60000 + " Minutes";
+                SimpleDateFormat format = new SimpleDateFormat("h:mm a");
+                leaveTimeString  = format.format(new Date(Converters.unixFromDateTime(event.getStartTime()) + compatibility.getMaxTimeAtStartEvent()));
             }
             holder.binding.listItemLeaveTime.setText(leaveTimeString);
             holder.binding.listItemMaxTime.setText(DirectionsUtils.readableTravelTime(compatibility.getMaxTimeAtStartEvent()/1000));
@@ -77,7 +81,8 @@ public class CompatibilityListAdapter extends RecyclerView.Adapter<RecyclerView.
             if(compatibility.getWithinDrivingDistance() != Compatible.TRUE){
                 leaveTimeString = "Not applicable";
             } else {
-                leaveTimeString = compatibility.getMaxTimeAtStartEvent()/60000 + " Minutes";
+                SimpleDateFormat format = new SimpleDateFormat("h:mm a");
+                leaveTimeString  = format.format(new Date(Converters.unixFromDateTime(event.getStartTime()) + compatibility.getMaxTimeAtStartEvent()));
             }
             holder.binding.listItemLeaveTime.setText(leaveTimeString);
             holder.binding.listItemMaxTime.setText(DirectionsUtils.readableTravelTime(compatibility.getMaxTimeAtStartEvent()/1000));

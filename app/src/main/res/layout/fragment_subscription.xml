@@ -28,13 +28,24 @@
         app:layout_constraintTop_toBottomOf="@id/subscription_heading" />
 
     <TextView
-        android:id="@+id/subscription_bullet_list"
+        android:id="@+id/standard_bullet_list"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:lineSpacingExtra="4dp"
         app:layout_constraintStart_toStartOf="@id/subscription_heading"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/subscription_main_body"
+        android:layout_marginEnd="@dimen/material_layout_keylines_screen_edge_margin"
+        android:layout_marginTop="@dimen/vertical_content_spacing_x_2" />
+
+    <TextView
+        android:id="@+id/subscription_bullet_list"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:lineSpacingExtra="4dp"
+        app:layout_constraintStart_toStartOf="@id/subscription_heading"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/standard_bullet_list"
         android:layout_marginEnd="@dimen/material_layout_keylines_screen_edge_margin"
         android:layout_marginTop="@dimen/vertical_content_spacing_x_2" />
 

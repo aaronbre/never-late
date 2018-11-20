@@ -122,7 +122,13 @@
     <string name="subscription_initial_launch_notice">Subscription features are enabled for all users during initial launch</string>
     <string name="subscription_bullet_list"><b><big>Premium Features</big></b>
         \n <li>Ads are removed</li>
+        \n <li>Uses real time data to determine travel distance and duration</li>
         \n <li>Allow different modes of transport, Walking, Cycling, Public Transportation</li>
         \n <li>Use of schedule analyzer to analyze your day to make sure all events are within drivable distance to each other</li></string>
+    <string name="standard_bullet_list"><b><big>Standard Features</big></b>
+        \n <li>Ads are enabled</li>
+        \n <li>Uses "as the crow flies" distance and default speed</li>
+        \n <li>Travel options are limited to driving only</li></string>
     <string name="subscription_button">Subscribe</string>
+    <string name="list_item_start_label">Start time</string>
 </resources>
