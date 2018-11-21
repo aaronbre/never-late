@@ -55,11 +55,9 @@ public class Event implements Parcelable {
     private boolean watching;
 
     @ColumnInfo
-    @Nullable
     private Long distance;
 
     @ColumnInfo
-    @Nullable
     private Long drivingTime;
 
     @Ignore
@@ -153,9 +151,7 @@ public class Event implements Parcelable {
         this.watching = watching;
     }
 
-    @NonNull
     public Long getDistance() {
-        if(this.distance == null) return Constants.ROOM_INVALID_LONG_VALUE;
         return distance;
     }
 
@@ -163,9 +159,7 @@ public class Event implements Parcelable {
         this.distance = distance;
     }
 
-    @NonNull
     public Long getDrivingTime() {
-        if (this.drivingTime == null) return Constants.ROOM_INVALID_LONG_VALUE;
         return drivingTime;
     }
 
