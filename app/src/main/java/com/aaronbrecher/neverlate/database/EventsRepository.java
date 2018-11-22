@@ -26,17 +26,27 @@ public class EventsRepository {
         mEventsDao.insertEvent(event);
     }
 
-    //query all events in the database
+    //query all events in the database this will include events that are not
+    // being watched as well as events without a location
     public LiveData<List<Event>> queryEventsNoLocation() {
         return mEventsDao.queryEventsNoLocation(System.currentTimeMillis());
     }
 
 
-    //query all events in the database
-    public LiveData<List<Event>> queryAllCurrentEvents() {
-        return mEventsDao.queryAllCurrentEvents(System.currentTimeMillis());
+    //query all the tracked events in the database - events with a watching set to false
+    // will NOT be returned - performs async
+    public LiveData<List<Event>> queryAllCurrentTrackedEvents() {
+        return mEventsDao.queryAllCurrentTrackedEvents(System.currentTimeMillis());
     }
 
+    //query all the tracked events in the database - events with a watching
+    //set to false will NOT be returned - performs synchronisly
+    public List<Event> queryAllCurrentTrackedEventsSync() {
+        return mEventsDao.queryAllCurrentTrackedEventsSync(System.currentTimeMillis());
+    }
+
+    //this will return all current events even if the event is not being
+    //watched - will not return events without a location
     public List<Event> queryAllCurrentEventsSync(){
         return mEventsDao.queryAllCurrentEventsSync(System.currentTimeMillis());
     }
@@ -62,4 +72,6 @@ public class EventsRepository {
     public void deleteCalendar(long calId) {
         mEventsDao.deleteCalendar(calId);
     }
+
+    public void updateEvents(Event... events){mEventsDao.updateEvents(events);}
 }

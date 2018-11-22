@@ -24,6 +24,11 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
     private List<Event> mEvents;
     private List<Event> mFilteredEvents;
     private ListItemClickListener mClickListener;
+
+    public Context getContext() {
+        return mContext;
+    }
+
     private Context mContext;
 
     /**
@@ -65,9 +70,23 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
 
 
     public void swapLists(List<Event> events) {
-        this.mEvents = events;
+        this.mEvents = new ArrayList<>(events);
         this.mFilteredEvents = mEvents;
         notifyDataSetChanged();
+    }
+
+    public void removeAt(int index){
+        mEvents.remove(index);
+        notifyItemRemoved(index);
+    }
+
+    public void insertAt(int index, Event event){
+        try {
+            mEvents.add(index, event);
+        }catch (IndexOutOfBoundsException e){
+            mEvents.add(event);
+        }
+        notifyItemInserted(index);
     }
 
     public class EventViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

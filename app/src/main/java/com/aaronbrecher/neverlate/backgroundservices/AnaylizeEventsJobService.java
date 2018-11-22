@@ -10,7 +10,7 @@ import com.aaronbrecher.neverlate.database.EventCompatibilityRepository;
 import com.aaronbrecher.neverlate.database.EventsRepository;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.models.EventCompatibility;
-import com.aaronbrecher.neverlate.models.retrofitmodels.MapboxDirectionMatrix;
+import com.aaronbrecher.neverlate.models.retrofitmodels.MapboxDirectionMatrix.MapboxDirectionMatrix;
 import com.aaronbrecher.neverlate.network.AppApiService;
 import com.aaronbrecher.neverlate.network.AppApiUtils;
 import com.aaronbrecher.neverlate.ui.activities.MainActivity;
@@ -61,7 +61,7 @@ public class AnaylizeEventsJobService extends JobService {
 
     private void doWork() {
         mEventCompatibilities = new ArrayList<>();
-        mEventList = mEventsRepository.queryAllCurrentEventsSync();
+        mEventList = mEventsRepository.queryAllCurrentTrackedEventsSync();
         for (int i = 0; i < mEventList.size() - 1; i++) {
             mEventCompatibilities.add(getCompatibility(mEventList.get(i), mEventList.get(i + 1)));
         }

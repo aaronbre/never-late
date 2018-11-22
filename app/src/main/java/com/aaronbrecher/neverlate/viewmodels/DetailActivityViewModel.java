@@ -12,7 +12,7 @@ public class DetailActivityViewModel extends BaseViewModel {
 
     @Inject
     public DetailActivityViewModel(EventsRepository eventsRepository){
-        super(eventsRepository, null);
+        super(eventsRepository, null, null);
     }
 
     public MutableLiveData<Event> getEvent() {

@@ -7,6 +7,7 @@ import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
 
 import com.aaronbrecher.neverlate.models.Event;
 
@@ -26,10 +27,14 @@ public interface EventsDao {
     LiveData<List<Event>> queryAllEvents();
 
     //query all not expired events in the database
-    @Query("SELECT * FROM events WHERE endTime > :currentTime AND location IS NOT NULL AND location != '' ORDER BY startTime")
-    LiveData<List<Event>> queryAllCurrentEvents(long currentTime);
+    @Query("SELECT * FROM events WHERE endTime > :currentTime AND location IS NOT NULL AND location != '' AND watching = 1 ORDER BY startTime")
+    LiveData<List<Event>> queryAllCurrentTrackedEvents(long currentTime);
 
-    @Query("SELECT * FROM events WHERE endTime > :currentTime ORDER BY startTime")
+    //query all not expired events in the database
+    @Query("SELECT * FROM events WHERE endTime > :currentTime AND location IS NOT NULL AND location != '' AND watching = 1 ORDER BY startTime")
+    List<Event> queryAllCurrentTrackedEventsSync(long currentTime);
+
+    @Query("SELECT * FROM events WHERE endTime > :currentTime AND location IS NOT NULL AND location != '' ORDER BY startTime")
     List<Event> queryAllCurrentEventsSync(long currentTime);
 
     @Query("SELECT * FROM events WHERE endTime > :currentTime ORDER BY startTime")
@@ -51,4 +56,7 @@ public interface EventsDao {
 
     @Delete
     void deleteEvents(Event... event);
+
+    @Update
+    void updateEvents(Event... event);
 }

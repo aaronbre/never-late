@@ -66,12 +66,16 @@ public class Constants {
     public static final int UNIT_SYSTEM_METRIC = 1;
     public static final int UNIT_SYSTEM_IMPERIAL = 2;
 
+    //actions
     public static final String ACTION_ADD_CALENDAR_EVENTS = "com.aaronbrecher.neverlate.action.RETRIEVE_CALENDAR_EVENTS";
     public static final String ACTION_START_AWARENESS_FENCE_SERVICE = "com.aaronbrecher.neverlate.action.START_AWARENESS_FENCE_SERVICE";
     public static final String ACTION_START_ACTIVITY_TRANSITION_SERVICE = "com.aaronbrecher.neverlate.action.START_ACTIVITY_TRANSITION_SERVICE";
     public static final String ACTION_PROCESS_LOCATION_UPDATE = "com.aaronbrecher.neverlate.action.TRACK_CURRENT_LOCATION";
 
-    public static final long ROOM_INVALID_LONG_VALUE = -1;
+    public static final long ROOM_INVALID_LONG_VALUE = -1L;
+    public static final int TRANSPORT_DRIVING = 1;
+    public static final int TRANSPORT_WALKING = 2;
+    public static final int TRANSPORT_PUBLIC = 3;
     public static final String ACTION_CANCEL_DRIVING_SERVICE = "com.aaronbrecher.neverlate.action.CANCEL_DRIVING_SERVICE";
 
     public static final Uri PRIVACY_POLICY_URI = Uri.parse("https://never-late-api.herokuapp.com/privacy-policy");

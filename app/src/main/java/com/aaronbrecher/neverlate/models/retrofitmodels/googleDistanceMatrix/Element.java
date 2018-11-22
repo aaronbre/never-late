@@ -1,4 +1,4 @@
-package com.aaronbrecher.neverlate.models.retrofitmodels;
+package com.aaronbrecher.neverlate.models.retrofitmodels.googleDistanceMatrix;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

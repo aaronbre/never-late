@@ -4,6 +4,7 @@ import android.app.Application;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.persistence.room.Room;
 
+import com.aaronbrecher.neverlate.AppExecutors;
 import com.aaronbrecher.neverlate.database.EventCompatibilityDao;
 import com.aaronbrecher.neverlate.database.EventCompatibilityRepository;
 import com.aaronbrecher.neverlate.database.EventsDao;
@@ -61,7 +62,8 @@ public class RoomModule {
 
     @Provides
     @Singleton
-    ViewModelProvider.Factory provideViewModelFactory(EventsRepository eventsRepository, EventCompatibilityRepository compatabilityRepository, Application application) {
-        return new CustomViewModelFactory(eventsRepository, compatabilityRepository, application);
+    ViewModelProvider.Factory provideViewModelFactory(EventsRepository eventsRepository,
+                                                      EventCompatibilityRepository compatabilityRepository, Application application, AppExecutors appExecutors) {
+        return new CustomViewModelFactory(eventsRepository, compatabilityRepository, application, appExecutors);
     }
 }

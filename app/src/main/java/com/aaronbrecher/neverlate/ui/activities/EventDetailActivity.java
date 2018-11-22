@@ -40,12 +40,8 @@ public class EventDetailActivity extends AppCompatActivity{
     @Inject
     SharedPreferences mSharedPreferences;
     private DetailActivityViewModel mViewModel;
-    private AdView mAdView;
-    private InterstitialAd mInterstitialAd;
     private Event mEvent;
     private Intent mIntent;
-
-    private static ArrayList<Integer> eventsViewed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,37 +94,11 @@ public class EventDetailActivity extends AppCompatActivity{
             intent.setData(uri);
             startActivity(intent);
         });
-        showAd();
-
-    }
-
-    /**
-     * Method to display an interstitial ad to the user. Currently will show an ad once for
-     * each new event opened (if user closes app will restart the count). Possibly change this
-     * to show only once on each app lifecycle
-     */
-    private void showAd() {
-        if(eventsViewed == null) eventsViewed = new ArrayList<>();
-        Integer eventId = mEvent.getId();
-        if(!eventsViewed.contains(eventId)){
-           eventsViewed.add(eventId);
-            mInterstitialAd = new InterstitialAd(this);
-            mInterstitialAd.setAdUnitId(getString(R.string.ad_mob_interstitial_ad_unit));
-            mInterstitialAd.loadAd(new AdRequest.Builder().build());
-
-            mInterstitialAd.setAdListener(new AdListener(){
-                @Override
-                public void onAdLoaded() {
-                    mInterstitialAd.show();
-                }
-            });
-        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mInterstitialAd = null;
     }
 
     @Override

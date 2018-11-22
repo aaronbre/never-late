@@ -148,6 +148,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
         mController.setUpNotificationChannel();
         mController.checkIfUpdateNeeded();
+        mController.setupRateThisApp();
         checkForCalendarApp();
 
         if (savedInstanceState != null && savedInstanceState.containsKey(SHOW_ALL_EVENTS_KEY)) {
@@ -224,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                EventListFragment fragment = (EventListFragment) fragmentManager.findFragmentByTag(Constants.EVENT_LIST_TAG);
+                EventListFragment fragment = (EventListFragment) fragmentManager.findFragmentById(R.id.eventListFragment);
                 if (fragment == null) return false;
                 fragment.filter(query);
                 return false;
@@ -232,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                EventListFragment fragment = (EventListFragment) fragmentManager.findFragmentByTag(Constants.EVENT_LIST_TAG);
+                EventListFragment fragment = (EventListFragment) fragmentManager.findFragmentById(R.id.eventListFragment);
                 if (fragment == null) return false;
                 fragment.filter(newText);
                 return false;

@@ -3,8 +3,8 @@ package com.aaronbrecher.neverlate.viewmodels;
 import android.app.Application;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.os.AsyncTask;
 
+import com.aaronbrecher.neverlate.AppExecutors;
 import com.aaronbrecher.neverlate.database.EventsRepository;
 import com.aaronbrecher.neverlate.models.Event;
 
@@ -25,23 +25,17 @@ public class MainActivityViewModel extends BaseViewModel {
     private MutableLiveData<List<Event>> mEventsWithLocation;
 
     @Inject
-    public MainActivityViewModel(EventsRepository eventsRepository, Application application) {
-        super(eventsRepository, application);
+    public MainActivityViewModel(EventsRepository eventsRepository, Application application, AppExecutors appExecutors) {
+        super(eventsRepository, application, appExecutors);
     }
 
     //insert the events async using a simple async task
     public void insertEvents(List<Event> events) {
-        new AsyncTask<List<Event>, Void, Void>() {
-            @Override
-            protected Void doInBackground(List<Event>... lists) {
-                mEventsRepository.insertAll(lists[0]);
-                return null;
-            }
-        }.execute(events);
+        mAppExecutors.diskIO().execute(()-> mEventsRepository.insertAll(events));
     }
 
     public LiveData<List<Event>> getAllCurrentEvents() {
-        return mEventsRepository.queryAllCurrentEvents();
+        return mEventsRepository.queryAllCurrentTrackedEvents();
     }
 
     public LiveData<List<Event>> getAllEvents() {
@@ -69,6 +63,10 @@ public class MainActivityViewModel extends BaseViewModel {
     public void setShouldShowAllEvents(boolean bool){
         if(mShouldShowAllEvents == null) mShouldShowAllEvents = new MutableLiveData<>();
         mShouldShowAllEvents.postValue(bool);
+    }
+
+    public void updateEvent(Event event){
+        mAppExecutors.diskIO().execute(()-> mEventsRepository.updateEvents(event));
     }
 
     public void setShowAllEvents(){

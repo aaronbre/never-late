@@ -16,12 +16,17 @@ import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.adapters.CompatibilityListAdapter;
 import com.aaronbrecher.neverlate.database.EventCompatibilityRepository;
 import com.aaronbrecher.neverlate.database.EventsRepository;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 
 import javax.inject.Inject;
 
 public class CompatibilityFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private CompatibilityListAdapter mAdapter;
+    private InterstitialAd mInterstitialAd;
+
     @Inject
     EventsRepository mEventsRepository;
     @Inject
@@ -41,21 +46,44 @@ public class CompatibilityFragment extends Fragment {
         mAdapter = new CompatibilityListAdapter(null, null, getActivity());
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mEventsRepository.queryAllCurrentEvents().observe(this, events -> {
+        mEventsRepository.queryAllCurrentTrackedEvents().observe(this, events -> {
             mAdapter.setEvents(events);
         });
         mCompatibilityRepository.queryCompatibility().observe(this, list -> {
             mAdapter.setEventCompatibilities(list);
         });
+        mInterstitialAd = new InterstitialAd(getActivity());
         return rootView;
     }
 
-
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        showAd();
+    }
 
     @Override
     public void onDestroyView() {
-        mEventsRepository.queryAllCurrentEvents().removeObservers(this);
+        mEventsRepository.queryAllCurrentTrackedEvents().removeObservers(this);
         mCompatibilityRepository.queryCompatibility().removeObservers(this);
+        mInterstitialAd = null;
         super.onDestroyView();
+    }
+
+    /**
+     * Method to display an interstitial ad to the user. Currently will show an ad once for
+     * each new event opened (if user closes app will restart the count). Possibly change this
+     * to show only once on each app lifecycle
+     */
+    private void showAd() {
+        mInterstitialAd = new InterstitialAd(getActivity());
+        mInterstitialAd.setAdUnitId(getString(R.string.ad_mob_interstitial_ad_unit));
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+        mInterstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                mInterstitialAd.show();
+            }
+        });
     }
 }

@@ -28,6 +28,7 @@ import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.kobakei.ratethisapp.RateThisApp;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -81,6 +82,11 @@ public class MainActivityController {
                 }
             }
         });
+    }
+
+    public void setupRateThisApp(){
+        RateThisApp.onCreate(mActivity);
+        RateThisApp.showRateDialogIfNeeded(mActivity);
     }
 
     public void setUpNotificationChannel() {

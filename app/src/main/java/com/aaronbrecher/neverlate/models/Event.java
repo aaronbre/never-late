@@ -60,6 +60,12 @@ public class Event implements Parcelable {
     @ColumnInfo
     private Long drivingTime;
 
+    @ColumnInfo
+    private String origin;
+
+    @ColumnInfo
+    private Integer transportMode;
+
     @Ignore
     public Event(@NonNull int id, @NonNull long calendarId, String title, String description,
                  LocalDateTime startTime, LocalDateTime endTime, String location, LatLng locationLatlng, boolean watching) {
@@ -155,7 +161,7 @@ public class Event implements Parcelable {
         return distance;
     }
 
-    public void setDistance(long distance) {
+    public void setDistance(Long distance) {
         this.distance = distance;
     }
 
@@ -163,8 +169,24 @@ public class Event implements Parcelable {
         return drivingTime;
     }
 
-    public void setDrivingTime(long drivingTime) {
+    public void setDrivingTime(Long drivingTime) {
         this.drivingTime = drivingTime;
+    }
+
+    public String getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(String origin) {
+        this.origin = origin;
+    }
+
+    public Integer getTransportMode() {
+        return transportMode;
+    }
+
+    public void setTransportMode(Integer transportMode) {
+        this.transportMode = transportMode;
     }
 
     @Ignore

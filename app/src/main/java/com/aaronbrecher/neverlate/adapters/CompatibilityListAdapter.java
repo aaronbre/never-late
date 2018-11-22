@@ -74,9 +74,10 @@ public class CompatibilityListAdapter extends RecyclerView.Adapter<RecyclerView.
         }
         else if(viewHolder.getItemViewType() == LAST_ITEM_VIEW_HOLDER){
             CompatibilityViewHolderLast holder = (CompatibilityViewHolderLast) viewHolder;
-            holder.binding.setEvent2(getEventForId(compatibility.getEndEvent()));
-            holder.binding.setEvent(event);
+            holder.binding.setEvent(getEventForId(compatibility.getEndEvent()));
             holder.binding.setFormatter(formatter);
+            holder.binding.includedItem.setEvent(event);
+            holder.binding.includedItem.setFormatter(formatter);
             String leaveTimeString;
             if(compatibility.getWithinDrivingDistance() != Compatible.TRUE){
                 leaveTimeString = "Not applicable";
@@ -84,8 +85,8 @@ public class CompatibilityListAdapter extends RecyclerView.Adapter<RecyclerView.
                 SimpleDateFormat format = new SimpleDateFormat("h:mm a");
                 leaveTimeString  = format.format(new Date(Converters.unixFromDateTime(event.getStartTime()) + compatibility.getMaxTimeAtStartEvent()));
             }
-            holder.binding.listItemLeaveTime.setText(leaveTimeString);
-            holder.binding.listItemMaxTime.setText(DirectionsUtils.readableTravelTime(compatibility.getMaxTimeAtStartEvent()/1000));
+            holder.binding.includedItem.listItemLeaveTime.setText(leaveTimeString);
+            holder.binding.includedItem.listItemMaxTime.setText(DirectionsUtils.readableTravelTime(compatibility.getMaxTimeAtStartEvent()/1000));
             if(compatibility.getWithinDrivingDistance() == Compatible.TRUE){
                 holder.binding.listItemConnectionImage.setImageDrawable(mContext.getDrawable(R.drawable.is_compatible));
             }else {
@@ -96,7 +97,7 @@ public class CompatibilityListAdapter extends RecyclerView.Adapter<RecyclerView.
 
     @Override
     public int getItemViewType(int position) {
-        if(position < getItemCount()-1)
+        if(position < getItemCount()-1 || mEventCompatibilities.size() <= 1)
             return REGULAR_VIEW_HOLDER;
         else return LAST_ITEM_VIEW_HOLDER;
     }
