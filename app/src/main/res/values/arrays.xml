@@ -28,6 +28,7 @@
         <item>@string/prefs_speed_medium_option</item>
         <item>@string/prefs_speed_fast_option</item>
         <item>@string/prefs_speed_very_fast_option</item>
+        <item>@string/prefs_speed_extremely_fast_option</item>
     </string-array>
 
     <string-array name="pref_speed_values">
@@ -36,12 +37,42 @@
         <item>@string/prefs_speed_medium_value</item>
         <item>@string/prefs_speed_fast_value</item>
         <item>@string/prefs_speed_very_fast_value</item>
+        <item>@string/prefs_speed_extremely_fast_value</item>
+    </string-array>
+
+    <string-array name="pref_speed_options_miles">
+        <item>@string/prefs_speed_very_slow_option_miles</item>
+        <item>@string/prefs_speed_slow_option_miles</item>
+        <item>@string/prefs_speed_medium_option_miles</item>
+        <item>@string/prefs_speed_fast_option_miles</item>
+        <item>@string/prefs_speed_very_fast_option_miles</item>
+        <item>@string/prefs_speed_extremely_fast_option_miles</item>
+    </string-array>
+
+    <string-array name="pref_speed_values_miles">
+        <item>@string/prefs_speed_very_slow_value_miles</item>
+        <item>@string/prefs_speed_slow_value_miles</item>
+        <item>@string/prefs_speed_medium_value_miles</item>
+        <item>@string/prefs_speed_fast_value_miles</item>
+        <item>@string/prefs_speed_very_fast_value_miles</item>
+        <item>@string/prefs_speed_extremely_fast_value_miles</item>
     </string-array>
 
     <string-array name="subscription_bullet_points">
         <item>Ads are completely removed.</item>
         <item>Allow different modes of transport, Walking, Cycling, Public Transportation</item>
         <item>Use of schedule analyzer to analyze your day to make sure all events are within drivable distance to each other</item>
+    </string-array>
+
+    <string-array name="event_detail_edit_transport">
+        <item>@string/transport_mode_driving</item>
+        <item>@string/transport_mode_walking</item>
+        <item>@string/transport_mode_public</item>
+    </string-array>
+
+    <string-array name="event_detail_edit_tracking">
+        <item>@string/edit_dialog_track</item>
+        <item>@string/edit_dialog_stop_tracking</item>
     </string-array>
 
 </resources>

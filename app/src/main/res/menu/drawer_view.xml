@@ -18,6 +18,10 @@
             android:icon="@drawable/ic_settings_gray_24dp"
             android:title="@string/menu_settings" />
         <item
+            android:id="@+id/drawer_snooze"
+            android:title="@string/drawer_snooze"
+            android:icon="@drawable/ic_snooze_gray_24dp"/>
+        <item
             android:id="@+id/drawer_privacy"
             android:icon="@drawable/ic_security_gray_24dp"
             android:title="@string/menu_privacy_policy" />

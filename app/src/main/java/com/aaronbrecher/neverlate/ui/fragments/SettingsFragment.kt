@@ -19,6 +19,10 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         for (index in 0 until preferenceScreen.preferenceCount) {
             val preference = preferenceScreen.getPreference(index)
             if (preference !is CheckBoxPreference) {
+                if (preference.key == getString(R.string.prefs_speed_key)){
+                    val unitPref = preferenceScreen.findPreference(getString(R.string.pref_units_key))
+                    changeSpeedPrefsToUnitSystem(preferenceScreen.sharedPreferences.getString(unitPref.key, getString(R.string.pref_units_metric))!!)
+                }
                 preference.createDefaultValueIfNull()
                 setPreferenceSummary(preference,
                         preferenceScreen.sharedPreferences.getString(preference.key, "")!!)
@@ -28,8 +32,12 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
         val preference = findPreference(key)
+        val preferenceValue = sharedPreferences.getString(key, "")!!
         if (null != preference && preference !is CheckBoxPreference) {
-            setPreferenceSummary(preference, sharedPreferences.getString(key, "")!!)
+            setPreferenceSummary(preference, preferenceValue)
+        }
+        if (key == getString(R.string.pref_units_key)) {
+            changeSpeedPrefsToUnitSystem(preferenceValue)
         }
     }
 
@@ -72,7 +80,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     }
 
     private fun getDefaultUnitsByLocale(): String {
-        var country: String;
+        var country: String
         // Android N and higher supports multiple locales, we base default units on the main locale
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             country = resources.configuration.locales[0].country
@@ -84,5 +92,24 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
             "US", "GB", "MM", "LR" -> getString(R.string.pref_units_imperial)
             else -> getString(R.string.pref_units_metric)
         }
+    }
+
+    private fun changeSpeedPrefsToUnitSystem(system: String) {
+        val defaultSpeedPreference = findPreference(getString(R.string.prefs_speed_key)) as ListPreference
+        var index = defaultSpeedPreference.findIndexOfValue(defaultSpeedPreference.value)
+        if (index < 0) index = 2
+        if (system == getString(R.string.pref_units_metric)) {
+            //use metric entries
+            defaultSpeedPreference.setEntries(R.array.pref_speed_options)
+            defaultSpeedPreference.setEntryValues(R.array.pref_speed_values)
+            defaultSpeedPreference.setValueIndex(index)
+        } else if (system == getString(R.string.pref_units_imperial)) {
+            //use imperial entries
+            defaultSpeedPreference.setEntries(R.array.pref_speed_options_miles)
+            defaultSpeedPreference.setEntryValues(R.array.pref_speed_values_miles)
+            defaultSpeedPreference.setValueIndex(index)
+        }
+        setPreferenceSummary(defaultSpeedPreference,
+                preferenceScreen.sharedPreferences.getString(defaultSpeedPreference.key, "")!!)
     }
 }

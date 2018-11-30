@@ -5,6 +5,7 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -13,12 +14,12 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.adapters.EventListAdapter;
@@ -27,9 +28,12 @@ import com.aaronbrecher.neverlate.databinding.FragmentMainActivityListBinding;
 import com.aaronbrecher.neverlate.dependencyinjection.AppComponent;
 import com.aaronbrecher.neverlate.geofencing.AwarenessFencesCreator;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
+import com.aaronbrecher.neverlate.interfaces.NavigationControl;
 import com.aaronbrecher.neverlate.interfaces.SwipeToDeleteListener;
 import com.aaronbrecher.neverlate.models.Event;
+import com.aaronbrecher.neverlate.ui.activities.EventDetailActivity;
 import com.aaronbrecher.neverlate.ui.activities.MainActivity;
+import com.aaronbrecher.neverlate.ui.controllers.MainActivityController;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
 import com.google.android.gms.location.FusedLocationProviderClient;
 
@@ -38,10 +42,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 //TODO when the list becomes empty need to close the fragment and load the no-events-fragment, probably needs to be done in mainActivity via a interface
-public class EventListFragment extends Fragment implements SwipeToDeleteListener {
-
-    ListItemClickListener mListItemClickListener;
-
+public class EventListFragment extends Fragment implements SwipeToDeleteListener, ListItemClickListener {
     @Inject
     ViewModelProvider.Factory mViewModelFactory;
     @Inject
@@ -53,25 +54,27 @@ public class EventListFragment extends Fragment implements SwipeToDeleteListener
     private EventListAdapter mListAdapter;
     private FragmentMainActivityListBinding mBinding;
     private View mRootView;
-    private MainActivity mActivity;
+    private NavigationControl mNavController;
     private List<Event> mEventList;
     private ItemTouchHelper mItemTouchHelper;
+    private boolean mAppIsSnoozed;
 
     @SuppressLint("MissingPermission")
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         try {
-            mListItemClickListener = (ListItemClickListener) context;
+            mNavController = (NavigationControl) getActivity();
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() +
                     " must implement the ListItemClickListener interface");
         }
         AppComponent appComponent = NeverLateApp.getApp().getAppComponent();
         appComponent.inject(this);
-        mActivity = (MainActivity) getActivity();
-        mViewModel = ViewModelProviders.of(mActivity, mViewModelFactory).get(MainActivityViewModel.class);
-        mListAdapter = new EventListAdapter(null, mActivity);
+        mViewModel = ViewModelProviders.of(getActivity(), mViewModelFactory).get(MainActivityViewModel.class);
+        mAppIsSnoozed = mSharedPreferences.getLong(Constants.SNOOZE_PREFS_KEY, Constants.ROOM_INVALID_LONG_VALUE) != Constants.ROOM_INVALID_LONG_VALUE
+                && !mSharedPreferences.getBoolean(Constants.SNOOZE_ONLY_NOTIFICATIONS_PREFS_KEY, false);
+        mListAdapter = new EventListAdapter(null, getContext(), this);
         mViewModel.getShouldShowAllEvents().observe(this, showAllEventsObserver);
     }
 
@@ -80,9 +83,9 @@ public class EventListFragment extends Fragment implements SwipeToDeleteListener
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mBinding = FragmentMainActivityListBinding.inflate(inflater, container, false);
         mBinding.eventListRv.setAdapter(mListAdapter);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(mActivity);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         mBinding.eventListRv.setLayoutManager(layoutManager);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mActivity, layoutManager.getOrientation());
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(getContext(), layoutManager.getOrientation());
         mBinding.eventListRv.addItemDecoration(dividerItemDecoration);
         setupDeleteTouchHelper();
         mRootView = mBinding.getRoot();
@@ -104,8 +107,11 @@ public class EventListFragment extends Fragment implements SwipeToDeleteListener
     private final Observer<List<Event>> eventsObserver = new Observer<List<Event>>() {
         @Override
         public void onChanged(@Nullable List<Event> events) {
-            if (events == null || events.size() == 0) {
-                mActivity.loadNoEventsFragment();
+            MainActivity.setFinishedLoading(true);
+            if (mAppIsSnoozed) {
+                mNavController.navigateToDestination(R.id.appSnoozedFragment);
+            } else if (events == null || events.size() == 0) {
+                mNavController.navigateToDestination(R.id.noEventsFragment);
             } else {
                 mEventList = events;
                 mListAdapter.swapLists(events);
@@ -163,4 +169,14 @@ public class EventListFragment extends Fragment implements SwipeToDeleteListener
     private void undoDelete(int index) {
         mListAdapter.insertAt(index, mEventList.get(index));
     }
+
+    @Override
+    public void onListItemClick(Event event) {
+        Intent intent = new Intent(getContext(), EventDetailActivity.class);
+        intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, Event.convertEventToJson(event));
+        startActivity(intent);
+
+    }
+
+
 }

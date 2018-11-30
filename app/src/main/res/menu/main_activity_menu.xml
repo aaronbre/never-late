@@ -4,29 +4,31 @@
     <group android:id="@+id/main_activity_menu">
         <item
             android:id="@+id/main_activity_menu_search"
-            android:title="@string/search"
-            app:showAsAction="ifRoom"
             android:icon="@drawable/ic_search_black_24dp"
-            app:actionViewClass="android.support.v7.widget.SearchView" />
+            android:title="@string/search"
+            app:actionViewClass="android.support.v7.widget.SearchView"
+            app:showAsAction="ifRoom" />
         <item
             android:id="@+id/main_activity_menu_sync"
-            android:title="@string/menu_item_refresh"
             android:icon="@drawable/ic_refresh_white_24dp"
-            app:showAsAction="ifRoom"/>
+            android:title="@string/menu_item_refresh"
+            app:showAsAction="ifRoom" />
         <item
             android:id="@+id/main_activity_menu_show_all"
             android:title="@string/menu_item_show_all"
-            app:showAsAction="never"/>
+            app:showAsAction="never" />
         <item
             android:id="@+id/main_activity_menu_show_location_only"
             android:title="@string/menu_item_show_loc_only"
-            app:showAsAction="never"/>
+            app:showAsAction="never" />
     </group>
-    <group android:id="@+id/analyze_menu">
+    <group
+        android:id="@+id/analyze_menu"
+        android:visible="false">
         <item
             android:id="@+id/analyze_refresh"
+            android:icon="@drawable/ic_refresh_white_24dp"
             android:title="@string/menu_item_refresh"
-            app:showAsAction="ifRoom"
-            android:icon="@drawable/ic_refresh_white_24dp"/>
+            app:showAsAction="ifRoom" />
     </group>
 </menu>

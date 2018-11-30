@@ -70,9 +70,9 @@
         <service
             android:name=".backgroundservices.jobintentservices.BootCompletedJobService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
-        <service android:name=".backgroundservices.DrivingForegroundService" />
         <service android:name=".backgroundservices.CheckForCalendarChangedService" />
         <service android:name=".backgroundservices.AnaylizeEventsJobService" />
+        <service android:name=".backgroundservices.EndSnoozeJobService" />
 
         <receiver
             android:name=".backgroundservices.broadcastreceivers.BootCompletedBroadcast"
@@ -107,9 +107,6 @@
         </receiver>
         <receiver android:name=".backgroundservices.broadcastreceivers.DrivingLocationUpdatesBroadcastReceiver" />
 
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="8da9a19591e925fea9caed84c077bfe36abf2b5e" />
 
         <activity android:name=".ui.activities.SettingsActivity" />
         <activity android:name=".ui.activities.NeedUpdateActivity" />
@@ -118,7 +115,9 @@
             android:name="org.apache.http.legacy"
             android:required="false" />
 
-        <activity android:name=".ui.activities.Onboarding" />
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="a39b9f54aeb9dedd7c5cf5edc7056db071a784ca" />
     </application>
 
 </manifest>

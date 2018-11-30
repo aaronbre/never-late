@@ -62,13 +62,21 @@ public class AnaylizeEventsJobService extends JobService {
     private void doWork() {
         mEventCompatibilities = new ArrayList<>();
         mEventList = mEventsRepository.queryAllCurrentTrackedEventsSync();
+        if (mEventList == null || mEventList.size() < 2) {
+            mAppExecutors.mainThread().execute(() -> MainActivity.setFinishedLoading(true));
+            return;
+        }
         for (int i = 0; i < mEventList.size() - 1; i++) {
             mEventCompatibilities.add(getCompatibility(mEventList.get(i), mEventList.get(i + 1)));
         }
         //todo figure out a better way of doing this
         mCompatabilityRepository.deleteAll();
-        mCompatabilityRepository.insertAll(mEventCompatibilities);
-        mAppExecutors.mainThread().execute(()-> MainActivity.setFinishedLoading(true));
+        try{
+            mCompatabilityRepository.insertAll(mEventCompatibilities);
+        }catch (NullPointerException e){
+            e.printStackTrace();
+        }
+        mAppExecutors.mainThread().execute(() -> MainActivity.setFinishedLoading(true));
         jobFinished(mJobParameters, false);
     }
 
@@ -118,7 +126,10 @@ public class AnaylizeEventsJobService extends JobService {
         } else {
             eventCompatibility.setWithinDrivingDistance(EventCompatibility.Compatible.TRUE);
             long maximumTimeAtEvent = secondEventStart - arrivalTimeToSecondEvent;
-            eventCompatibility.setMaxTimeAtStartEvent((int) maximumTimeAtEvent);
+            //TODO Setting this to false to avoid bugs in future fix this
+            eventCompatibility.setCanReturnHome(false);
+            eventCompatibility.setCanReturnToWork(false);
+            eventCompatibility.setMaxTimeAtStartEvent(maximumTimeAtEvent);
         }
 
     }

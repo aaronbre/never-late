@@ -3,6 +3,7 @@ package com.aaronbrecher.neverlate.Utils;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.backgroundservices.AnaylizeEventsJobService;
 import com.aaronbrecher.neverlate.backgroundservices.CheckForCalendarChangedService;
+import com.aaronbrecher.neverlate.backgroundservices.EndSnoozeJobService;
 import com.aaronbrecher.neverlate.backgroundservices.SetupActivityRecognitionJobService;
 import com.firebase.jobdispatcher.Constraint;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
@@ -26,7 +27,7 @@ public class BackgroundUtils {
                 .setTrigger(Trigger.executionWindow(ONE_HOUR_IN_SECONDS * 23, ONE_HOUR_IN_SECONDS * 24))
                 .setRecurring(true)
                 .setReplaceCurrent(false)
-                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
+                .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR)
                 .setConstraints(Constraint.ON_ANY_NETWORK)
                 .build();
     }
@@ -65,6 +66,18 @@ public class BackgroundUtils {
                 .setTag(Constants.FIREBASE_JOB_SERVICE_ANALYZE_SCHEDULE_TAG)
                 .setRecurring(false)
                 .setTrigger(Trigger.NOW)
+                .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR)
+                .build();
+    }
+
+    public static Job endSnoozeJob(FirebaseJobDispatcher dispatcher, long endTime){
+        long now = System.currentTimeMillis();
+        int timeToEnd = (int) (endTime - now)/1000;
+        return dispatcher.newJobBuilder()
+                .setTag(Constants.FIREBASE_JOB_SERVICE_END_SNOOZE)
+                .setService(EndSnoozeJobService.class)
+                .setRecurring(false)
+                .setTrigger(Trigger.executionWindow(timeToEnd, timeToEnd + 60))
                 .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR)
                 .build();
     }

@@ -1,8 +1,6 @@
 package com.aaronbrecher.neverlate.ui.activities;
 
 import android.annotation.SuppressLint;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.SearchManager;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModelProvider;
@@ -10,11 +8,8 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.support.annotation.NonNull;
@@ -34,48 +29,34 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.aaronbrecher.neverlate.AppExecutors;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
-import com.aaronbrecher.neverlate.Utils.BackgroundUtils;
 import com.aaronbrecher.neverlate.Utils.SystemUtils;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
+import com.aaronbrecher.neverlate.interfaces.NavigationControl;
 import com.aaronbrecher.neverlate.models.Event;
-import com.aaronbrecher.neverlate.models.retrofitmodels.Version;
-import com.aaronbrecher.neverlate.network.AppApiService;
-import com.aaronbrecher.neverlate.network.AppApiUtils;
 import com.aaronbrecher.neverlate.ui.controllers.MainActivityController;
 import com.aaronbrecher.neverlate.ui.fragments.EventListFragment;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
-import com.firebase.jobdispatcher.FirebaseJobDispatcher;
-import com.firebase.jobdispatcher.GooglePlayDriver;
-import com.firebase.jobdispatcher.Job;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResponse;
-import com.google.android.gms.location.SettingsClient;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.analytics.FirebaseAnalytics;
 
 import javax.inject.Inject;
 
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import androidx.navigation.ui.NavigationUI;
 
 import static com.aaronbrecher.neverlate.Constants.PERMISSIONS_REQUEST_CODE;
 
-public class MainActivity extends AppCompatActivity implements ListItemClickListener {
+public class MainActivity extends AppCompatActivity implements NavigationControl {
     //TODO with current refactoring need to figure out where to set up ActivityRecoginition
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String SHOW_ALL_EVENTS_KEY = "should-show-all-events";
@@ -117,9 +98,9 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     private ProgressBar mLoadingIcon;
     private FloatingActionButton mFab;
     private DrawerLayout mDrawerLayout;
-    private NavController mNavController;
     private MainActivityController mController;
     private boolean shouldShowAllEvents = false;
+    private boolean mNotSnoozed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,8 +116,8 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         mDrawerLayout = findViewById(R.id.drawer_layout);
         mViewModel = ViewModelProviders.of(this, mViewModelFactory)
                 .get(MainActivityViewModel.class);
-        mNavController = Navigation.findNavController(mHostFragment);
-        mController = new MainActivityController(this);
+        NavController navController = Navigation.findNavController(mHostFragment);
+        mController = new MainActivityController(this, navController);
 
         setUpDrawerDestinations();
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -144,36 +125,27 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         ActionBar actionbar = getSupportActionBar();
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
-
-
+        NavigationUI.setupActionBarWithNavController(this, navController);
         mController.setUpNotificationChannel();
         mController.checkIfUpdateNeeded();
         mController.setupRateThisApp();
         checkForCalendarApp();
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(SHOW_ALL_EVENTS_KEY)) {
-            shouldShowAllEvents = savedInstanceState.getBoolean(SHOW_ALL_EVENTS_KEY, false);
-            mViewModel.setShouldShowAllEvents(shouldShowAllEvents);
-        } else {
-            shouldShowAllEvents = false;
-            mViewModel.setShouldShowAllEvents(false);
-        }
+
+        shouldShowAllEvents = false;
+        mViewModel.setShouldShowAllEvents(false);
+        //The app is not snoozed either if there is no unix time in the snooze prefs or even if there is
+        //if the snooze is only a notification snooze
+        mNotSnoozed = mSharedPreferences.getLong(Constants.SNOOZE_PREFS_KEY, Constants.ROOM_INVALID_LONG_VALUE) == Constants.ROOM_INVALID_LONG_VALUE
+                || mSharedPreferences.getBoolean(Constants.SNOOZE_ONLY_NOTIFICATIONS_PREFS_KEY, false);
         if (!SystemUtils.hasPermissions(this)) {
             SystemUtils.requestCalendarAndLocationPermissions(this, findViewById(R.id.main_container));
-        } else {
+            //only create calendar check if there is no snooze i.e. the value saved to prefs is -1
+        } else if (mNotSnoozed) {
             mController.createRecurringCalendarCheck();
             mController.setUpActivityMonitoring();
         }
         mController.checkLocationSettings();
-
-        mViewModel.getAllCurrentEvents().observe(this, events -> {
-            hideLoadingIcon();
-            if (events == null || events.size() < 1) {
-                mNavController.navigate(R.id.noEventsFragment);
-            } else {
-                mNavController.navigate(R.id.eventListFragment);
-            }
-        });
 
         mFab.setOnClickListener(v -> {
             Intent calIntent = new Intent(Intent.ACTION_INSERT);
@@ -182,13 +154,31 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         });
 
         MobileAds.initialize(this, getString(R.string.admob_id));
+
         getFinishedLoading().observe(this, finishedLoading -> {
             if (finishedLoading != null && finishedLoading) hideLoadingIcon();
+        });
+
+        mViewModel.getAllCurrentEvents().observe(this, events -> {
+            hideLoadingIcon();
+            if (events != null && events.size() >= 1) {
+                mController.navigateToDestination(R.id.eventListFragment);
+            }
         });
     }
 
     public void loadNoEventsFragment() {
-        mNavController.navigate(R.id.noEventsFragment);
+        mController.navigateToDestination(R.id.noEventsFragment);
+    }
+
+    public void loadSnoozeSettings() {
+        mController.navigateToDestination(R.id.snoozeFragment);
+        mFab.hide();
+    }
+
+    public void loadAppSnoozedFragment() {
+        mController.navigateToDestination(R.id.appSnoozedFragment);
+        mFab.hide();
     }
 
     @SuppressLint({"MissingPermission", "ApplySharedPref"})
@@ -248,22 +238,27 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             int id = menuItem.getItemId();
             switch (id) {
                 case R.id.drawer_home:
-                    mNavController.navigate(R.id.eventListFragment);
+                    mController.navigateToDestination(R.id.eventListFragment);
                     toggleOptionsMenu(true);
                     mDrawerLayout.closeDrawers();
                     return true;
                 case R.id.drawer_settings:
-                    mNavController.navigate(R.id.settingsFragment);
+                    mController.navigateToDestination(R.id.settingsFragment);
                     toggleOptionsMenu(false);
                     mDrawerLayout.closeDrawers();
                     return true;
                 case R.id.drawer_analyze:
-                    mNavController.navigate(R.id.compatabilityFragment);
+                    mController.navigateToDestination(R.id.compatabilityFragment);
                     showAnalyzeMenu();
                     mDrawerLayout.closeDrawers();
                     return true;
                 case R.id.drawer_subscription:
-                    mNavController.navigate(R.id.subscriptionFragment);
+                    mController.navigateToDestination(R.id.subscriptionFragment);
+                    toggleOptionsMenu(false);
+                    mDrawerLayout.closeDrawers();
+                    return true;
+                case R.id.drawer_snooze:
+                    mController.navigateToDestination(R.id.snoozeFragment);
                     toggleOptionsMenu(false);
                     mDrawerLayout.closeDrawers();
                     return true;
@@ -281,13 +276,13 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         if (mMenu != null) {
             mMenu.setGroupVisible(R.id.main_activity_menu, shouldShow);
             mMenu.setGroupVisible(R.id.analyze_menu, false);
-            if(shouldShow) mFab.show();
+            if (shouldShow) mFab.show();
             else mFab.hide();
         }
     }
 
-    private void showAnalyzeMenu(){
-        if(mMenu != null){
+    private void showAnalyzeMenu() {
+        if (mMenu != null) {
             toggleOptionsMenu(false);
             mMenu.setGroupVisible(R.id.analyze_menu, true);
         }
@@ -301,6 +296,11 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                 mDrawerLayout.openDrawer(GravityCompat.START);
                 return true;
             case R.id.main_activity_menu_sync:
+                if (mSharedPreferences.getLong(Constants.SNOOZE_PREFS_KEY, Constants.ROOM_INVALID_LONG_VALUE) != Constants.ROOM_INVALID_LONG_VALUE
+                        && !mSharedPreferences.getBoolean(Constants.SNOOZE_ONLY_NOTIFICATIONS_PREFS_KEY, false)) {
+                    Toast.makeText(this, R.string.refresh_pressed_on_snooze, Toast.LENGTH_SHORT).show();
+                    return true;
+                }
                 if (SystemUtils.isConnected(this)) {
                     showLoadingIcon();
                     mController.doCalendarUpdate();
@@ -311,13 +311,16 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
             case R.id.main_activity_menu_show_all:
                 shouldShowAllEvents = true;
                 mViewModel.setShouldShowAllEvents(true);
+                mController.navigateToDestination(R.id.eventListFragment);
                 return true;
             case R.id.main_activity_menu_show_location_only:
                 shouldShowAllEvents = false;
                 mViewModel.setShouldShowAllEvents(false);
                 return true;
             case R.id.analyze_refresh:
-                if(SystemUtils.isConnected(this)){
+                if (SystemUtils.isConnected(this)) {
+                    //Toast.makeText(this, "This feature is currently disabled while we track down the issues involving it", Toast.LENGTH_LONG).show();
+                    //Todo when the bug is fixed uncomment
                     showLoadingIcon();
                     mController.analyzeEvents();
                     return true;
@@ -340,15 +343,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
                 .show();
     }
 
-    @Override
-    public void onListItemClick(Event event) {
-        Intent intent = new Intent(this, EventDetailActivity.class);
-        intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, Event.convertEventToJson(event));
-        startActivity(intent);
-
-    }
-
-    private void hideLoadingIcon() {
+    public void hideLoadingIcon() {
         mLoadingIcon.setVisibility(View.GONE);
         mHostFragment.setVisibility(View.VISIBLE);
     }
@@ -363,7 +358,7 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
         calIntent.setData(CalendarContract.Events.CONTENT_URI);
         if (getPackageManager().queryIntentActivities(calIntent, 0).isEmpty()) {
             mFab.hide();
-            mNavController.navigate(R.id.noCalendarFragment);
+            mController.navigateToDestination(R.id.noCalendarFragment);
         }
     }
 
@@ -383,5 +378,15 @@ public class MainActivity extends AppCompatActivity implements ListItemClickList
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(SHOW_ALL_EVENTS_KEY, shouldShowAllEvents);
+    }
+
+    public MainActivityController getController(){
+        return mController;
+    }
+
+    @Override
+    public void navigateToDestination(int destination) {
+        if(destination == R.id.snoozeFragment) mFab.hide();
+        mController.navigateToDestination(destination);
     }
 }

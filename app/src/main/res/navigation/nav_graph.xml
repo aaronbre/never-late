@@ -8,29 +8,38 @@
     <fragment
         android:id="@+id/noCalendarFragment"
         android:name="com.aaronbrecher.neverlate.ui.fragments.NoCalendarFragment"
-        android:label="no_calendar_fragment"
+        android:label="Never Late"
         tools:layout="@layout/fragment_no_calendar" />
     <fragment
         android:id="@+id/eventListFragment"
         android:name="com.aaronbrecher.neverlate.ui.fragments.EventListFragment"
-        android:label="EventListFragment" />
+        android:label="Never Late" />
     <fragment
         android:id="@+id/noEventsFragment"
         android:name="com.aaronbrecher.neverlate.ui.fragments.NoEventsFragment"
-        android:label="no_events_fragment"
+        android:label="Never Late"
         tools:layout="@layout/fragment_no_events" />
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.aaronbrecher.neverlate.ui.fragments.SettingsFragment"
-        android:label="SettingsFragment" />
+        android:label="Settings" />
     <fragment
         android:id="@+id/compatabilityFragment"
         android:name="com.aaronbrecher.neverlate.ui.fragments.CompatibilityFragment"
-        android:label="compatability_fragment"
+        android:label="Conflict Analysis"
         tools:layout="@layout/fragment_compatability" />
     <fragment
         android:id="@+id/subscriptionFragment"
         android:name="com.aaronbrecher.neverlate.ui.fragments.SubscriptionFragment"
-        android:label="fragment_subscription"
+        android:label="Subscription"
         tools:layout="@layout/fragment_subscription" />
+    <fragment
+        android:id="@+id/snoozeFragment"
+        android:name="com.aaronbrecher.neverlate.ui.fragments.SnoozeFragment"
+        android:label="Snooze" />
+    <fragment
+        android:id="@+id/appSnoozedFragment"
+        android:name="com.aaronbrecher.neverlate.ui.fragments.AppSnoozedFragment"
+        android:label="Never Late"
+        tools:layout="@layout/fragment_app_snoozed" />
 </navigation>

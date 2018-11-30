@@ -60,6 +60,9 @@ public class Constants {
     public static final String ALERT_TIME_MEDIUM = "10";
     public static final String ALERT_TIME_LONG = "15";
     public static final String USER_LOCATION_PREFS_KEY = "users-location";
+    public static final String SNOOZE_PREFS_KEY = "snooze-time";
+    public static final String SNOOZE_ONLY_NOTIFICATIONS_PREFS_KEY = "snooze-type";
+    public static final String DISABLED_DRIVING_EVENTS = "disabled-driving";
 
 
 
@@ -80,4 +83,5 @@ public class Constants {
 
     public static final Uri PRIVACY_POLICY_URI = Uri.parse("https://never-late-api.herokuapp.com/privacy-policy");
     public static final String FIREBASE_JOB_SERVICE_ANALYZE_SCHEDULE_TAG = "analyze-schedule";
+    public static final String FIREBASE_JOB_SERVICE_END_SNOOZE = "end-snooze";
 }

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <data>
+        <variable
+            name="onSnoozeTypeChange"
+            type="android.widget.CompoundButton.OnCheckedChangeListener"/>
+    </data>
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/snooze_heading"
+            style="@style/headline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/material_layout_keylines_screen_edge_margin"
+            android:layout_marginTop="@dimen/small_margin"
+            android:text="@string/snooze_heading"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/snooze_main_body"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/material_layout_keylines_screen_edge_margin"
+            android:layout_marginTop="@dimen/small_margin"
+            android:layout_marginEnd="@dimen/material_layout_keylines_screen_edge_margin"
+            android:lineSpacingExtra="2dp"
+            android:text="@string/snooze_main_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/snooze_heading" />
+
+        <TextView
+            android:id="@+id/snooze_options_label"
+            style="@style/smallSubHeading"
+            android:textSize="12sp"
+            android:layout_marginStart="@dimen/material_layout_keylines_screen_edge_margin"
+            android:layout_marginTop="@dimen/vertical_content_spacing_x_2"
+            android:text="@string/snooze_options_label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/snooze_main_body" />
+
+        <Switch
+            android:id="@+id/snooze_options"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onCheckedChanged="@{onSnoozeTypeChange}"
+            app:layout_constraintBottom_toBottomOf="@id/snooze_options_label"
+            app:layout_constraintEnd_toEndOf="@id/snooze_main_body"
+            app:layout_constraintTop_toTopOf="@id/snooze_options_label" />
+
+        <LinearLayout
+            android:id="@+id/snooze_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/snooze_options_label">
+
+            <TextView
+                android:id="@+id/snoozed_until_label"
+                style="@style/TextAppearance.MaterialComponents.Headline5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:text="@string/snoozed_until_label" />
+
+            <TextView
+                android:id="@+id/snooze_time"
+                style="@style/TextAppearance.MaterialComponents.Headline4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/small_margin"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/snoozed_until_label"
+                tools:text="December 1 5:45 PM" />
+            <TextView
+                android:id="@+id/snooze_type_text"
+                style="@style/smallSubHeading"
+                android:textSize="12dp"/>
+
+            <Button
+                android:id="@+id/snooze_edit_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/small_margin"
+                android:background="@color/colorPrimaryLight"
+                android:padding="10dp"
+                android:text="@string/edit_snooze_button"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/snooze_button"
+            android:layout_width="180dp"
+            android:layout_height="45dp"
+            android:layout_marginBottom="@dimen/bottom_button_margin"
+            android:background="@color/colorAccent"
+            android:enabled="true"
+            android:text="@string/snooze_set_button"
+            android:textColor="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </android.support.constraint.ConstraintLayout>
+</layout>

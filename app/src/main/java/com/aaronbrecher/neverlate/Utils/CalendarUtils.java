@@ -41,9 +41,7 @@ public class CalendarUtils {
         //TODO change this to only query calendars user has selected {NOT_MVP}
         //as of now filters for only events starting at midnight of that day until 11:59PM
         String selection = Constants.CALENDAR_EVENTS_DTSTART + " >= ? AND "
-                + Constants.CALENDAR_EVENTS_DTSTART + " <= ? AND "
-                //+ Constants.CALENDAR_EVENTS_EVENT_LOCATION + " IS NOT NULL AND " + Constants.CALENDAR_EVENTS_EVENT_LOCATION + " != '' AND "
-                + "(deleted != 1)";
+                + Constants.CALENDAR_EVENTS_DTSTART + " <= ? AND " + "(deleted != 1)";
         String[] args = getSelectionArgs();
         if(ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) ==
                 PackageManager.PERMISSION_GRANTED){

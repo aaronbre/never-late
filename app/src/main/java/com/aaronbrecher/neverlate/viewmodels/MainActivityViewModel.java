@@ -5,8 +5,11 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 
 import com.aaronbrecher.neverlate.AppExecutors;
+import com.aaronbrecher.neverlate.Utils.BackgroundUtils;
 import com.aaronbrecher.neverlate.database.EventsRepository;
 import com.aaronbrecher.neverlate.models.Event;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,5 +78,18 @@ public class MainActivityViewModel extends BaseViewModel {
 
     public void deleteAllEvents(){
         mEventsRepository.deleteAllEvents();
+    }
+
+    public void setSnoozeForTime(long endTime){
+        mAppExecutors.diskIO().execute(() -> deleteAllEvents());
+        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(mApplication));
+        dispatcher.cancelAll();
+        dispatcher.mustSchedule(BackgroundUtils.endSnoozeJob(dispatcher, endTime));
+    }
+
+    public void rescheduleAllJobs(){
+        FirebaseJobDispatcher jobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(mApplication));
+        jobDispatcher.mustSchedule(BackgroundUtils.setUpPeriodicCalendarChecks(jobDispatcher));
+        jobDispatcher.mustSchedule(BackgroundUtils.setUpActivityRecognitionJob(jobDispatcher));
     }
 }

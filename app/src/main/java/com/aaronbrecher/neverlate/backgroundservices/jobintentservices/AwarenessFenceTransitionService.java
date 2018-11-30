@@ -3,6 +3,7 @@ package com.aaronbrecher.neverlate.backgroundservices.jobintentservices;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v4.app.JobIntentService;
 import android.support.v4.app.NotificationCompat;
@@ -28,6 +29,8 @@ public class AwarenessFenceTransitionService extends JobIntentService {
     private static final String TAG = AwarenessFenceTransitionService.class.getSimpleName();
     @Inject
     EventsRepository mEventsRepository;
+    @Inject
+    SharedPreferences mSharedPreferences;
 
     private Event mEvent;
 
@@ -68,8 +71,11 @@ public class AwarenessFenceTransitionService extends JobIntentService {
             if (fenceKey.contains(Constants.AWARENESS_FENCE_MAIN_PREFIX) && fenceState.getCurrentState() == FenceState.TRUE) {
                 //this is a sanity check in a case where the event was removed from the DB
                 //but the fence was not removed
-                NotificationCompat.Builder notificationBuilder = createNotificationForFence(mEvent);
-                NotificationManagerCompat.from(this).notify(mEvent.getId(), notificationBuilder.build());
+                if(mSharedPreferences.getLong(Constants.SNOOZE_PREFS_KEY, Constants.ROOM_INVALID_LONG_VALUE) == Constants.ROOM_INVALID_LONG_VALUE){
+                    NotificationCompat.Builder notificationBuilder = createNotificationForFence(mEvent);
+                    NotificationManagerCompat.from(this).notify(mEvent.getId(), notificationBuilder.build());
+                }
+
             }
         }
     }

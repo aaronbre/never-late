@@ -65,6 +65,7 @@ public class ActivityTransitionService extends JobIntentService {
             if (event.getTransitionType() == ActivityTransition.ACTIVITY_TRANSITION_EXIT) {
                 setUpFences();
                 stopLocationUpdates();
+                clearDisabledEvents();
             } else if (event.getTransitionType() == ActivityTransition.ACTIVITY_TRANSITION_ENTER) {
                 requestLocationUpdates();
             }
@@ -90,6 +91,10 @@ public class ActivityTransitionService extends JobIntentService {
 
     private void stopLocationUpdates() {
         mLocationProviderClient.removeLocationUpdates(getPendingIntent());
+    }
+
+    private void clearDisabledEvents(){
+        mSharedPreferences.edit().putStringSet(Constants.DISABLED_DRIVING_EVENTS, null).apply();
     }
 
     private PendingIntent getPendingIntent() {

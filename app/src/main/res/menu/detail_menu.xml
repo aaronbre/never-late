@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <group android:id="@+id/save_cancel_menu">
+        <item android:id="@+id/cancel"
+            app:showAsAction="ifRoom"
+            android:title="@string/cancel"
+            android:icon="@drawable/ic_close_white_24dp"/>
+        <item android:id="@+id/save"
+            app:showAsAction="ifRoom"
+            android:title="@string/save"
+            android:icon="@drawable/ic_check_white_24dp"/>
+    </group>
+</menu>

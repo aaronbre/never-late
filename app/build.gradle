@@ -23,8 +23,8 @@ android {
         applicationId "com.aaronbrecher.neverlate"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 23
-        versionName "1.23"
+        versionCode 29
+        versionName "2.12"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "GOOGLE_API_KEY", GOOGLE_API_KEY)
@@ -119,11 +119,15 @@ dependencies {
 
     //billing
     implementation 'com.android.billingclient:billing:1.2'
+
+    //kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    //onboarding
-    implementation 'com.ramotion.paperonboarding:paper-onboarding:1.1.1'
+    //navigation
     implementation 'android.arch.navigation:navigation-fragment:1.0.0-alpha07'
+    implementation "android.arch.navigation:navigation-ui:1.0.0-alpha07"
+
+    //rating
     implementation 'io.github.kobakei:ratethisapp:1.2.0'
 }
 

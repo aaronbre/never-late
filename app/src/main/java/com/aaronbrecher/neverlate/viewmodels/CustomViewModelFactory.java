@@ -33,7 +33,7 @@ public class CustomViewModelFactory implements ViewModelProvider.Factory {
         if (modelClass.isAssignableFrom(MainActivityViewModel.class)) {
             return (T) new MainActivityViewModel(mEventsRepository,mApplication, mAppExecutors);
         } else if (modelClass.isAssignableFrom(DetailActivityViewModel.class)) {
-            return (T) new DetailActivityViewModel(mEventsRepository);
+            return (T) new DetailActivityViewModel(mEventsRepository, mAppExecutors);
         }
         else throw new IllegalArgumentException("ViewModel does not exist");
     }

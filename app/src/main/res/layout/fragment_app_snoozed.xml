@@ -10,7 +10,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@string/no_events_error_image"
-        android:src="@drawable/event_passed_image"
+        android:src="@drawable/snooze_screen_image"
+        android:layout_marginTop="@dimen/vertical_content_spacing_x_2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -18,8 +19,9 @@
     <TextView
         android:id="@+id/app_snoozed_heading"
         style="@style/headline"
-        android:text="@string/passed_event_heading"
+        android:text="@string/app_snoozed_heading"
         android:textColor="@android:color/black"
+        android:layout_marginTop="@dimen/vertical_content_spacing_x_2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/app_snoozed_image" />
@@ -32,7 +34,7 @@
         android:lineSpacingExtra="2dp"
         android:paddingStart="@dimen/material_layout_keylines_screen_edge_margin"
         android:paddingEnd="@dimen/material_layout_keylines_screen_edge_margin"
-        android:text="@string/passed_event_text"
+        android:text="@string/app_snoozed_message_body"
         android:textAlignment="center"
         android:textColor="#344B67"
         android:textSize="@dimen/material_component_lists_two_line_text_size"
@@ -40,5 +42,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/app_snoozed_heading" />
 
+    <Button
+        android:id="@+id/app_snoozed_cancel_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:background="@color/colorAccent"
+        android:textColor="@android:color/white"
+        android:text="@string/app_snoozed_cancel_button"
+        android:layout_marginTop="@dimen/vertical_content_spacing_x_2"
+        app:layout_constraintTop_toBottomOf="@id/app_snoozed_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </android.support.constraint.ConstraintLayout>

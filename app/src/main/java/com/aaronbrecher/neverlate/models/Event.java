@@ -68,7 +68,7 @@ public class Event implements Parcelable {
 
     @Ignore
     public Event(@NonNull int id, @NonNull long calendarId, String title, String description,
-                 LocalDateTime startTime, LocalDateTime endTime, String location, LatLng locationLatlng, boolean watching) {
+                 LocalDateTime startTime, LocalDateTime endTime, String location, LatLng locationLatlng, boolean watching, int transportMode) {
         this.id = id;
         this.calendarId = calendarId;
         this.title = title;
@@ -78,9 +78,19 @@ public class Event implements Parcelable {
         this.location = location;
         this.locationLatlng = locationLatlng;
         this.watching = watching;
+        this.transportMode = transportMode;
     }
 
     public Event() {
+    }
+
+    @Ignore
+    public Event copy(){
+        Event event = new Event(this.getId(), this.getCalendarId(), this.getTitle(), this.getDescription(),
+                this.getStartTime(), this.getEndTime(), this.getLocation(), this.getLocationLatlng(), this.isWatching(), this.getTransportMode());
+        event.setDistance(this.getDistance());
+        event.setDrivingTime(this.getDrivingTime());
+        return event;
     }
 
     @NonNull

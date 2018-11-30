@@ -23,7 +23,9 @@ import com.aaronbrecher.neverlate.ui.activities.EventDetailActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -75,7 +77,9 @@ public class DrivingLocationHelper {
                     long bufferTime = eventTime - Constants.TIME_FIFTEEN_MINUTES;
                     if (arrivalTime >= eventTime) {
                         Boolean pastEndTime = eventTime == Converters.unixFromDateTime(event.getEndTime());
-                        showEventNotification(event, EVENT_TIME, pastEndTime);
+                        if(mSharedPreferences.getLong(Constants.SNOOZE_PREFS_KEY, Constants.ROOM_INVALID_LONG_VALUE) == Constants.ROOM_INVALID_LONG_VALUE){
+                            showEventNotification(event, EVENT_TIME, pastEndTime);
+                        }
                     } else if (arrivalTime >= bufferTime) {
                         showEventNotification(event, BUFFER_TIME, null);
                     }
@@ -120,6 +124,7 @@ public class DrivingLocationHelper {
     }
 
     private void showEventNotification(Event event, int type, Boolean pastEndTime) {
+        if(alreadyNotified(String.valueOf(event.getId()))) return;
         Intent intent = new Intent(mContext, EventDetailActivity.class);
         intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, Event.convertEventToJson(event));
         PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT);
@@ -145,6 +150,14 @@ public class DrivingLocationHelper {
                     .setStyle(new NotificationCompat.BigTextStyle().bigText(mContext.getString(R.string.driving_nofication_time_to_go_content)));
         }
         NotificationManagerCompat.from(mContext).notify(0, builder.build());
+    }
+
+    private boolean alreadyNotified(String id){
+        Set<String> set = mSharedPreferences.getStringSet(Constants.DISABLED_DRIVING_EVENTS, new HashSet<>());
+        if(set.contains(id)) return true;
+        set.add(id);
+        mSharedPreferences.edit().putStringSet(Constants.DISABLED_DRIVING_EVENTS, set).apply();
+        return false;
     }
 
 }

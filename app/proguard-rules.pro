@@ -22,6 +22,7 @@
 
 ## Google Play Services 4.3.23 specific rules ##
 ## https://developer.android.com/google/play-services/setup.html#Proguard ##
+-dontobfuscate
 
 -keep class * extends java.util.ListResourceBundle {
     protected Object[][] getContents();

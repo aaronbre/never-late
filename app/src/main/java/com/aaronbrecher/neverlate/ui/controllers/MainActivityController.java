@@ -1,8 +1,10 @@
 package com.aaronbrecher.neverlate.ui.controllers;
 
 
+import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -30,18 +32,21 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.kobakei.ratethisapp.RateThisApp;
 
+import androidx.navigation.NavController;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivityController {
-    private MainActivity mActivity;
+    private Activity mActivity;
     private FirebaseJobDispatcher mFirebaseJobDispatcher;
+    private NavController mNavController;
 
-    public MainActivityController(MainActivity activity) {
+    public MainActivityController(Activity activity, NavController navController) {
         mActivity = activity;
         mFirebaseJobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(mActivity));
         FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(mActivity);
+        mNavController = navController;
     }
 
     public void setUpActivityMonitoring() {
@@ -113,7 +118,7 @@ public class MainActivityController {
                     if (v == null) return;
                     int latestVersion = v.getVersion();
                     if (currentVersion < latestVersion) {
-                        mActivity.showUpdateSnackbar();
+                        ((MainActivity) mActivity).showUpdateSnackbar();
                     } else if (mActivity.getString(R.string.version_invalid).equals(v.getMessage()) || v.getNeedsUpdate()) {
                         mFirebaseJobDispatcher.cancel(Constants.FIREBASE_JOB_SERVICE_CHECK_CALENDAR_CHANGED);
                         mFirebaseJobDispatcher.cancel(Constants.FIREBASE_JOB_SERVICE_SETUP_ACTIVITY_RECOG);
@@ -131,4 +136,10 @@ public class MainActivityController {
             e.printStackTrace();
         }
     }
+
+    public void navigateToDestination(int id){
+        mNavController.navigate(id);
+
+    }
+
 }
