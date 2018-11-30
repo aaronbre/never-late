@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
@@ -16,17 +17,12 @@ import com.aaronbrecher.neverlate.AppExecutors;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
-import com.aaronbrecher.neverlate.Utils.BackgroundUtils;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
 import com.aaronbrecher.neverlate.Utils.GeofenceUtils;
 import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.backgroundservices.broadcastreceivers.StartJobIntentServiceBroadcastReceiver;
 import com.aaronbrecher.neverlate.database.Converters;
 import com.aaronbrecher.neverlate.database.EventsRepository;
-import com.aaronbrecher.neverlate.dependencyinjection.AppModule;
-import com.aaronbrecher.neverlate.dependencyinjection.DaggerGeofencingComponent;
-import com.aaronbrecher.neverlate.dependencyinjection.RoomModule;
-import com.aaronbrecher.neverlate.interfaces.LocationCallback;
 import com.aaronbrecher.neverlate.models.Event;
 import com.google.android.gms.awareness.Awareness;
 import com.google.android.gms.awareness.FenceClient;
@@ -71,11 +67,7 @@ public class AwarenessFencesCreator{
     }
 
     private AwarenessFencesCreator(List<Event> eventList) {
-        DaggerGeofencingComponent.builder()
-                .appModule(new AppModule(NeverLateApp.getApp()))
-                .roomModule(new RoomModule())
-                .build()
-                .inject(this);
+        NeverLateApp.getApp().getAppComponent().inject(this);
         mFenceClient = Awareness.getFenceClient(mApp);
         mEventList = eventList;
         mAlertTime = getAlertTime();

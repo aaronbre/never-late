@@ -1,21 +1,16 @@
 package com.aaronbrecher.neverlate.Utils;
 
-import android.Manifest;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.support.v4.app.ActivityCompat;
-
 import com.aaronbrecher.neverlate.Constants;
+import com.aaronbrecher.neverlate.backgroundservices.AnaylizeEventsJobService;
 import com.aaronbrecher.neverlate.backgroundservices.CheckForCalendarChangedService;
+import com.aaronbrecher.neverlate.backgroundservices.EndSnoozeJobService;
 import com.aaronbrecher.neverlate.backgroundservices.SetupActivityRecognitionJobService;
-import com.aaronbrecher.neverlate.interfaces.LocationCallback;
 import com.firebase.jobdispatcher.Constraint;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.Job;
 import com.firebase.jobdispatcher.Lifetime;
 import com.firebase.jobdispatcher.RetryStrategy;
 import com.firebase.jobdispatcher.Trigger;
-import com.google.android.gms.location.FusedLocationProviderClient;
 
 public class BackgroundUtils {
     public static final int DEFAULT_JOB_TIMEFRAME = 15;
@@ -32,7 +27,7 @@ public class BackgroundUtils {
                 .setTrigger(Trigger.executionWindow(ONE_HOUR_IN_SECONDS * 23, ONE_HOUR_IN_SECONDS * 24))
                 .setRecurring(true)
                 .setReplaceCurrent(false)
-                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
+                .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR)
                 .setConstraints(Constraint.ON_ANY_NETWORK)
                 .build();
     }
@@ -65,22 +60,25 @@ public class BackgroundUtils {
                 .build();
     }
 
+    public static Job anaylzeSchedule(FirebaseJobDispatcher dispatcher){
+        return dispatcher.newJobBuilder()
+                .setService(AnaylizeEventsJobService.class)
+                .setTag(Constants.FIREBASE_JOB_SERVICE_ANALYZE_SCHEDULE_TAG)
+                .setRecurring(false)
+                .setTrigger(Trigger.NOW)
+                .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR)
+                .build();
+    }
 
-
-    /**
-     * get the user last known location and send it back to provided callback
-     * @param callback interface that will use the location
-     * @param context context to use the fused location provider
-     * @param providerClient
-     */
-    public static void getLocation(final LocationCallback callback, Context context, FusedLocationProviderClient providerClient) {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        providerClient.getLastLocation().addOnSuccessListener(location -> {
-            if (location == null) callback.getLocationFailedCallback();
-            else callback.getLocationSuccessCallback(location);
-        }).addOnFailureListener(e -> callback.getLocationFailedCallback());
+    public static Job endSnoozeJob(FirebaseJobDispatcher dispatcher, long endTime){
+        long now = System.currentTimeMillis();
+        int timeToEnd = (int) (endTime - now)/1000;
+        return dispatcher.newJobBuilder()
+                .setTag(Constants.FIREBASE_JOB_SERVICE_END_SNOOZE)
+                .setService(EndSnoozeJobService.class)
+                .setRecurring(false)
+                .setTrigger(Trigger.executionWindow(timeToEnd, timeToEnd + 60))
+                .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR)
+                .build();
     }
 }

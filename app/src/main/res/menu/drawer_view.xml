@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group>
+        <item
+            android:id="@+id/drawer_home"
+            android:icon="@drawable/ic_home_gray_24dp"
+            android:title="@string/drawer_home" />
+        <item
+            android:id="@+id/drawer_analyze"
+            android:icon="@drawable/analyze_icon"
+            android:title="@string/drawer_analyze_title" />
+        <item
+            android:id="@+id/drawer_subscription"
+            android:icon="@drawable/ic_subscriptions_gray_24dp"
+            android:title="@string/drawer_subscription" />
+        <item
+            android:id="@+id/drawer_settings"
+            android:icon="@drawable/ic_settings_gray_24dp"
+            android:title="@string/menu_settings" />
+        <item
+            android:id="@+id/drawer_snooze"
+            android:title="@string/drawer_snooze"
+            android:icon="@drawable/ic_snooze_gray_24dp"/>
+        <item
+            android:id="@+id/drawer_privacy"
+            android:icon="@drawable/ic_security_gray_24dp"
+            android:title="@string/menu_privacy_policy" />
+
+    </group>
+</menu>

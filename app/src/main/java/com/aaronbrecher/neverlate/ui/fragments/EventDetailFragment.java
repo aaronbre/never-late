@@ -1,50 +1,41 @@
 package com.aaronbrecher.neverlate.ui.fragments;
 
-import android.annotation.SuppressLint;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
 import com.aaronbrecher.neverlate.Utils.GeofenceUtils;
-import com.aaronbrecher.neverlate.Utils.LocationUtils;
-import com.aaronbrecher.neverlate.Utils.SystemUtils;
-import com.aaronbrecher.neverlate.databinding.EventDetailFragmentBinding;
-import com.aaronbrecher.neverlate.dependencyinjection.AppComponent;
+import com.aaronbrecher.neverlate.databinding.FragmentEventDetailBinding;
 import com.aaronbrecher.neverlate.models.Event;
+import com.aaronbrecher.neverlate.ui.activities.EventDetailActivity;
 import com.aaronbrecher.neverlate.viewmodels.BaseViewModel;
 import com.aaronbrecher.neverlate.viewmodels.DetailActivityViewModel;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.threeten.bp.format.DateTimeFormatter;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.inject.Inject;
 
-public class EventDetailFragment extends Fragment implements OnMapReadyCallback {
+public class EventDetailFragment extends Fragment {
 
     @Inject
     ViewModelProvider.Factory mViewModelFactory;
@@ -54,31 +45,34 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
     @Inject
     FusedLocationProviderClient mFusedLocationProviderClient;
     private BaseViewModel mViewModel;
-    private EventDetailFragmentBinding mBinding;
-    private SupportMapFragment mMapFragment;
+    private FragmentEventDetailBinding mBinding;
     private Event mEvent;
-    private Marker mEventMarker;
-    private Marker mLocationMarker;
-    private LatLng mUserLocationLatLng = null;
+    private EventDetailActivity mActivity;
+    private EditedEventListener mEditedEventListener;
+
 
     private Observer<Event> mEventObserver = new Observer<Event>() {
         @Override
         public void onChanged(@Nullable Event event) {
             mBinding.setEvent(event);
-            mMapFragment.getMapAsync(EventDetailFragment.this);
             mEvent = event;
             String timeToLeave = DirectionsUtils.getTimeToLeaveHumanReadable(mEvent.getDrivingTime(),
                     GeofenceUtils.determineRelevantTime(mEvent.getStartTime(), mEvent.getEndTime()));
             String formatted = getString(R.string.event_detail_leave_time, timeToLeave);
             mBinding.eventDetailLeaveTime.setText(formatted);
+            String watchingText;
+            watchingText = event.isWatching() ? getString(R.string.tracking) : getString(R.string.not_tracking);
+            mBinding.eventDetailTracking.setText(watchingText);
+            setTransportTextView();
         }
     };
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        AppComponent appComponent = ((NeverLateApp) getActivity().getApplication()).getAppComponent();
-        appComponent.inject(this);
+        mActivity = (EventDetailActivity) getActivity();
+        mEditedEventListener = mActivity;
+        NeverLateApp.getApp().getAppComponent().inject(this);
         if (getResources().getBoolean(R.bool.is_tablet)) {
             mViewModel = ViewModelProviders.of(getActivity(), mViewModelFactory).get(MainActivityViewModel.class);
         } else {
@@ -90,60 +84,93 @@ public class EventDetailFragment extends Fragment implements OnMapReadyCallback 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mBinding = EventDetailFragmentBinding.inflate(inflater, container, false);
+        mBinding = FragmentEventDetailBinding.inflate(inflater, container, false);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM d  h:mm a");
         mBinding.setFormatter(formatter);
-        mMapFragment = (SupportMapFragment) getChildFragmentManager()
-                .findFragmentById(R.id.event_detail_map);
         mViewModel.getEvent().observe(this, mEventObserver);
+        mBinding.eventDetailChangeTrackingButton.setOnClickListener(mClickListener);
+        mBinding.eventDetailChangeTransportButton.setOnClickListener(mClickListener);
         return mBinding.getRoot();
     }
 
-    @SuppressLint("MissingPermission")
-    @Override
-    public void onMapReady(final GoogleMap googleMap) {
-        if(SystemUtils.hasLocationPermissions(getActivity())){
-            mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(location -> {
-                if (location != null) mUserLocationLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-                setUpMap(googleMap);
-            });
-        } else {
-            setUpMap(googleMap);
+    private void setTransportTextView() {
+        int mode = mEvent.getTransportMode();
+        String modeString;
+        switch (mode) {
+            case Constants.TRANSPORT_WALKING:
+                modeString = getString(R.string.transport_mode_walking);
+                break;
+            case Constants.TRANSPORT_PUBLIC:
+                modeString = getString(R.string.transport_mode_public);
+                break;
+            default:
+                modeString = getString(R.string.transport_mode_driving);
+
         }
+        mBinding.eventDetailTransportMode.setText(modeString);
     }
 
-    @SuppressLint("MissingPermission")
-    private void setUpMap(GoogleMap googleMap) {
-        if (mEventMarker != null) mEventMarker.remove();
-        if (mLocationMarker != null) mLocationMarker.remove();
-        googleMap.setMyLocationEnabled(true);
-        if(!mEvent.getLocation().isEmpty()){
-            LatLng latLng = mEvent.getLocationLatlng();
-            LatLngBounds.Builder builder = new LatLngBounds.Builder();
-            if (latLng != null) {
-                mEventMarker = googleMap.addMarker(new MarkerOptions().position(latLng)
-                        .title(mEvent.getTitle()));
-                builder.include(latLng);
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
+    private View.OnClickListener mClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            int id = view.getId();
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            if (id == mBinding.eventDetailChangeTrackingButton.getId()) {
+                int checked = mBinding.eventDetailTracking.getText().toString().equals(getString(R.string.tracking)) ? 0 : 1;
+                AtomicInteger userSelected = new AtomicInteger();
+                builder.setTitle(R.string.edit_dialog_tracking_title);
+                builder.setSingleChoiceItems(R.array.event_detail_edit_tracking, checked, (dialog, which) -> userSelected.set(which));
+                builder.setPositiveButton(R.string.save, (dialog, which) -> {
+                    //This will be true for tracking and false for not tracking used to check if there
+                    //was a real change from original event
+                    boolean selectedTracking = userSelected.get() == 0;
+                    String watchingText = userSelected.get() == 0 ? "Tracking" : "Not tracking";
+                    mBinding.eventDetailTracking.setText(watchingText);
+                    Event editedEvent = mEvent.copy();
+                    editedEvent.setWatching(selectedTracking);
+                    mEditedEventListener.updateEvent(editedEvent);
+                    if (selectedTracking != mEvent.isWatching()) {
+                        mActivity.showOptionsMenu();
+                    }else {
+                        mActivity.hideOptionsMenu();
+                    }
+                });
+                builder.setNegativeButton(R.string.cancel, null);
+                builder.create().show();
+            } else if (id == mBinding.eventDetailChangeTransportButton.getId()) {
+                Toast.makeText(getActivity(), "This feature is not implemented yet, we are working hard to get this up and running", Toast.LENGTH_SHORT).show();
+//                TODO this is not yet implemented
+//                builder.setTitle("Select driving mode");
+//                builder.setItems(R.array.event_detail_edit_transport, (dialog, which) ->{
+//                    String transportMode = "";
+//                    switch (which + 1){
+//                        case Constants.TRANSPORT_DRIVING:
+//                            transportMode = getString(R.string.transport_mode_driving);
+//                            break;
+//                        case Constants.TRANSPORT_WALKING:
+//                            transportMode = getString(R.string.transport_mode_walking);
+//                            break;
+//                        case Constants.TRANSPORT_PUBLIC:
+//                            transportMode = getString(R.string.transport_mode_public);
+//                            break;
+//                    }
+//                    mBinding.eventDetailTransportMode.setText(transportMode);
+//                    Event editedEvent = mEvent.copy();
+//                    editedEvent.setTransportMode(which+1);
+//                    mEditedEventListener.updateEvent(editedEvent);
+//                    if(mEvent.getTransportMode() == which+1){
+//                        mActivity.hideOptionsMenu();
+//                    }else {
+//                        mActivity.showOptionsMenu();
+//                    }
+//                });
+//                builder.setNegativeButton(R.string.cancel, null);
+//                builder.create().show();
             }
-
-            if (mUserLocationLatLng != null) {
-                builder.include(mUserLocationLatLng);
-            }
-            googleMap.setOnMapLoadedCallback(() -> {
-                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(builder.build(), 200);
-                googleMap.animateCamera(cu);
-            });
-        }else if(mUserLocationLatLng != null){
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mUserLocationLatLng,10));
         }
-    }
+    };
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (mEvent != null) {
-            mViewModel.getGeofenceForKey(mEvent.getId()).removeObservers(this);
-        }
+    public interface EditedEventListener{
+        void updateEvent(Event event);
     }
 }

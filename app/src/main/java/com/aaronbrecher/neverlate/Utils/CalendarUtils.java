@@ -41,9 +41,7 @@ public class CalendarUtils {
         //TODO change this to only query calendars user has selected {NOT_MVP}
         //as of now filters for only events starting at midnight of that day until 11:59PM
         String selection = Constants.CALENDAR_EVENTS_DTSTART + " >= ? AND "
-                + Constants.CALENDAR_EVENTS_DTSTART + " <= ? AND "
-                //+ Constants.CALENDAR_EVENTS_EVENT_LOCATION + " IS NOT NULL AND " + Constants.CALENDAR_EVENTS_EVENT_LOCATION + " != '' AND "
-                + "(deleted != 1)";
+                + Constants.CALENDAR_EVENTS_DTSTART + " <= ? AND " + "(deleted != 1)";
         String[] args = getSelectionArgs();
         if(ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) ==
                 PackageManager.PERMISSION_GRANTED){
@@ -122,6 +120,8 @@ public class CalendarUtils {
         event.setWatching(true);
         event.setDistance(Constants.ROOM_INVALID_LONG_VALUE);
         event.setDrivingTime(Constants.ROOM_INVALID_LONG_VALUE);
+        event.setTransportMode(Constants.TRANSPORT_DRIVING);
+        event.setOrigin("");
         return event;
     }
 
@@ -177,6 +177,8 @@ public class CalendarUtils {
                         eventsToAddNoGeofences.add(oldEvent);
                         break;
                     case GEOFENCE_CHANGE:
+                        newEvent.setWatching(oldEvent.isWatching());
+                        //TODO add all other data that would not be in the new event
                         eventsToAddWithGeofences.add(newEvent);
                         break;
                     case SAME:

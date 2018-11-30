@@ -1,18 +1,24 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowContentTransitions">true</item>
         <item name="android:windowEnterTransition">@transition/slide</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowTranslucentStatus">false</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 
     <style name="AppTheme.Launcher">
         <item name="android:windowBackground">@drawable/launch_screen</item>
+    </style>
+
+    <style name="AppTheme.Drawer">
+        <item name="android:windowTranslucentStatus">true</item>
     </style>
 
     <style name="headline">
@@ -37,8 +43,13 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="layout_constraintStart_toStartOf">parent</item>
+        <item name="android:layout_marginTop">@dimen/vertical_content_spacing_x_2</item>
         <item name="android:layout_marginStart">@dimen/material_layout_keylines_screen_edge_margin
         </item>
+    </style>
+
+    <style name="eventDetailImage.NoTopMagin">
+        <item name="android:layout_marginTop">0dp</item>
     </style>
 
     <style name="eventDetailDivder">
@@ -57,7 +68,6 @@
 
     <style name="eventDetailDivder.Land" parent="eventDetailDivder">
         <item name="android:layout_marginTop">@dimen/small_margin</item>
-        <item name="layout_constraintEnd_toEndOf">@id/guideline</item>
     </style>
 
     <style name="eventDetailText">
@@ -77,7 +87,15 @@
         <item name="android:layout_marginEnd">
             @dimen/material_layout_vertical_spacing_between_content_areas
         </item>
-        <item name="layout_constraintEnd_toStartOf">@id/guideline</item>
+    </style>
+    
+    <style name="eventDetailEditButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name= "android:layout_marginEnd">@dimen/material_layout_keylines_screen_edge_margin</item>
+        <item name="android:text">Edit</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:textColor">@color/colorAccent</item>
     </style>
 
     <!--Loading animation-->

@@ -1,7 +1,7 @@
 package com.aaronbrecher.neverlate.network;
 
-import com.aaronbrecher.neverlate.models.retrofitmodels.DistanceMatrix;
-import com.aaronbrecher.neverlate.models.retrofitmodels.MapboxDirectionMatrix;
+import com.aaronbrecher.neverlate.models.retrofitmodels.googleDistanceMatrix.DistanceMatrix;
+import com.aaronbrecher.neverlate.models.retrofitmodels.MapboxDirectionMatrix.MapboxDirectionMatrix;
 import com.aaronbrecher.neverlate.models.retrofitmodels.Version;
 
 import retrofit2.Call;

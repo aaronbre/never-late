@@ -32,7 +32,7 @@
     <string name="passed_event_heading">Event Missed</string>
     <string name="passed_event_text">Seems like this event has already passed, make sure that notifications are active so you don\'t miss any other events.</string>
     <string name="menu_item_show_all">Show all Events</string>
-    <string name="menu_item_show_loc_only">Show only events with location</string>
+    <string name="menu_item_show_loc_only">Show only tracked events</string>
     <string name="search">Search</string>
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
@@ -57,6 +57,10 @@
     <string name="version_mismatch_snackbar_update_button">Update</string>
     <string name="version_invalid">Invalid Version</string>
 
+    <!--undo delete snackbar strings-->
+    <string name="undo_delete_snackbar">This event will no longer be tracked. Reactivate it in its detail screen by showing all events</string>
+    <string name="undo_delete_snackbar_action_undo">Undo</string>
+    <string name="undo_delete_snackbar_action_dismiss">Dismiss</string>
     <!--admob-->
     <string name="admob_id">ca-app-pub-6961678341915263~3845118420</string>
     <string name="ad_mob_interstitial_ad_unit">ca-app-pub-6961678341915263/9541132389</string>
@@ -72,18 +76,36 @@
     <string name="pref_units_label_imperial">Miles</string>
 
     <!--Speed prefs strings-->
-    <string name="prefs_speed_title">Default speed (kph)</string>
+    <string name="prefs_speed_title">Default speed</string>
     <string name="prefs_speed_key" translatable="false">kpm</string>
+
+    <!--Metric-->
     <string name="prefs_speed_very_slow_option">30 Kilometers per hour</string>
     <string name="prefs_speed_slow_option">40 Kilometers per hour</string>
     <string name="prefs_speed_medium_option">50 Kilometers per hour</string>
     <string name="prefs_speed_fast_option">60 Kilometers per hour</string>
     <string name="prefs_speed_very_fast_option">70 Kilometers per hour</string>
+    <string name="prefs_speed_extremely_fast_option">100 kilometers per hour</string>
     <string name="prefs_speed_very_slow_value">0.5</string>
     <string name="prefs_speed_slow_value">0.666667</string>
-    <string name="prefs_speed_medium_value">833333</string>
+    <string name="prefs_speed_medium_value">0.833333</string>
     <string name="prefs_speed_fast_value">1</string>
     <string name="prefs_speed_very_fast_value">1.166667</string>
+    <string name="prefs_speed_extremely_fast_value">1.666</string>
+
+    <!--Imperial-->
+    <string name="prefs_speed_very_slow_option_miles">15 miles per hour</string>
+    <string name="prefs_speed_slow_option_miles">25 miles per hour</string>
+    <string name="prefs_speed_medium_option_miles">35 miles per hour</string>
+    <string name="prefs_speed_fast_option_miles">45 miles per hour</string>
+    <string name="prefs_speed_very_fast_option_miles">55 miles per hour</string>
+    <string name="prefs_speed_extremely_fast_option_miles">65 miles per hour</string>
+    <string name="prefs_speed_very_slow_value_miles">0.4</string>
+    <string name="prefs_speed_slow_value_miles">0.666667</string>
+    <string name="prefs_speed_medium_value_miles">0.93333</string>
+    <string name="prefs_speed_fast_value_miles">1.4</string>
+    <string name="prefs_speed_very_fast_value_miles">1.47</string>
+    <string name="prefs_speed_extremely_fast_value_miles">1.73</string>
 
     <string name="prefs_speed_default" translatable="false">@string/prefs_speed_slow_value</string>
     <string name="menu_settings">Settings</string>
@@ -109,4 +131,60 @@
     <string name="title_activity_onboarding">Onboarding</string>
     <string name="action_settings">Settings</string>
     <string name="section_format">Hello World from section: %1$d</string>
+    <string name="drawer_analyze_title">Analyze Schedule</string>
+    <string name="drawer_subscription">Subscription Status</string>
+    <string name="drawer_home">Home</string>
+    <string name="maximum_time_by_event">Maximum time by event</string>
+    <string name="analyze_leave_time_label">Time to leave to next event</string>
+    <string name="subscription_heading">Subscription</string>
+    <string name="subscription_main_body">In order to provide our users with the most relevant travel
+        time data we use the Mapbox API to get driving time data. In order to uset this data a subscription is necessary as the costs
+        can be quite high. if you would rather use more basic data you can, and no subscription is needed.
+        Subscription will also unlock additional features as well.</string>
+    <string name="subscription_initial_launch_notice">Subscription features are enabled for all users during initial launch</string>
+    <string name="subscription_bullet_list"><b><big>Premium Features</big></b>
+        \n <li>Ads are removed</li>
+        \n <li>Uses real time data to determine travel distance and duration</li>
+        \n <li>Allow different modes of transport, Walking, Cycling, Public Transportation</li>
+        \n <li>Use of schedule analyzer to analyze your day to make sure all events are within drivable distance to each other</li></string>
+    <string name="standard_bullet_list"><b><big>Standard Features</big></b>
+        \n <li>Ads are enabled</li>
+        \n <li>Uses "as the crow flies" distance and default speed</li>
+        \n <li>Travel options are limited to driving only</li></string>
+    <string name="subscription_button">Subscribe</string>
+    <string name="list_item_start_label">Start time</string>
+    <string name="event_detail_transport_label">Transport Mode</string>
+    <string name="event_detail_tracking_label">Currently Watched</string>
+    <string name="transport_mode_walking">Walking</string>
+    <string name="transport_mode_public">Public Transport</string>
+    <string name="transport_mode_driving">Driving</string>
+    <string name="save">Save</string>
+    <string name="cancel">cancel</string>
+    <string name="edit_dialog_tracking_title">Track this event?</string>
+    <string name="edit_dialog_track">Track</string>
+    <string name="edit_dialog_stop_tracking">Stop Tracking</string>
+    <string name="tracking">Tracking</string>
+    <string name="not_tracking">Not tracking</string>
+    <string name="event_updated_toast">Event Updated</string>
+    <string name="event_update_cancelled_toast">Update cancelled</string>
+    <string name="drawer_snooze">Snooze App</string>
+
+    <!--Snooze strings-->
+    <string name="snooze_heading">Snooze App</string>
+    <string name="snooze_main_text">If you feel like you do not need the app functionality at this time you can snooze it here until a specified time. When the app is snoozed you will not see any events in the list, and event analysis will not be available.
+    \n\nNote: If you would like to retain the functionality but not receive notifications use the switch below.</string>
+    <string name="snooze_set_button">Set Snooze</string>
+    <string name="cancel_snooze_button">Cancel Snooze</string>
+    <string name="snoozed_until_label">Snoozed Until</string>
+    <string name="edit_snooze_button">Edit Snooze</string>
+    <string name="refresh_pressed_on_snooze">App is currently snoozed, disable snooze in order to refresh</string>
+    <string name="snooze_end_error_toast">Snooze end must be after current time</string>
+    <string name="snooze_options_label">Only snooze Notifications</string>
+    <string name="snooze_type_main">Currently snoozing - %1$s</string>
+    <string name="snooze_type_all">all functionality</string>
+    <string name="snooze_type_notifications">only notifications</string>
+    <string name="app_snoozed_heading">App is snoozed</string>
+    <string name="app_snoozed_message_body">Snooze is activated and therefore no events are being tracked. To enable tracking turn off snooze.</string>
+    <string name="app_snoozed_cancel_button">Go to Snooze Settings</string>
+    <string name="stop_alerts_driving_notification">Stop alerts for this event</string>
 </resources>

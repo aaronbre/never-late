@@ -3,11 +3,13 @@ package com.aaronbrecher.neverlate.viewmodels;
 import android.app.Application;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.os.AsyncTask;
 
+import com.aaronbrecher.neverlate.AppExecutors;
+import com.aaronbrecher.neverlate.Utils.BackgroundUtils;
 import com.aaronbrecher.neverlate.database.EventsRepository;
-import com.aaronbrecher.neverlate.database.GeofencesRepository;
 import com.aaronbrecher.neverlate.models.Event;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,23 +28,17 @@ public class MainActivityViewModel extends BaseViewModel {
     private MutableLiveData<List<Event>> mEventsWithLocation;
 
     @Inject
-    public MainActivityViewModel(EventsRepository eventsRepository, GeofencesRepository geofencesRepository, Application application) {
-        super(eventsRepository, geofencesRepository, application);
+    public MainActivityViewModel(EventsRepository eventsRepository, Application application, AppExecutors appExecutors) {
+        super(eventsRepository, application, appExecutors);
     }
 
     //insert the events async using a simple async task
     public void insertEvents(List<Event> events) {
-        new AsyncTask<List<Event>, Void, Void>() {
-            @Override
-            protected Void doInBackground(List<Event>... lists) {
-                mEventsRepository.insertAll(lists[0]);
-                return null;
-            }
-        }.execute(events);
+        mAppExecutors.diskIO().execute(()-> mEventsRepository.insertAll(events));
     }
 
     public LiveData<List<Event>> getAllCurrentEvents() {
-        return mEventsRepository.queryAllCurrentEvents();
+        return mEventsRepository.queryAllCurrentTrackedEvents();
     }
 
     public LiveData<List<Event>> getAllEvents() {
@@ -72,11 +68,28 @@ public class MainActivityViewModel extends BaseViewModel {
         mShouldShowAllEvents.postValue(bool);
     }
 
+    public void updateEvent(Event event){
+        mAppExecutors.diskIO().execute(()-> mEventsRepository.updateEvents(event));
+    }
+
     public void setShowAllEvents(){
 
     }
 
     public void deleteAllEvents(){
         mEventsRepository.deleteAllEvents();
+    }
+
+    public void setSnoozeForTime(long endTime){
+        mAppExecutors.diskIO().execute(() -> deleteAllEvents());
+        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(mApplication));
+        dispatcher.cancelAll();
+        dispatcher.mustSchedule(BackgroundUtils.endSnoozeJob(dispatcher, endTime));
+    }
+
+    public void rescheduleAllJobs(){
+        FirebaseJobDispatcher jobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(mApplication));
+        jobDispatcher.mustSchedule(BackgroundUtils.setUpPeriodicCalendarChecks(jobDispatcher));
+        jobDispatcher.mustSchedule(BackgroundUtils.setUpActivityRecognitionJob(jobDispatcher));
     }
 }

@@ -5,11 +5,11 @@ import android.arch.persistence.room.RoomDatabase;
 import android.arch.persistence.room.TypeConverters;
 
 import com.aaronbrecher.neverlate.models.Event;
-import com.aaronbrecher.neverlate.models.GeofenceModel;
+import com.aaronbrecher.neverlate.models.EventCompatibility;
 
-@Database(entities = {Event.class, GeofenceModel.class}, version = 2)
+@Database(entities = {Event.class, EventCompatibility.class}, version = 7)
 @TypeConverters({Converters.class})
 public abstract class EventsDatabase extends RoomDatabase{
     public abstract EventsDao eventsDao();
-    public abstract GeofencesDao geofencesDao();
+    public abstract EventCompatibilityDao compatabilityDao();
 }

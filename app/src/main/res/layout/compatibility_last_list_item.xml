@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="event"
+            type="com.aaronbrecher.neverlate.models.Event" />
+
+        <variable
+            name="formatter"
+            type="org.threeten.bp.format.DateTimeFormatter" />
+
+        <import type="android.view.View" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/included_item"
+            layout="@layout/compatibility_list_item"/>
+
+        <ImageView
+            android:id="@+id/list_item_connection_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/is_compatible"/>
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/list_item_card_view_second"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/small_margin"
+            android:layout_marginEnd="@dimen/small_margin"
+            android:layout_marginBottom="@dimen/small_margin">
+
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/small_margin">
+
+                <TextView
+                    android:id="@+id/list_item_title_second"
+                    android:layout_width="0dp"
+                    style="@style/headline"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:text="@{event.title}"
+                    app:layout_constraintEnd_toStartOf="@+id/list_item_start_second"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="Doctor Appointment" />
+
+                <TextView
+                    android:id="@+id/list_item_address_second"
+                    android:layout_width="0dp"
+                    style="@style/smallSubHeading"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:text="@{event.location}"
+                    app:layout_constraintEnd_toStartOf="@+id/list_item_start_second"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/list_item_title_second"
+                    tools:text="32 East 7th Street, Brooklyn NY" />
+
+                <TextView
+                    android:id="@+id/list_item_start_label_second"
+                    style="@style/smallSubHeading"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toStartOf="@+id/list_item_start_second"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="Start" />
+
+                <TextView
+                    android:id="@+id/list_item_start_second"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:text="@{event.startTime.format(formatter)}"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/list_item_start_label_second"
+                    tools:text="10:45 AM" />
+            </android.support.constraint.ConstraintLayout>
+        </android.support.v7.widget.CardView>
+    </LinearLayout>
+
+</layout>

@@ -1,14 +1,13 @@
 package com.aaronbrecher.neverlate.viewmodels;
 
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.ViewModel;
 
-import com.aaronbrecher.neverlate.Constants;
+import com.aaronbrecher.neverlate.AppExecutors;
 import com.aaronbrecher.neverlate.database.EventsRepository;
-import com.aaronbrecher.neverlate.database.GeofencesRepository;
+import com.aaronbrecher.neverlate.geofencing.AwarenessFencesCreator;
 import com.aaronbrecher.neverlate.models.Event;
-import com.aaronbrecher.neverlate.models.GeofenceModel;
+
+import java.util.ArrayList;
 
 import javax.inject.Inject;
 
@@ -16,8 +15,8 @@ public class DetailActivityViewModel extends BaseViewModel {
     private MutableLiveData<Event> mEvent;
 
     @Inject
-    public DetailActivityViewModel(EventsRepository eventsRepository, GeofencesRepository geofencesRepository){
-        super(eventsRepository, geofencesRepository, null);
+    public DetailActivityViewModel(EventsRepository eventsRepository, AppExecutors appExecutors) {
+        super(eventsRepository, null, appExecutors);
     }
 
     public MutableLiveData<Event> getEvent() {
@@ -32,4 +31,21 @@ public class DetailActivityViewModel extends BaseViewModel {
         }
         mEvent.postValue(event);
     }
+
+    public void updateEvent(Event event) {
+        mAppExecutors.diskIO().execute(() -> mEventsRepository.updateEvents(event));
+    }
+
+    public void resetFenceForEvent(Event event){
+        ArrayList<Event> events = new ArrayList<>();
+        events.add(event);
+        AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(events).build();
+        creator.buildAndSaveFences();
+    }
+
+    public void removeGeofenceForEvent(Event event){
+        AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(null).build();
+        creator.removeFences(event);
+    }
+
 }

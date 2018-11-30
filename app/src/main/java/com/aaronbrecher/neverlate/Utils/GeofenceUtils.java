@@ -13,25 +13,7 @@ import java.util.List;
 public class GeofenceUtils {
     private static final String TAG = GeofenceUtils.class.getSimpleName();
 
-    /**
-     * Get the fence Radius based on the time and the kmPerMinute Multiplier
-     * Radius will be determined by roundtrip to point (hence divided by 2)
-     *
-     * @param timeToEvent the time to the event either will be start or end
-     * @param kmPerMinute as it sounds - when DistanceMatrix was not able to be used this
-     *                    will be a constant value from shared prefs, otherwise this will
-     *                    be determined by getting the average speed from all events
-     * @return an integer value of the rounded radius in meters
-     */
-    public static int getFenceRadius(long timeToEvent, double kmPerMinute) {
-        long millisToEvent = (timeToEvent - System.currentTimeMillis());
-        long minutesToEvent = millisToEvent / 60000;
-        double kmRadius = (minutesToEvent * kmPerMinute);
-        double meterRadius = kmRadius * 1000;
-        Log.i(TAG, "getFenceRadius: " + Math.round(meterRadius));
-        int radius = (int) Math.round(meterRadius);
-        return radius > 100 ? radius : 100;
-    }
+
 
     /**
      * Determine time to use to calculate the fence, if we are past the start time

@@ -7,41 +7,43 @@
     <android.support.constraint.ConstraintLayout
         android:id="@+id/list_item_container"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/list_item_height"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/material_layout_vertical_spacing_between_content_areas"
+        android:paddingBottom="@dimen/material_layout_vertical_spacing_between_content_areas"
         android:layout_marginLeft="@dimen/material_layout_keylines_screen_edge_margin"
         android:layout_marginRight="@dimen/material_layout_keylines_screen_edge_margin">
 
         <TextView
             android:id="@+id/event_title"
             style="@style/headline"
-            app:layout_constraintBottom_toTopOf="@id/event_location"
+            android:layout_width="0dp"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/event_time_to"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_chainStyle="spread"
             tools:text="Doctors Appointment" />
 
         <TextView
             android:id="@+id/event_location"
             style="@style/smallSubHeading"
-            android:maxWidth="@dimen/address_max_width"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_width="0dp"
+            android:layout_marginTop="@dimen/margin_very_small"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/event_title"
+            app:layout_constraintEnd_toStartOf="@id/event_time_to"
             tools:text="665 Princeton ave lakewood NJ, Ocean county USA 08701-12943" />
 
         <TextView
             android:id="@+id/event_time_to"
             style="@style/headline"
-            app:layout_constraintBottom_toTopOf="@id/event_distance"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_chainStyle="spread"
+            app:layout_constraintTop_toTopOf="@id/event_title"
+            app:layout_constraintBottom_toBottomOf="@id/event_title"
             app:layout_constraintEnd_toEndOf="parent"
             tools:text="45 Min" />
 
         <TextView
             android:id="@+id/event_distance"
             style="@style/smallSubHeading"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginTop="@dimen/margin_very_small"
             app:layout_constraintEnd_toEndOf="@id/event_time_to"
             app:layout_constraintTop_toBottomOf="@id/event_time_to"
             tools:text="22 Miles" />

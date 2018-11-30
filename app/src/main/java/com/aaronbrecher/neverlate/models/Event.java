@@ -55,16 +55,20 @@ public class Event implements Parcelable {
     private boolean watching;
 
     @ColumnInfo
-    @Nullable
     private Long distance;
 
     @ColumnInfo
-    @Nullable
     private Long drivingTime;
+
+    @ColumnInfo
+    private String origin;
+
+    @ColumnInfo
+    private Integer transportMode;
 
     @Ignore
     public Event(@NonNull int id, @NonNull long calendarId, String title, String description,
-                 LocalDateTime startTime, LocalDateTime endTime, String location, LatLng locationLatlng, boolean watching) {
+                 LocalDateTime startTime, LocalDateTime endTime, String location, LatLng locationLatlng, boolean watching, int transportMode) {
         this.id = id;
         this.calendarId = calendarId;
         this.title = title;
@@ -74,9 +78,19 @@ public class Event implements Parcelable {
         this.location = location;
         this.locationLatlng = locationLatlng;
         this.watching = watching;
+        this.transportMode = transportMode;
     }
 
     public Event() {
+    }
+
+    @Ignore
+    public Event copy(){
+        Event event = new Event(this.getId(), this.getCalendarId(), this.getTitle(), this.getDescription(),
+                this.getStartTime(), this.getEndTime(), this.getLocation(), this.getLocationLatlng(), this.isWatching(), this.getTransportMode());
+        event.setDistance(this.getDistance());
+        event.setDrivingTime(this.getDrivingTime());
+        return event;
     }
 
     @NonNull
@@ -153,24 +167,36 @@ public class Event implements Parcelable {
         this.watching = watching;
     }
 
-    @NonNull
     public Long getDistance() {
-        if(this.distance == null) return Constants.ROOM_INVALID_LONG_VALUE;
         return distance;
     }
 
-    public void setDistance(long distance) {
+    public void setDistance(Long distance) {
         this.distance = distance;
     }
 
-    @NonNull
     public Long getDrivingTime() {
-        if (this.drivingTime == null) return Constants.ROOM_INVALID_LONG_VALUE;
         return drivingTime;
     }
 
-    public void setDrivingTime(long drivingTime) {
+    public void setDrivingTime(Long drivingTime) {
         this.drivingTime = drivingTime;
+    }
+
+    public String getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(String origin) {
+        this.origin = origin;
+    }
+
+    public Integer getTransportMode() {
+        return transportMode;
+    }
+
+    public void setTransportMode(Integer transportMode) {
+        this.transportMode = transportMode;
     }
 
     @Ignore
