@@ -123,9 +123,9 @@ public class MainActivity extends AppCompatActivity implements NavigationControl
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionbar = getSupportActionBar();
+        //NavigationUI.setupActionBarWithNavController(this, navController);
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
-        NavigationUI.setupActionBarWithNavController(this, navController);
         mController.setUpNotificationChannel();
         mController.checkIfUpdateNeeded();
         mController.setupRateThisApp();
@@ -165,20 +165,6 @@ public class MainActivity extends AppCompatActivity implements NavigationControl
                 mController.navigateToDestination(R.id.eventListFragment);
             }
         });
-    }
-
-    public void loadNoEventsFragment() {
-        mController.navigateToDestination(R.id.noEventsFragment);
-    }
-
-    public void loadSnoozeSettings() {
-        mController.navigateToDestination(R.id.snoozeFragment);
-        mFab.hide();
-    }
-
-    public void loadAppSnoozedFragment() {
-        mController.navigateToDestination(R.id.appSnoozedFragment);
-        mFab.hide();
     }
 
     @SuppressLint({"MissingPermission", "ApplySharedPref"})
@@ -248,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements NavigationControl
                     mDrawerLayout.closeDrawers();
                     return true;
                 case R.id.drawer_analyze:
-                    mController.navigateToDestination(R.id.compatabilityFragment);
+                    mController.navigateToDestination(R.id.conflictAnalysisFragment);
                     showAnalyzeMenu();
                     mDrawerLayout.closeDrawers();
                     return true;
@@ -380,9 +366,6 @@ public class MainActivity extends AppCompatActivity implements NavigationControl
         outState.putBoolean(SHOW_ALL_EVENTS_KEY, shouldShowAllEvents);
     }
 
-    public MainActivityController getController(){
-        return mController;
-    }
 
     @Override
     public void navigateToDestination(int destination) {

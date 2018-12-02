@@ -17,6 +17,7 @@ public class SubscriptionFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_subscription,container, false);
+        getActivity().setTitle(R.string.subscription_title);
         TextView premiumList = rootView.findViewById(R.id.subscription_bullet_list);
         TextView standardList = rootView.findViewById(R.id.standard_bullet_list);
         premiumList.setText(R.string.subscription_bullet_list);

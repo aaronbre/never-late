@@ -38,11 +38,11 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivityController {
-    private Activity mActivity;
+    private MainActivity mActivity;
     private FirebaseJobDispatcher mFirebaseJobDispatcher;
     private NavController mNavController;
 
-    public MainActivityController(Activity activity, NavController navController) {
+    public MainActivityController(MainActivity activity, NavController navController) {
         mActivity = activity;
         mFirebaseJobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(mActivity));
         FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(mActivity);
@@ -138,6 +138,7 @@ public class MainActivityController {
     }
 
     public void navigateToDestination(int id){
+        mActivity.hideLoadingIcon();
         mNavController.navigate(id);
 
     }

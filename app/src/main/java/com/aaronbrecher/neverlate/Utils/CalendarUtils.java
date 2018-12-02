@@ -1,10 +1,14 @@
 package com.aaronbrecher.neverlate.Utils;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.net.Uri;
 import android.provider.BaseColumns;
+import android.provider.CalendarContract;
 import android.support.v4.content.ContextCompat;
 import android.util.Pair;
 
@@ -28,32 +32,94 @@ import java.util.List;
 
 
 public class CalendarUtils {
+    public static List<Event> getCalendarEventsForToday(Context context){
+        String[] projection = new String[]{
+                CalendarContract.Instances.BEGIN,
+                CalendarContract.Instances.END,
+                CalendarContract.Instances.EVENT_ID
+        };
+        Pair<LocalDateTime, LocalDateTime> times = getDateTimes();
+        Uri.Builder builder = CalendarContract.Instances.CONTENT_URI.buildUpon();
+        ContentUris.appendId(builder, getTimeInMillis(times.first));
+        ContentUris.appendId(builder, getTimeInMillis(times.second));
+
+        if(ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) ==
+                PackageManager.PERMISSION_GRANTED){
+            Cursor cursor = context.getContentResolver().query(
+                    builder.build(),
+                    projection,
+                    null,
+                    null,
+                    CalendarContract.Instances.BEGIN + " ASC");
+            return convertToEventList(cursor, context);
+        }else {
+            return new ArrayList<>();
+        }
+    }
+
+    private static List<Event> convertToEventList(Cursor cursor, Context context){
+        List<Event> eventList = new ArrayList<>();
+        if(cursor != null){
+            while (cursor.moveToNext()){
+                int beginIndex = cursor.getColumnIndex(CalendarContract.Instances.BEGIN);
+                int endIndex = cursor.getColumnIndex(CalendarContract.Instances.END);
+                int eventIdIndex = cursor.getColumnIndex(CalendarContract.Instances.EVENT_ID);
+
+                long begin = cursor.getLong(beginIndex);
+                long end = cursor.getLong(endIndex);
+                String id = String.valueOf(cursor.getInt(eventIdIndex));
+                eventList.add(getEvent(id, begin, end, context));
+            }
+        }
+        return eventList;
+    }
+
+    private static Event getEvent(String eventId, long begin, long end, Context context) {
+        Event event = new Event();
+        event.setStartTime(Converters.dateTimeFromUnix(begin));
+        event.setEndTime(Converters.dateTimeFromUnix(end));
+        event.setId(Integer.valueOf(eventId));
+        event.setWatching(true);
+        event.setDistance(Constants.ROOM_INVALID_LONG_VALUE);
+        event.setDrivingTime(Constants.ROOM_INVALID_LONG_VALUE);
+        event.setTransportMode(Constants.TRANSPORT_DRIVING);
+        event.setOrigin("");
+        Cursor eventsCursor = getEventById(context, eventId);
+        if(eventsCursor != null) {
+            int titleIndex = eventsCursor.getColumnIndex(Constants.CALENDAR_EVENTS_TITLE);
+            int descriptionIndex = eventsCursor.getColumnIndex(Constants.CALENDAR_EVENTS_DESCRIPTION);
+            int locationIndex = eventsCursor.getColumnIndex(Constants.CALENDAR_EVENTS_EVENT_LOCATION);
+            int calendarIdIndex = eventsCursor.getColumnIndex(Constants.CALENDAR_EVENTS_CALENDAR_ID);
+
+            eventsCursor.moveToFirst();
+            event.setTitle(eventsCursor.getString(titleIndex));
+            event.setDescription(eventsCursor.getString(descriptionIndex));
+            event.setLocation(eventsCursor.getString(locationIndex));
+            LatLng latLng = convertLocationToLatLng(eventsCursor.getString(locationIndex));
+            event.setLocationLatlng(latLng);
+            event.setCalendarId(eventsCursor.getLong(calendarIdIndex));
+        }
+        return event;
+    }
 
     //only run this on a background thread access dbs as well as other work will block UI
-    public static List<Event> getCalendarEventsForToday(Context context){
+    private static Cursor getEventById(Context context, String id){
         String[] projection = new String[]{BaseColumns._ID,
                 Constants.CALENDAR_EVENTS_TITLE,
                 Constants.CALENDAR_EVENTS_DESCRIPTION,
                 Constants.CALENDAR_EVENTS_CALENDAR_ID,
-                Constants.CALENDAR_EVENTS_DTSTART,
-                Constants.CALENDAR_EVENTS_DTEND,
                 Constants.CALENDAR_EVENTS_EVENT_LOCATION};
         //TODO change this to only query calendars user has selected {NOT_MVP}
         //as of now filters for only events starting at midnight of that day until 11:59PM
-        String selection = Constants.CALENDAR_EVENTS_DTSTART + " >= ? AND "
-                + Constants.CALENDAR_EVENTS_DTSTART + " <= ? AND " + "(deleted != 1)";
-        String[] args = getSelectionArgs();
-        if(ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) ==
-                PackageManager.PERMISSION_GRANTED){
-            Cursor calendarCursor = context.getContentResolver().query(
+        String selection = Constants.CALENDAR_EVENTS_ID + " = ?";
+
+            @SuppressLint("MissingPermission") Cursor calendarCursor = context.getContentResolver().query(
                     Constants.CALENDAR_EVENTS_URI,
                     projection,
                     selection,
-                    getSelectionArgs(),
-                    Constants.CALENDAR_EVENTS_DTSTART + " ASC");
-            return convertCursorToEventList(calendarCursor);
-        }
-        else return new ArrayList<>();
+                    new String[]{id},
+                    null);
+            return calendarCursor;
     }
 
     /**
@@ -63,10 +129,10 @@ public class CalendarUtils {
      * calendars that the user would like to have
      * @return a selection string to query the calendarProvider
      */
-    private static String[] getSelectionArgs() {
-        Pair dates = getDateTimes();
-        return new String[]{getTimeInMillis((LocalDateTime)dates.first), getTimeInMillis((LocalDateTime)dates.second)};
-    }
+//    private static String[] getSelectionArgs() {
+//        Pair dates = getDateTimes();
+//        return new String[]{getTimeInMillis((LocalDateTime)dates.first), getTimeInMillis((LocalDateTime)dates.second)};
+//    }
 
     /**
      * Function to get the LocalDateTime objects to define "Today"
@@ -79,9 +145,9 @@ public class CalendarUtils {
         return new Pair<>(LocalDateTime.of(LocalDate.now(), LocalTime.now()), tommorowMidnight);
     }
 
-    private static String getTimeInMillis(LocalDateTime dateTime){
+    private static long getTimeInMillis(LocalDateTime dateTime){
         ZonedDateTime zdt = dateTime.atZone(ZoneId.systemDefault());
-        return String.valueOf(zdt.toInstant().toEpochMilli());
+        return zdt.toInstant().toEpochMilli();
     }
 
     private static List<Event> convertCursorToEventList(Cursor cursor){
@@ -103,9 +169,10 @@ public class CalendarUtils {
         int titleIndex = cursor.getColumnIndex(Constants.CALENDAR_EVENTS_TITLE);
         int descriptionIndex = cursor.getColumnIndex(Constants.CALENDAR_EVENTS_DESCRIPTION);
         int locationIndex = cursor.getColumnIndex(Constants.CALENDAR_EVENTS_EVENT_LOCATION);
+        int calendarIdIndex = cursor.getColumnIndex(Constants.CALENDAR_EVENTS_CALENDAR_ID);
         int startIndex = cursor.getColumnIndex(Constants.CALENDAR_EVENTS_DTSTART);
         int endIndex = cursor.getColumnIndex(Constants.CALENDAR_EVENTS_DTEND);
-        int calendarIdIndex = cursor.getColumnIndex(Constants.CALENDAR_EVENTS_CALENDAR_ID);
+
 
         Event event = new Event();
         event.setId(cursor.getInt(idIndex));

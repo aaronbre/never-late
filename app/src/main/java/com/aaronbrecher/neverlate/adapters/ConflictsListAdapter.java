@@ -22,14 +22,14 @@ import java.util.List;
 
 import static com.aaronbrecher.neverlate.models.EventCompatibility.Compatible;
 
-public class CompatibilityListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class ConflictsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int REGULAR_VIEW_HOLDER = 1;
     public static final int LAST_ITEM_VIEW_HOLDER = 0;
     private List<EventCompatibility> mEventCompatibilities;
     private List<Event> mEvents;
     private Context mContext;
 
-    public CompatibilityListAdapter(List<EventCompatibility> eventCompatibilities, List<Event> events, Context context) {
+    public ConflictsListAdapter(List<EventCompatibility> eventCompatibilities, List<Event> events, Context context) {
         mEventCompatibilities = eventCompatibilities;
         mEvents = events;
         mContext = context;
@@ -97,9 +97,9 @@ public class CompatibilityListAdapter extends RecyclerView.Adapter<RecyclerView.
 
     @Override
     public int getItemViewType(int position) {
-        if(position < getItemCount()-1 || mEventCompatibilities.size() <= 1)
-            return REGULAR_VIEW_HOLDER;
-        else return LAST_ITEM_VIEW_HOLDER;
+        if(position == getItemCount()-1)
+            return LAST_ITEM_VIEW_HOLDER;
+        else return REGULAR_VIEW_HOLDER;
     }
 
     private Event getEventForId(Integer startEvent) {

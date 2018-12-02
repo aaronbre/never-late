@@ -24,6 +24,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.fabric.sdk.android.Fabric;
 import retrofit2.Call;
 
 public class AnaylizeEventsJobService extends JobService {
@@ -63,6 +64,7 @@ public class AnaylizeEventsJobService extends JobService {
         mEventCompatibilities = new ArrayList<>();
         mEventList = mEventsRepository.queryAllCurrentTrackedEventsSync();
         if (mEventList == null || mEventList.size() < 2) {
+            mCompatabilityRepository.deleteAll();
             mAppExecutors.mainThread().execute(() -> MainActivity.setFinishedLoading(true));
             return;
         }

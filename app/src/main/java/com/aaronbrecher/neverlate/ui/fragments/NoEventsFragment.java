@@ -15,6 +15,7 @@ public class NoEventsFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_no_events, container, false);
+        getActivity().setTitle(R.string.no_events_title);
         return rootView;
     }
 }

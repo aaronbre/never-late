@@ -17,6 +17,7 @@ public class Constants {
     public static final int AWARENESS_TRANSITION_PENDING_INTENT_CODE = 1;
     public static final String AWARENESS_FENCE_PREFIX = "never-late-awareness";
     public static final String AWARENESS_FENCE_MAIN_PREFIX = "never-late-awareness-main";
+    public static final String AWARENESS_FENCE_END_PREFIX = "never-late-awareness-end";
     public static final String AWARENESS_FENCE_ARRIVAL_PREFIX = "never-late-awareness-arrived";
     public static final long TIME_FIVE_MINUTES = 5 * 60 * 1000;
     public static final long TIME_TEN_MINUTES = TIME_FIVE_MINUTES * 2;
@@ -37,6 +38,7 @@ public class Constants {
     public static final String CALENDAR_EVENTS_DTSTART = Events.DTSTART;
     public static final String CALENDAR_EVENTS_DTEND = Events.DTEND;
     public static final Uri CALENDAR_EVENTS_URI = Events.CONTENT_URI;
+    public static final String CALENDAR_EVENTS_ID = Events._ID;
 
     public static final String LIST_NEEDS_FENCE_UPDATE = "needs-fence-update";
     public static final String LIST_NO_FENCE_UPDATE = "no-fence-update";

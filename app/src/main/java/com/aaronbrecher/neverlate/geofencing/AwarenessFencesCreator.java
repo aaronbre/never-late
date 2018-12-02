@@ -123,6 +123,13 @@ public class AwarenessFencesCreator{
                 AwarenessFenceWithName arrivalFence = new AwarenessFenceWithName(createArrivalFenceForEvent(event), arrivalFenceName);
                 fenceList.add(arrivalFence);
                 fenceList.add(fence);
+
+                if(relevantTime == Converters.unixFromDateTime(event.getStartTime())){
+                    fenceName = Constants.AWARENESS_FENCE_END_PREFIX + event.getId();
+                    triggerTime = Converters.unixFromDateTime(event.getEndTime()) - (event.getDrivingTime() * 1000);
+                    AwarenessFenceWithName endFence = new AwarenessFenceWithName(createAwarenessFenceForEvent(triggerTime), fenceName);
+                    fenceList.add(endFence);
+                }
             } catch (IllegalArgumentException | ConcurrentModificationException e) {
                 //todo fix conccurent error
                 e.printStackTrace();
@@ -221,6 +228,7 @@ public class AwarenessFencesCreator{
         for (Event event : events) {
             builder.removeFence(Constants.AWARENESS_FENCE_MAIN_PREFIX + event.getId());
             builder.removeFence(Constants.AWARENESS_FENCE_ARRIVAL_PREFIX + event.getId());
+            builder.removeFence(Constants.AWARENESS_FENCE_END_PREFIX + event.getId());
         }
         mFenceClient.updateFences(builder.build());
     }
