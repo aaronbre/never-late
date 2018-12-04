@@ -83,7 +83,6 @@ public class EventListFragment extends Fragment implements SwipeToDeleteListener
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        getActivity().setTitle(R.string.list_title);
         mBinding = FragmentMainActivityListBinding.inflate(inflater, container, false);
         mBinding.eventListRv.setAdapter(mListAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -128,10 +127,12 @@ public class EventListFragment extends Fragment implements SwipeToDeleteListener
             if (shouldShow != null && shouldShow) {
                 mViewModel.getAllCurrentEvents().removeObserver(eventsObserver);
                 mViewModel.getAllEvents().observe(EventListFragment.this, eventsObserver);
+                getActivity().setTitle(R.string.list_title_all);
                 mItemTouchHelper.attachToRecyclerView(null);
             } else {
                 mViewModel.getAllEvents().removeObserver(eventsObserver);
                 mViewModel.getAllCurrentEvents().observe(EventListFragment.this, eventsObserver);
+                getActivity().setTitle(R.string.list_title);
                 mItemTouchHelper.attachToRecyclerView(mBinding.eventListRv);
             }
         }

@@ -52,6 +52,7 @@ public class ConflictsListAdapter extends RecyclerView.Adapter<RecyclerView.View
         EventCompatibility compatibility = mEventCompatibilities.get(position);
         Event event = getEventForId(compatibility.getStartEvent());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM d  h:mm a");
+        long maxTimeAtStartEvent = compatibility.getMaxTimeAtStartEvent() == null ? 0 : compatibility.getMaxTimeAtStartEvent();
         if (event == null) return;
         if(viewHolder.getItemViewType() == REGULAR_VIEW_HOLDER){
             CompatibilityViewHolder holder = (CompatibilityViewHolder) viewHolder;
@@ -62,10 +63,10 @@ public class ConflictsListAdapter extends RecyclerView.Adapter<RecyclerView.View
                 leaveTimeString = "Not applicable";
             } else {
                 SimpleDateFormat format = new SimpleDateFormat("h:mm a");
-                leaveTimeString  = format.format(new Date(Converters.unixFromDateTime(event.getStartTime()) + compatibility.getMaxTimeAtStartEvent()));
+                leaveTimeString  = format.format(new Date(Converters.unixFromDateTime(event.getStartTime()) + maxTimeAtStartEvent));
             }
             holder.binding.listItemLeaveTime.setText(leaveTimeString);
-            holder.binding.listItemMaxTime.setText(DirectionsUtils.readableTravelTime(compatibility.getMaxTimeAtStartEvent()/1000));
+            holder.binding.listItemMaxTime.setText(DirectionsUtils.readableTravelTime(maxTimeAtStartEvent/1000));
             if(compatibility.getWithinDrivingDistance() == Compatible.TRUE){
                 holder.binding.listItemConnectionImage.setImageDrawable(mContext.getDrawable(R.drawable.is_compatible));
             }else {
@@ -83,10 +84,10 @@ public class ConflictsListAdapter extends RecyclerView.Adapter<RecyclerView.View
                 leaveTimeString = "Not applicable";
             } else {
                 SimpleDateFormat format = new SimpleDateFormat("h:mm a");
-                leaveTimeString  = format.format(new Date(Converters.unixFromDateTime(event.getStartTime()) + compatibility.getMaxTimeAtStartEvent()));
+                leaveTimeString  = format.format(new Date(Converters.unixFromDateTime(event.getStartTime()) + maxTimeAtStartEvent));
             }
             holder.binding.includedItem.listItemLeaveTime.setText(leaveTimeString);
-            holder.binding.includedItem.listItemMaxTime.setText(DirectionsUtils.readableTravelTime(compatibility.getMaxTimeAtStartEvent()/1000));
+            holder.binding.includedItem.listItemMaxTime.setText(DirectionsUtils.readableTravelTime( maxTimeAtStartEvent/1000));
             if(compatibility.getWithinDrivingDistance() == Compatible.TRUE){
                 holder.binding.listItemConnectionImage.setImageDrawable(mContext.getDrawable(R.drawable.is_compatible));
             }else {

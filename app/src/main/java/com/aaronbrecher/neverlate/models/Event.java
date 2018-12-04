@@ -26,11 +26,9 @@ import java.util.Comparator;
 public class Event implements Parcelable {
 
     @PrimaryKey(autoGenerate = false)
-    @NonNull
     private int id;
 
     @ColumnInfo
-    @NonNull
     private long calendarId;
 
     @ColumnInfo

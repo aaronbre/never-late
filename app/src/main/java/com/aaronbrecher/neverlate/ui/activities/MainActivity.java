@@ -51,6 +51,7 @@ import com.google.android.gms.location.LocationResult;
 import javax.inject.Inject;
 
 import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 
