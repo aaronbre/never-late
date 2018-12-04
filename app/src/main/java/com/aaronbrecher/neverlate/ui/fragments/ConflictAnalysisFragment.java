@@ -13,19 +13,21 @@ import android.view.ViewGroup;
 
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
-import com.aaronbrecher.neverlate.adapters.CompatibilityListAdapter;
+import com.aaronbrecher.neverlate.adapters.ConflictsListAdapter;
 import com.aaronbrecher.neverlate.database.EventCompatibilityRepository;
 import com.aaronbrecher.neverlate.database.EventsRepository;
+import com.aaronbrecher.neverlate.interfaces.NavigationControl;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 
 import javax.inject.Inject;
 
-public class CompatibilityFragment extends Fragment {
+public class ConflictAnalysisFragment extends Fragment {
     private RecyclerView mRecyclerView;
-    private CompatibilityListAdapter mAdapter;
+    private ConflictsListAdapter mAdapter;
     private InterstitialAd mInterstitialAd;
+    private NavigationControl mNavController;
 
     @Inject
     EventsRepository mEventsRepository;
@@ -36,22 +38,32 @@ public class CompatibilityFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         NeverLateApp.getApp().getAppComponent().inject(this);
+        try {
+            mNavController = (NavigationControl) getActivity();
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() +
+                    " must implement the ListItemClickListener interface");
+        }
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_compatability, container, false);
+        getActivity().setTitle(R.string.anaylize_title);
         mRecyclerView = rootView.findViewById(R.id.compatibility_list_rv);
-        mAdapter = new CompatibilityListAdapter(null, null, getActivity());
+        mAdapter = new ConflictsListAdapter(null, null, getActivity());
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mEventsRepository.queryAllCurrentTrackedEvents().observe(this, events -> {
-            mAdapter.setEvents(events);
-        });
-        mCompatibilityRepository.queryCompatibility().observe(this, list -> {
-            mAdapter.setEventCompatibilities(list);
-        });
+        mEventsRepository.queryAllCurrentTrackedEvents().observe(this, events -> mAdapter.setEvents(events));
+        mCompatibilityRepository.queryCompatibility().observe(this, list ->{
+            if(list == null || list.size() < 1){
+                mNavController.navigateToDestination(R.id.conflictEmptyFragment);
+                return;
+            }else {
+                mAdapter.setEventCompatibilities(list);
+            }
+        } );
         mInterstitialAd = new InterstitialAd(getActivity());
         return rootView;
     }
@@ -76,13 +88,15 @@ public class CompatibilityFragment extends Fragment {
      * to show only once on each app lifecycle
      */
     private void showAd() {
-        mInterstitialAd = new InterstitialAd(getActivity());
+        mInterstitialAd = new InterstitialAd(getContext());
         mInterstitialAd.setAdUnitId(getString(R.string.ad_mob_interstitial_ad_unit));
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
         mInterstitialAd.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
-                mInterstitialAd.show();
+                if(mInterstitialAd != null){
+                    mInterstitialAd.show();
+                }
             }
         });
     }

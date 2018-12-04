@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
+import com.aaronbrecher.neverlate.Utils.BackgroundUtils;
 import com.aaronbrecher.neverlate.adapters.EventListAdapter;
 import com.aaronbrecher.neverlate.adapters.EventListSwipeToDeleteCallback;
 import com.aaronbrecher.neverlate.databinding.FragmentMainActivityListBinding;
@@ -33,8 +34,9 @@ import com.aaronbrecher.neverlate.interfaces.SwipeToDeleteListener;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.ui.activities.EventDetailActivity;
 import com.aaronbrecher.neverlate.ui.activities.MainActivity;
-import com.aaronbrecher.neverlate.ui.controllers.MainActivityController;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
 import com.google.android.gms.location.FusedLocationProviderClient;
 
 import java.util.List;
@@ -125,10 +127,12 @@ public class EventListFragment extends Fragment implements SwipeToDeleteListener
             if (shouldShow != null && shouldShow) {
                 mViewModel.getAllCurrentEvents().removeObserver(eventsObserver);
                 mViewModel.getAllEvents().observe(EventListFragment.this, eventsObserver);
+                getActivity().setTitle(R.string.list_title_all);
                 mItemTouchHelper.attachToRecyclerView(null);
             } else {
                 mViewModel.getAllEvents().removeObserver(eventsObserver);
                 mViewModel.getAllCurrentEvents().observe(EventListFragment.this, eventsObserver);
+                getActivity().setTitle(R.string.list_title);
                 mItemTouchHelper.attachToRecyclerView(mBinding.eventListRv);
             }
         }
@@ -164,6 +168,8 @@ public class EventListFragment extends Fragment implements SwipeToDeleteListener
         creator.removeFences(event);
         event.setWatching(false);
         mViewModel.updateEvent(event);
+        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(getContext()));
+        dispatcher.mustSchedule(BackgroundUtils.anaylzeSchedule(dispatcher));
     }
 
     private void undoDelete(int index) {

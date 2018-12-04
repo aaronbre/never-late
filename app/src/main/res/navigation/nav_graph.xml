@@ -24,8 +24,8 @@
         android:name="com.aaronbrecher.neverlate.ui.fragments.SettingsFragment"
         android:label="Settings" />
     <fragment
-        android:id="@+id/compatabilityFragment"
-        android:name="com.aaronbrecher.neverlate.ui.fragments.CompatibilityFragment"
+        android:id="@+id/conflictAnalysisFragment"
+        android:name="com.aaronbrecher.neverlate.ui.fragments.ConflictAnalysisFragment"
         android:label="Conflict Analysis"
         tools:layout="@layout/fragment_compatability" />
     <fragment
@@ -42,4 +42,9 @@
         android:name="com.aaronbrecher.neverlate.ui.fragments.AppSnoozedFragment"
         android:label="Never Late"
         tools:layout="@layout/fragment_app_snoozed" />
+    <fragment
+        android:id="@+id/conflictEmptyFragment"
+        android:name="com.aaronbrecher.neverlate.ui.fragments.ConflictEmptyFragment"
+        android:label="fragment_conflict_empty"
+        tools:layout="@layout/fragment_conflict_empty" />
 </navigation>

@@ -68,7 +68,8 @@ public class AwarenessFenceTransitionService extends JobIntentService {
 
             //if the fence is true then user is still in his location and needs to
             //leave to his event now.
-            if (fenceKey.contains(Constants.AWARENESS_FENCE_MAIN_PREFIX) && fenceState.getCurrentState() == FenceState.TRUE) {
+            if ((fenceKey.contains(Constants.AWARENESS_FENCE_MAIN_PREFIX) || fenceKey.contains(Constants.AWARENESS_FENCE_END_PREFIX))
+                    && fenceState.getCurrentState() == FenceState.TRUE) {
                 //this is a sanity check in a case where the event was removed from the DB
                 //but the fence was not removed
                 if(mSharedPreferences.getLong(Constants.SNOOZE_PREFS_KEY, Constants.ROOM_INVALID_LONG_VALUE) == Constants.ROOM_INVALID_LONG_VALUE){

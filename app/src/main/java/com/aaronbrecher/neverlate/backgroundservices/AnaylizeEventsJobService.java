@@ -10,6 +10,7 @@ import com.aaronbrecher.neverlate.database.EventCompatibilityRepository;
 import com.aaronbrecher.neverlate.database.EventsRepository;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.models.EventCompatibility;
+import com.aaronbrecher.neverlate.models.retrofitmodels.DirectionsDuration;
 import com.aaronbrecher.neverlate.models.retrofitmodels.MapboxDirectionMatrix.MapboxDirectionMatrix;
 import com.aaronbrecher.neverlate.network.AppApiService;
 import com.aaronbrecher.neverlate.network.AppApiUtils;
@@ -24,6 +25,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.fabric.sdk.android.Fabric;
 import retrofit2.Call;
 
 public class AnaylizeEventsJobService extends JobService {
@@ -63,14 +65,19 @@ public class AnaylizeEventsJobService extends JobService {
         mEventCompatibilities = new ArrayList<>();
         mEventList = mEventsRepository.queryAllCurrentTrackedEventsSync();
         if (mEventList == null || mEventList.size() < 2) {
+            mCompatabilityRepository.deleteAll();
             mAppExecutors.mainThread().execute(() -> MainActivity.setFinishedLoading(true));
             return;
         }
         for (int i = 0; i < mEventList.size() - 1; i++) {
-            mEventCompatibilities.add(getCompatibility(mEventList.get(i), mEventList.get(i + 1)));
+            EventCompatibility compatibility = getCompatibility(mEventList.get(i), mEventList.get(i + 1));
+            if(compatibility != null){
+                mEventCompatibilities.add(compatibility);
+            }
         }
         //todo figure out a better way of doing this
         mCompatabilityRepository.deleteAll();
+        //TODO try/catch is to prevent crashes due to null pointer in dao, need to find the actual cause of this
         try{
             mCompatabilityRepository.insertAll(mEventCompatibilities);
         }catch (NullPointerException e){
@@ -90,10 +97,12 @@ public class AnaylizeEventsJobService extends JobService {
         if (originLatLng == null || destinationLatLng == null) return null;
         String origin = originLatLng.longitude + "," + originLatLng.latitude;
         String destination = destinationLatLng.longitude + "," + destinationLatLng.latitude;
-        double duration = getMapboxDrivingDuration(origin, destination) * 1000;
-        if (duration < 0)
+        Double duration = getMapboxDrivingDuration(origin, destination);
+        if (duration == null || duration < 0){
             eventCompatibility.setWithinDrivingDistance(EventCompatibility.Compatible.UNKNOWN);
+        }
         else {
+            duration = duration * 1000;
             determineComparabilityAndTiming(event1, event2, eventCompatibility, duration);
         }
         return eventCompatibility;
@@ -102,16 +111,16 @@ public class AnaylizeEventsJobService extends JobService {
     /**
      * get the mapbox distance
      */
-    private double getMapboxDrivingDuration(String origin, String destination) {
-        Call<MapboxDirectionMatrix> call = mApiService.queryMapboxDirectionMatrix(origin, destination, 1);
+    private Double getMapboxDrivingDuration(String origin, String destination) {
+        Call<DirectionsDuration> call = mApiService.queryDirections(origin, destination);
         try {
-            MapboxDirectionMatrix matrix = call.execute().body();
-            if (matrix == null || matrix.getDurations().size() < 1) return -1;
-            return matrix.getDurations().get(0).get(0);
+            DirectionsDuration duration = call.execute().body();
+            if (duration == null || duration.getDuration() == null) return (double)-1;
+            return duration.getDuration();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return -1;
+        return (double) -1;
     }
 
     private void determineComparabilityAndTiming(Event event1, Event event2, EventCompatibility eventCompatibility, double duration) {

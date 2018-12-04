@@ -83,6 +83,7 @@ public class SnoozeFragment extends Fragment implements DatePickerDialog.OnDateS
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mBinding = FragmentSnoozeBinding.inflate(inflater, container, false);
+        getActivity().setTitle(R.string.snooze_title);
         long snoozeEnd = mSharedPreferences.getLong(Constants.SNOOZE_PREFS_KEY, Constants.ROOM_INVALID_LONG_VALUE);
         if (snoozeEnd != Constants.ROOM_INVALID_LONG_VALUE) {
             showSnoozeInfo(snoozeEnd);

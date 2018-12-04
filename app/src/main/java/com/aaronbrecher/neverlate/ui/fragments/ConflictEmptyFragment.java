@@ -8,19 +8,23 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
+import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
+import com.aaronbrecher.neverlate.database.EventCompatibilityRepository;
 import com.aaronbrecher.neverlate.interfaces.NavigationControl;
-import com.aaronbrecher.neverlate.ui.activities.MainActivity;
 
-public class AppSnoozedFragment extends Fragment {
-    private Button mButton;
+import javax.inject.Inject;
+
+public class ConflictEmptyFragment extends Fragment {
     private NavigationControl mNavController;
+    @Inject
+    EventCompatibilityRepository mCompatibilityRepository;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        NeverLateApp.getApp().getAppComponent().inject(this);
         try {
             mNavController = (NavigationControl) getActivity();
         } catch (ClassCastException e) {
@@ -32,14 +36,11 @@ public class AppSnoozedFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_app_snoozed, container, false);
-        getActivity().setTitle(R.string.app_snoozed_title);
-        mButton = rootView.findViewById(R.id.app_snoozed_cancel_button);
-        return rootView;
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        mButton.setOnClickListener(v -> mNavController.navigateToDestination(R.id.snoozeFragment));
+        mCompatibilityRepository.queryCompatibility().observe(this, list -> {
+            if(list != null && list.size() > 0){
+                mNavController.navigateToDestination(R.id.conflictAnalysisFragment);
+            }
+        });
+        return inflater.inflate(R.layout.fragment_conflict_empty, container, false);
     }
 }

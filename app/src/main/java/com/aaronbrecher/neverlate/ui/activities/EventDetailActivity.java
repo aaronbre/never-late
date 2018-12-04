@@ -23,12 +23,15 @@ import android.widget.Toast;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
+import com.aaronbrecher.neverlate.Utils.BackgroundUtils;
 import com.aaronbrecher.neverlate.Utils.GeofenceUtils;
 import com.aaronbrecher.neverlate.adapters.EventDetailPagerAdapter;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
 import com.aaronbrecher.neverlate.ui.fragments.PassedEventFragment;
 import com.aaronbrecher.neverlate.viewmodels.DetailActivityViewModel;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
 
 import javax.inject.Inject;
 
@@ -144,6 +147,8 @@ public class EventDetailActivity extends AppCompatActivity implements TabLayout.
                 mEditedEvent = null;
                 mViewModel.setEvent(mEvent);
                 mViewModel.updateEvent(mEvent);
+                FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
+                dispatcher.mustSchedule(BackgroundUtils.anaylzeSchedule(dispatcher));
                 hideOptionsMenu();
                 Toast.makeText(this, R.string.event_updated_toast, Toast.LENGTH_SHORT).show();
                 break;

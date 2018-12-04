@@ -66,7 +66,9 @@ public class BackgroundUtils {
                 .setTag(Constants.FIREBASE_JOB_SERVICE_ANALYZE_SCHEDULE_TAG)
                 .setRecurring(false)
                 .setTrigger(Trigger.NOW)
+                .setReplaceCurrent(true)
                 .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR)
+                .setConstraints(Constraint.ON_ANY_NETWORK)
                 .build();
     }
 

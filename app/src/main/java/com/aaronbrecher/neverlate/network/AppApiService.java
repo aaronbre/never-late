@@ -1,5 +1,6 @@
 package com.aaronbrecher.neverlate.network;
 
+import com.aaronbrecher.neverlate.models.retrofitmodels.DirectionsDuration;
 import com.aaronbrecher.neverlate.models.retrofitmodels.googleDistanceMatrix.DistanceMatrix;
 import com.aaronbrecher.neverlate.models.retrofitmodels.MapboxDirectionMatrix.MapboxDirectionMatrix;
 import com.aaronbrecher.neverlate.models.retrofitmodels.Version;
@@ -18,4 +19,7 @@ public interface AppApiService {
 
     @GET(AppApiUtils.VERSION_ENDPOINT)
     Call<Version> queryVersionNumber(@Query("usersversion")int version);
+
+    @GET(AppApiUtils.DIRECTION_API_ENDPOINT)
+    Call<DirectionsDuration> queryDirections(@Query("origin")String origin, @Query("destination")String destination);
 }
