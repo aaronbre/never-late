@@ -1,6 +1,7 @@
 package com.aaronbrecher.neverlate.ui.fragments;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
@@ -60,11 +61,13 @@ public class EventListFragment extends Fragment implements SwipeToDeleteListener
     private List<Event> mEventList;
     private ItemTouchHelper mItemTouchHelper;
     private boolean mAppIsSnoozed;
+    private Context mContext;
 
     @SuppressLint("MissingPermission")
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        mContext = context;
         try {
             mNavController = (NavigationControl) getActivity();
         } catch (ClassCastException e) {
@@ -76,7 +79,7 @@ public class EventListFragment extends Fragment implements SwipeToDeleteListener
         mViewModel = ViewModelProviders.of(getActivity(), mViewModelFactory).get(MainActivityViewModel.class);
         mAppIsSnoozed = mSharedPreferences.getLong(Constants.SNOOZE_PREFS_KEY, Constants.ROOM_INVALID_LONG_VALUE) != Constants.ROOM_INVALID_LONG_VALUE
                 && !mSharedPreferences.getBoolean(Constants.SNOOZE_ONLY_NOTIFICATIONS_PREFS_KEY, false);
-        mListAdapter = new EventListAdapter(null, getContext(), this);
+        mListAdapter = new EventListAdapter(null, mContext, this);
         mViewModel.getShouldShowAllEvents().observe(this, showAllEventsObserver);
     }
 
@@ -87,7 +90,7 @@ public class EventListFragment extends Fragment implements SwipeToDeleteListener
         mBinding.eventListRv.setAdapter(mListAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         mBinding.eventListRv.setLayoutManager(layoutManager);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(getContext(), layoutManager.getOrientation());
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mContext, layoutManager.getOrientation());
         mBinding.eventListRv.addItemDecoration(dividerItemDecoration);
         setupDeleteTouchHelper();
         mRootView = mBinding.getRoot();
@@ -168,7 +171,7 @@ public class EventListFragment extends Fragment implements SwipeToDeleteListener
         creator.removeFences(event);
         event.setWatching(false);
         mViewModel.updateEvent(event);
-        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(getContext()));
+        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(mContext));
         dispatcher.mustSchedule(BackgroundUtils.anaylzeSchedule(dispatcher));
     }
 
@@ -183,6 +186,5 @@ public class EventListFragment extends Fragment implements SwipeToDeleteListener
         startActivity(intent);
 
     }
-
-
+    
 }

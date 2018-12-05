@@ -281,6 +281,11 @@ public class Event implements Parcelable {
      */
     @Ignore
     public static Change eventChanged(Event oldEvent, Event newEvent){
+        if(oldEvent == null && newEvent != null){
+            return Change.GEOFENCE_CHANGE;
+        }else if((oldEvent != null && newEvent == null) || oldEvent == null){
+            return Change.SAME;
+        }
         if(!oldEvent.startTime.equals(newEvent.startTime)
                 || !oldEvent.endTime.equals(newEvent.endTime)
                 || !oldEvent.location.equals(newEvent.location)) return Change.GEOFENCE_CHANGE;

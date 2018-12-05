@@ -51,8 +51,10 @@ public class DirectionsUtils {
                 wasAdded = wasAdded || executeMapboxQuery(list, location);
             }
             return wasAdded;
-        } else {
+        } else if(events.size() > 0){
             return executeMapboxQuery(events, location);
+        } else{
+            return false;
         }
     }
 
