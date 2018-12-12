@@ -8,6 +8,7 @@ import android.text.format.DateUtils;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.models.Event;
+import com.aaronbrecher.neverlate.models.Position;
 import com.aaronbrecher.neverlate.models.retrofitmodels.MapboxDirectionMatrix.MapboxDirectionMatrix;
 import com.aaronbrecher.neverlate.models.retrofitmodels.googleDistanceMatrix.DistanceMatrix;
 import com.aaronbrecher.neverlate.models.retrofitmodels.googleDistanceMatrix.Element;
@@ -159,6 +160,20 @@ public class DirectionsUtils {
             dest.add(lngLatString);
         }
         return android.text.TextUtils.join(";", dest);
+
+    }
+
+    /**
+     * Convert event to a lat lng Position will possibly use this instead of string
+     * when moving over to spring Boot
+     */
+    private static List<Position> getDestinationsAsPositionList(List<Event> events){
+        List<Position> positions = new ArrayList<>();
+        for(Event event : events){
+            if(event.getLocationLatlng() == null) continue;
+            positions.add(new Position(event.getLocationLatlng().longitude, event.getLocationLatlng().latitude));
+        }
+        return positions;
     }
 
     public static String readableTravelTime(long travelTime) {

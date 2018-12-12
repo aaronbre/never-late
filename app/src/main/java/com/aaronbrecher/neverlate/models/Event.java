@@ -16,6 +16,7 @@ import com.google.gson.Gson;
 import org.threeten.bp.LocalDateTime;
 
 import java.util.Comparator;
+import java.util.TimeZone;
 
 /**
  * Event class to represent the calendar event in a local DB
