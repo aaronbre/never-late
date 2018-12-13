@@ -8,6 +8,9 @@ import android.text.format.DateUtils;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.models.Event;
+import com.aaronbrecher.neverlate.models.EventLocationDetails;
+import com.aaronbrecher.neverlate.models.retrofitmodels.DirectionsDuration;
+import com.aaronbrecher.neverlate.models.retrofitmodels.EventDistanceDuration;
 import com.aaronbrecher.neverlate.models.retrofitmodels.MapboxDirectionMatrix.MapboxDirectionMatrix;
 import com.aaronbrecher.neverlate.models.retrofitmodels.googleDistanceMatrix.DistanceMatrix;
 import com.aaronbrecher.neverlate.models.retrofitmodels.googleDistanceMatrix.Element;
@@ -18,6 +21,7 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +35,7 @@ public class DirectionsUtils {
 
     private static final String NOT_FOUND = "NOT_FOUND";
     //Max allowable destinations for DistanceMatrix request
-    private static final int MAX_QUERY_SIZE = 24;
+    private static final int MAX_QUERY_SIZE = 99;
 
     /**
      * function to add distance information (Distance,Duration) to events. The query will be
@@ -48,11 +52,11 @@ public class DirectionsUtils {
         if (events.size() > MAX_QUERY_SIZE) {
             List<List<Event>> lists = splitList(events);
             for (List<Event> list : lists) {
-                wasAdded = wasAdded || executeMapboxQuery(list, location);
+                wasAdded = wasAdded || executeHereMatrixQuery(list, location);
             }
             return wasAdded;
         } else {
-            return executeMapboxQuery(events, location);
+            return executeHereMatrixQuery(events, location);
         }
     }
 
@@ -68,6 +72,43 @@ public class DirectionsUtils {
             lists.add(events.subList(i, Math.min(i + MAX_QUERY_SIZE, events.size())));
         }
         return lists;
+    }
+
+    private static boolean executeHereMatrixQuery(List<Event> events, Location location){
+        String origin = location.getLatitude() + "," + location.getLongitude();
+        List<EventLocationDetails> destinations = convertEventListForQuery(events, false);
+        AppApiService service = AppApiUtils.createService();
+        Call<List<EventDistanceDuration>> request = service.queryHereMatrix(origin, destinations);
+        try{
+            Response<List<EventDistanceDuration>> response = request.execute();
+            List<EventDistanceDuration> durationList = response.body();
+            if(durationList == null || durationList.size() < 1) return false;
+            for(int i = 0; i < durationList.size();i++){
+                Event event = events.get(i);
+                EventDistanceDuration distanceDuration = durationList.get(i);
+                event.setDistance((long) distanceDuration.getDistance());
+                event.setDrivingTime((long) distanceDuration.getDuration());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    private static List<EventLocationDetails> convertEventListForQuery(List<Event> events, boolean forPublicTransport) {
+        List<EventLocationDetails> destinations = new ArrayList<>();
+        for(Event event : events){
+            long eventTime = GeofenceUtils.determineRelevantTime(event.getStartTime(), event.getEndTime());
+            EventLocationDetails locationDetails = new EventLocationDetails(String.valueOf(event.getLocationLatlng().latitude),
+                    String.valueOf(event.getLocationLatlng().longitude));
+            if(forPublicTransport){
+                //TODO create iso-time for event location
+                // locationDetails.setArrivalTime();
+            }
+            destinations.add(locationDetails);
+        }
+        return destinations;
     }
 
 
@@ -159,13 +200,6 @@ public class DirectionsUtils {
         return android.text.TextUtils.join(";", dest);
     }
 
-    public static String readableTravelTime(long travelTime) {
-        int totalMinutes = (int) (travelTime / 60);
-        int hours = totalMinutes / 60;
-        int minutes = totalMinutes % 60;
-        return hours + ":" + minutes;
-    }
-
     /**
      * This query will be to the google API as mapbox does not support public transit
      * @return true if the data was added (even partially) false if not
@@ -248,5 +282,13 @@ public class DirectionsUtils {
         long leaveTime = eventTime - timeTo;
         return DateUtils.getRelativeTimeSpanString(leaveTime, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS).toString();
 
+    }
+
+
+    public static String readableTravelTime(long travelTime) {
+        int totalMinutes = (int) (travelTime / 60);
+        int hours = totalMinutes / 60;
+        int minutes = totalMinutes % 60;
+        return hours + ":" + minutes;
     }
 }
