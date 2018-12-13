@@ -29,11 +29,11 @@ import java.util.Map;
 import retrofit2.Call;
 import retrofit2.Response;
 
-//this class will be used to get direction information time etc.
-//for now it uses the google API's may change that to a Mapbox or Mapquest
+/**
+ * Class that contains functions to get distance information,
+ * will use the Here api https://developer.here.com/
+ */
 public class DirectionsUtils {
-
-    private static final String NOT_FOUND = "NOT_FOUND";
     //Max allowable destinations for DistanceMatrix request
     private static final int MAX_QUERY_SIZE = 99;
 
@@ -62,7 +62,6 @@ public class DirectionsUtils {
 
     /**
      * function to chunk original list
-     *
      * @param events the original list provided by the calendar
      * @return a list of lists each with a size less then @MAX_QUERY_SIZE
      */
@@ -74,16 +73,27 @@ public class DirectionsUtils {
         return lists;
     }
 
-    private static boolean executeHereMatrixQuery(List<Event> events, Location location){
+    //Filter out all events that do not have a valid location
+    private static List<Event> removeEventsWithoutLocation(List<Event> eventList) {
+        List<Event> filtered = new ArrayList<>();
+        for (Event event : eventList) {
+            if (event.getLocationLatlng() != null) {
+                filtered.add(event);
+            }
+        }
+        return filtered;
+    }
+
+    private static boolean executeHereMatrixQuery(List<Event> events, Location location) {
         String origin = location.getLatitude() + "," + location.getLongitude();
         List<EventLocationDetails> destinations = convertEventListForQuery(events, false);
         AppApiService service = AppApiUtils.createService();
         Call<List<EventDistanceDuration>> request = service.queryHereMatrix(origin, destinations);
-        try{
+        try {
             Response<List<EventDistanceDuration>> response = request.execute();
             List<EventDistanceDuration> durationList = response.body();
-            if(durationList == null || durationList.size() < 1) return false;
-            for(int i = 0; i < durationList.size();i++){
+            if (durationList == null || durationList.size() < 1) return false;
+            for (int i = 0; i < durationList.size(); i++) {
                 Event event = events.get(i);
                 EventDistanceDuration distanceDuration = durationList.get(i);
                 event.setDistance((long) distanceDuration.getDistance());
@@ -96,48 +106,26 @@ public class DirectionsUtils {
         return true;
     }
 
-    private static List<EventLocationDetails> convertEventListForQuery(List<Event> events, boolean forPublicTransport) {
-        List<EventLocationDetails> destinations = new ArrayList<>();
-        for(Event event : events){
-            long eventTime = GeofenceUtils.determineRelevantTime(event.getStartTime(), event.getEndTime());
-            EventLocationDetails locationDetails = new EventLocationDetails(String.valueOf(event.getLocationLatlng().latitude),
-                    String.valueOf(event.getLocationLatlng().longitude));
-            if(forPublicTransport){
-                //TODO create iso-time for event location
-                // locationDetails.setArrivalTime();
-            }
-            destinations.add(locationDetails);
-        }
-        return destinations;
-    }
-
-
-    //TODO add an additional parameter here and in retrofit to query walking as well
-    private static boolean executeMapboxQuery(List<Event> events, Location location) {
-        String destinations = getDestinationsLngLatAsString(events);
-        String origin = location.getLongitude() + "," + location.getLatitude();
+    /**
+     * This query will be to check for public transportation data
+     *
+     * @return true if the data was added (even partially) false if not
+     */
+    private static boolean executeTransitQuery(List<Event> events, Location location) {
+        List<EventLocationDetails> destinations = convertEventListForQuery(events, true);
+        String origin = location.getLatitude() + "," + location.getLongitude();
         AppApiService service = AppApiUtils.createService();
-        Call<MapboxDirectionMatrix> request = service.queryMapboxDirectionMatrix(origin, destinations, events.size());
+        Call<List<EventDistanceDuration>> request = service.queryHereMatrix(origin, destinations);
         try {
-            Response<MapboxDirectionMatrix> response = request.execute();
-            MapboxDirectionMatrix directionMatrix = response.body();
-            //Sanity check to make sure everything is good
-            if (directionMatrix == null || directionMatrix.getDurations() == null || directionMatrix.getDurations().size() < 1)
+            Response<List<EventDistanceDuration>> response = request.execute();
+            List<EventDistanceDuration> distanceMatrix = response.body();
+            if (distanceMatrix == null || distanceMatrix.size() < 1)
                 return false;
-
-            //get the list of distances and durations these will always be the same size
-            List<Double> durations = directionMatrix.getDurations().get(0);
-            List<Double> distances = directionMatrix.getDistances().get(0);
-            if (durations.size() < 1 || distances.size() < 1) return false;
-            for (int i = 0, j = durations.size(); i < j; i++) {
-                Double distance = distances.get(i);
-                Double duration = durations.get(i);
-                //if this particular route failed skip it
-                if (distance == null || duration == null) continue;
+            for (int i = 0; i < distanceMatrix.size(); i++) {
+                EventDistanceDuration distanceDuration = distanceMatrix.get(i);
                 Event event = events.get(i);
-                event.setDistance(distance.longValue());
-                //if there is a relative traffic time rather use that
-                event.setDrivingTime(duration.longValue());
+                event.setDrivingTime((long) distanceDuration.getDuration());
+                event.setDistance((long) distanceDuration.getDistance());
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -146,27 +134,40 @@ public class DirectionsUtils {
         return true;
     }
 
-    private static List<Event> removeEventsWithoutLocation(List<Event> eventList) {
-        List<Event> filtered = new ArrayList<>();
-        for (Event event : eventList) {
-            if (event.getLocationLatlng() != null) {
-                filtered.add(event);
+    /**
+     * convert the event list to a more concise representation to send to server, will include the latitude,
+     * longitude, as well as the arrival time
+     * @param events list of all the events
+     * @param forPublicTransport if for a public transit request need to add the arrival time in iso-format
+     * @return a list of the minimized event objects
+     */
+    private static List<EventLocationDetails> convertEventListForQuery(List<Event> events, boolean forPublicTransport) {
+        List<EventLocationDetails> destinations = new ArrayList<>();
+        for (Event event : events) {
+            long eventTime = GeofenceUtils.determineRelevantTime(event.getStartTime(), event.getEndTime());
+            EventLocationDetails locationDetails = new EventLocationDetails(String.valueOf(event.getLocationLatlng().latitude),
+                    String.valueOf(event.getLocationLatlng().longitude));
+            if (forPublicTransport) {
+                //TODO create iso-time for event location
+                // locationDetails.setArrivalTime();
             }
+            destinations.add(locationDetails);
         }
-        return filtered;
+        return destinations;
     }
 
     /**
      * Function to split the events into different driving catagories
+     *
      * @return a map containing lists corresponding to all driving types
      */
-    private static Map<Integer, List<Event>> splitEventListByTrasportType(List<Event> eventList){
+    private static Map<Integer, List<Event>> splitEventListByTrasportType(List<Event> eventList) {
         List<Event> drivingEvents = new ArrayList<>();
         List<Event> walkingEvents = new ArrayList<>();
         List<Event> publicEvents = new ArrayList<>();
         HashMap<Integer, List<Event>> splitMap = new HashMap<>();
-        for(Event event : eventList){
-            switch (event.getTransportMode()){
+        for (Event event : eventList) {
+            switch (event.getTransportMode()) {
                 case Constants.TRANSPORT_WALKING:
                     walkingEvents.add(event);
                     break;
@@ -174,7 +175,7 @@ public class DirectionsUtils {
                     publicEvents.add(event);
                     break;
                 case Constants.TRANSPORT_DRIVING:
-                    default:
+                default:
                     drivingEvents.add(event);
                     break;
             }
@@ -185,68 +186,9 @@ public class DirectionsUtils {
         return splitMap;
     }
 
-    /**
-     * Converts list of events to a comma seperated list of lat and long
-     * each lat and long will seperated by a space ex. 35.857399 24.34114
-     * this format will be needed for using mapbox
-     */
-    private static String getDestinationsLngLatAsString(List<Event> events){
-        ArrayList<String> dest = new ArrayList<>();
-        for(Event event : events){
-            if(event.getLocationLatlng() == null) continue;
-            String lngLatString = event.getLocationLatlng().longitude + "," + event.getLocationLatlng().latitude;
-            dest.add(lngLatString);
-        }
-        return android.text.TextUtils.join(";", dest);
-    }
-
-    /**
-     * This query will be to the google API as mapbox does not support public transit
-     * @return true if the data was added (even partially) false if not
-     */
-    private static boolean executeTransitQuery(List<Event> events, Location location, int numTries) {
-        String destinations = getDestinationsAsString(events);
-        String origin = location.getLatitude() + "," + location.getLongitude();
-        AppApiService service = AppApiUtils.createService();
-        Call<DistanceMatrix> request = service.queryDistanceMatrix(origin, destinations);
-        try {
-            Response<DistanceMatrix> response = request.execute();
-            DistanceMatrix distanceMatrix = response.body();
-            if (distanceMatrix == null || distanceMatrix.getRows() == null || distanceMatrix.getRows().get(0) == null)
-                return false;
-            List<Element> elements = distanceMatrix.getRows().get(0).getElements();
-            if (elements.size() < 1) return false;
-            for (int i = 0, j = elements.size(); i < j; i++) {
-                Element element = elements.get(i);
-                if (element.getStatus().equals(NOT_FOUND)) continue;
-                Event event = events.get(i);
-                event.setDistance(element.getDistance().getValue().longValue());
-                //if there is a relative traffic time rather use that
-                long timeTo = element.getDurationInTraffic() != null ? element.getDurationInTraffic().getValue() : element.getDuration().getValue();
-                event.setDrivingTime(timeTo);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-                return false;
-        }
-        return true;
-    }
-
-    /**
-     * Converts a list of events to a comma seperated list of the destinations
-     * this is needed in order to query the custom API using retrofit
-     */
-    private static String getDestinationsAsString(List<Event> events) {
-        ArrayList<String> dest = new ArrayList<>();
-        for (Event event : events) {
-            String location = event.getLocation();
-            location = location.replaceAll(",", " ");
-            dest.add(location);
-        }
-        return android.text.TextUtils.join(",", dest);
-    }
 
 
+    //TODO move these functions to a different class
     /**
      * Returns a readable string of distance to the event either in
      * Miles or KM
@@ -256,7 +198,7 @@ public class DirectionsUtils {
         boolean useMetric = true;
 
         String unitType = sharedPreferences.getString(context.getString(R.string.pref_units_key), "");
-        if(context.getString(R.string.pref_units_imperial).equals(unitType)){
+        if (context.getString(R.string.pref_units_imperial).equals(unitType)) {
             useMetric = false;
         }
         float km = distance.floatValue() / 1000;

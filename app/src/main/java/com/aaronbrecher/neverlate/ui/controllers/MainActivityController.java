@@ -1,15 +1,12 @@
 package com.aaronbrecher.neverlate.ui.controllers;
 
 
-import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.util.Log;
 
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.R;
@@ -118,7 +115,7 @@ public class MainActivityController {
                     if (v == null) return;
                     int latestVersion = v.getVersion();
                     if (currentVersion < latestVersion) {
-                        ((MainActivity) mActivity).showUpdateSnackbar();
+                        mActivity.showUpdateSnackbar();
                     } else if (mActivity.getString(R.string.version_invalid).equals(v.getMessage()) || v.getNeedsUpdate()) {
                         mFirebaseJobDispatcher.cancel(Constants.FIREBASE_JOB_SERVICE_CHECK_CALENDAR_CHANGED);
                         mFirebaseJobDispatcher.cancel(Constants.FIREBASE_JOB_SERVICE_SETUP_ACTIVITY_RECOG);

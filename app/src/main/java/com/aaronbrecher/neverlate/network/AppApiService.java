@@ -12,22 +12,17 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 public interface AppApiService {
-    @GET(AppApiUtils.DISTANCE_API_ENDPOINT)
-    Call<DistanceMatrix> queryDistanceMatrix(@Query("origin")String origin, @Query("destinations")String destinations);
 
-//    mapbox endpoint
-    @GET(AppApiUtils.DIRECTION_MATRIX_API_ENDPOINT)
-    Call<MapboxDirectionMatrix> queryMapboxDirectionMatrix(@Query("origin")String origin, @Query("destinations")String destinations, @Query("destinationsize") int size);
-
-    @GET(AppApiUtils.DIRECTION_MATRIX_API_ENDPOINT)
+    @POST(AppApiUtils.DIRECTION_MATRIX_API_ENDPOINT)
     Call<List<EventDistanceDuration>> queryHereMatrix(@Query("origin") String origin, @Body List<EventLocationDetails> destinations);
+
+    @POST(AppApiUtils.DIRECTION_API_ENDPOINT)
+    Call<EventDistanceDuration> queryDirections(@Query("origin")String origin, @Body EventLocationDetails destination);
 
     @GET(AppApiUtils.VERSION_ENDPOINT)
     Call<Version> queryVersionNumber(@Query("usersversion")int version);
-
-    @GET(AppApiUtils.DIRECTION_API_ENDPOINT)
-    Call<DirectionsDuration> queryDirections(@Query("origin")String origin, @Query("destination")String destination);
 }

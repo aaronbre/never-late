@@ -10,8 +10,8 @@ import com.aaronbrecher.neverlate.database.EventCompatibilityRepository;
 import com.aaronbrecher.neverlate.database.EventsRepository;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.models.EventCompatibility;
-import com.aaronbrecher.neverlate.models.retrofitmodels.DirectionsDuration;
-import com.aaronbrecher.neverlate.models.retrofitmodels.MapboxDirectionMatrix.MapboxDirectionMatrix;
+import com.aaronbrecher.neverlate.models.EventLocationDetails;
+import com.aaronbrecher.neverlate.models.retrofitmodels.EventDistanceDuration;
 import com.aaronbrecher.neverlate.network.AppApiService;
 import com.aaronbrecher.neverlate.network.AppApiUtils;
 import com.aaronbrecher.neverlate.ui.activities.MainActivity;
@@ -25,7 +25,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import io.fabric.sdk.android.Fabric;
 import retrofit2.Call;
 
 public class AnaylizeEventsJobService extends JobService {
@@ -95,10 +94,9 @@ public class AnaylizeEventsJobService extends JobService {
         LatLng originLatLng = event1.getLocationLatlng();
         LatLng destinationLatLng = event2.getLocationLatlng();
         if (originLatLng == null || destinationLatLng == null) return null;
-        String origin = originLatLng.longitude + "," + originLatLng.latitude;
-        String destination = destinationLatLng.longitude + "," + destinationLatLng.latitude;
-        Double duration = getMapboxDrivingDuration(origin, destination);
-        if (duration == null || duration < 0){
+        String origin = originLatLng.latitude + "," + originLatLng.longitude;
+        int duration = getDrivingDuration(origin, event2);
+        if (duration < 1){
             eventCompatibility.setWithinDrivingDistance(EventCompatibility.Compatible.UNKNOWN);
         }
         else {
@@ -108,19 +106,17 @@ public class AnaylizeEventsJobService extends JobService {
         return eventCompatibility;
     }
 
-    /**
-     * get the mapbox distance
-     */
-    private Double getMapboxDrivingDuration(String origin, String destination) {
-        Call<DirectionsDuration> call = mApiService.queryDirections(origin, destination);
-        try {
-            DirectionsDuration duration = call.execute().body();
-            if (duration == null || duration.getDuration() == null) return (double)-1;
-            return duration.getDuration();
-        } catch (IOException e) {
+    private int getDrivingDuration(String origin, Event event){
+        EventLocationDetails details = new EventLocationDetails(String.valueOf(event.getLocationLatlng().latitude),
+                String.valueOf(event.getLocationLatlng().longitude));
+        Call<EventDistanceDuration> call = mApiService.queryDirections(origin, details);
+        try{
+            EventDistanceDuration duration = call.execute().body();
+            if(duration != null) return duration.getDuration();
+        }catch (IOException e){
             e.printStackTrace();
         }
-        return (double) -1;
+        return -1;
     }
 
     private void determineComparabilityAndTiming(Event event1, Event event2, EventCompatibility eventCompatibility, double duration) {
