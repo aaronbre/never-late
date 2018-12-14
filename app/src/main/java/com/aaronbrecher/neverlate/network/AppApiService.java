@@ -1,10 +1,7 @@
 package com.aaronbrecher.neverlate.network;
 
 import com.aaronbrecher.neverlate.models.EventLocationDetails;
-import com.aaronbrecher.neverlate.models.retrofitmodels.DirectionsDuration;
 import com.aaronbrecher.neverlate.models.retrofitmodels.EventDistanceDuration;
-import com.aaronbrecher.neverlate.models.retrofitmodels.googleDistanceMatrix.DistanceMatrix;
-import com.aaronbrecher.neverlate.models.retrofitmodels.MapboxDirectionMatrix.MapboxDirectionMatrix;
 import com.aaronbrecher.neverlate.models.retrofitmodels.Version;
 
 import java.util.List;
@@ -22,6 +19,9 @@ public interface AppApiService {
 
     @POST(AppApiUtils.DIRECTION_API_ENDPOINT)
     Call<EventDistanceDuration> queryDirections(@Query("origin")String origin, @Body EventLocationDetails destination);
+
+    @POST(AppApiUtils.PUBLIC_TRANSIT_API_ENDPOINT)
+    Call<List<EventDistanceDuration>> queryHerePublicTransit(@Query("origin") String origin, @Body List<EventLocationDetails> destinations);
 
     @GET(AppApiUtils.VERSION_ENDPOINT)
     Call<Version> queryVersionNumber(@Query("usersversion")int version);

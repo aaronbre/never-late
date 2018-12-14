@@ -9,17 +9,13 @@ import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.models.EventLocationDetails;
-import com.aaronbrecher.neverlate.models.retrofitmodels.DirectionsDuration;
 import com.aaronbrecher.neverlate.models.retrofitmodels.EventDistanceDuration;
-import com.aaronbrecher.neverlate.models.retrofitmodels.MapboxDirectionMatrix.MapboxDirectionMatrix;
-import com.aaronbrecher.neverlate.models.retrofitmodels.googleDistanceMatrix.DistanceMatrix;
-import com.aaronbrecher.neverlate.models.retrofitmodels.googleDistanceMatrix.Element;
-import com.aaronbrecher.neverlate.network.AppApiUtils;
 import com.aaronbrecher.neverlate.network.AppApiService;
+import com.aaronbrecher.neverlate.network.AppApiUtils;
 
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -52,11 +48,11 @@ public class DirectionsUtils {
         if (events.size() > MAX_QUERY_SIZE) {
             List<List<Event>> lists = splitList(events);
             for (List<Event> list : lists) {
-                wasAdded = wasAdded || executeHereMatrixQuery(list, location);
+                wasAdded = wasAdded || executeHereMatrixQuery(list, location, false);
             }
             return wasAdded;
         } else {
-            return executeHereMatrixQuery(events, location);
+            return executeHereMatrixQuery(events, location, false);
         }
     }
 
@@ -84,11 +80,13 @@ public class DirectionsUtils {
         return filtered;
     }
 
-    private static boolean executeHereMatrixQuery(List<Event> events, Location location) {
+    private static boolean executeHereMatrixQuery(List<Event> events, Location location, boolean forPublicTransit) {
         String origin = location.getLatitude() + "," + location.getLongitude();
-        List<EventLocationDetails> destinations = convertEventListForQuery(events, false);
+        List<EventLocationDetails> destinations = convertEventListForQuery(events, forPublicTransit);
         AppApiService service = AppApiUtils.createService();
-        Call<List<EventDistanceDuration>> request = service.queryHereMatrix(origin, destinations);
+
+        Call<List<EventDistanceDuration>> request = forPublicTransit ? service.queryHerePublicTransit(origin, destinations)
+                : service.queryHereMatrix(origin, destinations);
         try {
             Response<List<EventDistanceDuration>> response = request.execute();
             List<EventDistanceDuration> durationList = response.body();
@@ -112,26 +110,7 @@ public class DirectionsUtils {
      * @return true if the data was added (even partially) false if not
      */
     private static boolean executeTransitQuery(List<Event> events, Location location) {
-        List<EventLocationDetails> destinations = convertEventListForQuery(events, true);
-        String origin = location.getLatitude() + "," + location.getLongitude();
-        AppApiService service = AppApiUtils.createService();
-        Call<List<EventDistanceDuration>> request = service.queryHereMatrix(origin, destinations);
-        try {
-            Response<List<EventDistanceDuration>> response = request.execute();
-            List<EventDistanceDuration> distanceMatrix = response.body();
-            if (distanceMatrix == null || distanceMatrix.size() < 1)
-                return false;
-            for (int i = 0; i < distanceMatrix.size(); i++) {
-                EventDistanceDuration distanceDuration = distanceMatrix.get(i);
-                Event event = events.get(i);
-                event.setDrivingTime((long) distanceDuration.getDuration());
-                event.setDistance((long) distanceDuration.getDistance());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
+        return executeHereMatrixQuery(events, location, true);
     }
 
     /**
@@ -149,7 +128,9 @@ public class DirectionsUtils {
                     String.valueOf(event.getLocationLatlng().longitude));
             if (forPublicTransport) {
                 //TODO create iso-time for event location
-                // locationDetails.setArrivalTime();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+                String formatted = dateFormat.format(new Date(eventTime));
+                locationDetails.setArrivalTime(formatted);
             }
             destinations.add(locationDetails);
         }

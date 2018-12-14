@@ -1,10 +1,10 @@
 package com.aaronbrecher.neverlate.network;
 
 public class AppApiUtils {
-    public static final String DIRECTION_MATRIX_API_ENDPOINT = "directionmatrix";
-    static final String DISTANCE_API_ENDPOINT = "distancematrix";
+    public static final String DIRECTION_MATRIX_API_ENDPOINT = "direction-matrix";
     static final String VERSION_ENDPOINT = "current-version";
     static final String DIRECTION_API_ENDPOINT = "directions";
+    static final String PUBLIC_TRANSIT_API_ENDPOINT = "public-transit";
     private static final String BASE_URL = "https://never-late-spring-api.herokuapp.com/";
 
     public static AppApiService createService(){
