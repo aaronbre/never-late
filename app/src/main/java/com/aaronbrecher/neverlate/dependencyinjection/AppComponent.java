@@ -13,6 +13,7 @@ import com.aaronbrecher.neverlate.ui.fragments.ConflictEmptyFragment;
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailMapFragment;
 import com.aaronbrecher.neverlate.ui.fragments.EventListFragment;
+import com.aaronbrecher.neverlate.ui.fragments.SettingsFragment;
 import com.aaronbrecher.neverlate.ui.fragments.SnoozeFragment;
 import com.aaronbrecher.neverlate.ui.widget.NeverLateWidget;
 
@@ -38,4 +39,5 @@ public interface AppComponent {
     void inject(ConflictAnalysisFragment fragment);
     void inject(SnoozeFragment fragment);
     void inject(ConflictEmptyFragment fragment);
+    void inject(SettingsFragment fragment);
 }

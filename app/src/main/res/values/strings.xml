@@ -67,6 +67,10 @@
 
     <string name="unable_to_get_directions_data">Geofences were not updated, unable to get directions data. Check your internet connection and try to refresh again</string>
 
+    <!--calendar prefs strings-->
+    <string name="prefs_calendars_title">Calendars</string>
+    <string name="prefs_calendars_key" translatable="false">calendars</string>
+
     <!--Distance prefs strings-->
     <string name="pref_units_title" translatable="false">Distance Units</string>
     <string name="pref_units_key" translatable="false">units</string>

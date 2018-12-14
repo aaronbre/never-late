@@ -1,24 +1,39 @@
 package com.aaronbrecher.neverlate.ui.fragments
 
+import android.annotation.SuppressLint
+import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Observer
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
+import android.provider.CalendarContract
+import android.support.v14.preference.MultiSelectListPreference
 import android.support.v7.preference.CheckBoxPreference
 import android.support.v7.preference.ListPreference
 import android.support.v7.preference.Preference
 import android.support.v7.preference.PreferenceFragmentCompat
 import android.view.*
+import com.aaronbrecher.neverlate.AppExecutors
+import com.aaronbrecher.neverlate.NeverLateApp
 import com.aaronbrecher.neverlate.R
+import com.aaronbrecher.neverlate.models.Calendar
+import javax.inject.Inject
 
 class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
 
-    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        addPreferencesFromResource(R.xml.prefs)
+    @Inject
+    lateinit var appExecutors: AppExecutors
 
+    private val mCalenders: MutableLiveData<List<Calendar>> = MutableLiveData()
+
+
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        NeverLateApp.getApp().appComponent.inject(this)
+        addPreferencesFromResource(R.xml.prefs)
         for (index in 0 until preferenceScreen.preferenceCount) {
             val preference = preferenceScreen.getPreference(index)
-            if (preference !is CheckBoxPreference) {
-                if (preference.key == getString(R.string.prefs_speed_key)){
+            if (preference !is CheckBoxPreference && preference !is MultiSelectListPreference) {
+                if (preference.key == getString(R.string.prefs_speed_key)) {
                     val unitPref = preferenceScreen.findPreference(getString(R.string.pref_units_key))
                     changeSpeedPrefsToUnitSystem(preferenceScreen.sharedPreferences.getString(unitPref.key, getString(R.string.pref_units_metric))!!)
                 }
@@ -27,16 +42,64 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                         preferenceScreen.sharedPreferences.getString(preference.key, "")!!)
             }
         }
+
+        getCalendars()
+        mCalenders.observe(this, Observer {
+            if (it == null) return@Observer
+            val calendarPrefs = preferenceScreen.findPreference(getString(R.string.prefs_calendars_key)) as MultiSelectListPreference
+            val entries = ArrayList<String>()
+            val values = ArrayList<String>()
+            it.forEach {
+                entries.add(it.name)
+                values.add(it.id.toString())
+            }
+            calendarPrefs.entries = entries.toTypedArray()
+            calendarPrefs.entryValues = values.toTypedArray()
+            setPreferenceSummary(calendarPrefs, getCalendarSummary(calendarPrefs.entries, calendarPrefs.entryValues, calendarPrefs))
+        })
+    }
+
+    private fun getCalendarSummary(entries: Array<CharSequence>, values: Array<CharSequence>, calendarPref: MultiSelectListPreference): String {
+        val savedCalendars = preferenceScreen.sharedPreferences.getStringSet(calendarPref.key, null)
+        if (savedCalendars == null || savedCalendars.isEmpty()) return ""
+        val builder = StringBuilder("")
+        savedCalendars.forEach {
+            builder.append(entries[values.indexOf(it)]).append("\n")
+        }
+        return builder.toString()
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun getCalendars() {
+        appExecutors.diskIO().execute {
+            val projection = arrayOf(CalendarContract.Calendars._ID,
+                    CalendarContract.Calendars.CALENDAR_DISPLAY_NAME)
+            val cr = context!!.contentResolver
+            val cursor = cr.query(CalendarContract.Calendars.CONTENT_URI, projection, null, null, null)
+            val calendarList = ArrayList<Calendar>()
+            if (cursor == null) return@execute
+            while (cursor.moveToNext()) {
+                val name = cursor.getString(cursor.getColumnIndex(CalendarContract.Calendars.CALENDAR_DISPLAY_NAME))
+                val id = cursor.getLong(cursor.getColumnIndex(CalendarContract.Calendars._ID))
+                calendarList.add(Calendar(name, id))
+            }
+            cursor.close()
+            appExecutors.mainThread().execute { mCalenders.value = calendarList }
+        }
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
         val preference = findPreference(key)
-        val preferenceValue = sharedPreferences.getString(key, "")!!
-        if (null != preference && preference !is CheckBoxPreference) {
-            setPreferenceSummary(preference, preferenceValue)
-        }
-        if (key == getString(R.string.pref_units_key)) {
-            changeSpeedPrefsToUnitSystem(preferenceValue)
+        if (preference is MultiSelectListPreference) {
+            setPreferenceSummary(preference, getCalendarSummary(preference.entries, preference.entryValues, preference))
+        } else {
+            val preferenceValue = sharedPreferences.getString(key, "")!!
+            if (null != preference && preference !is CheckBoxPreference) {
+                setPreferenceSummary(preference, preferenceValue)
+            }
+            if (key == getString(R.string.pref_units_key)) {
+                changeSpeedPrefsToUnitSystem(preferenceValue)
+            }
         }
     }
 

@@ -86,11 +86,12 @@ public class CheckForCalendarChangedService extends JobService {
     @SuppressLint("MissingPermission")
     private void doWork() {
         Log.i(TAG, "doWork: checking for calendar changes");
+        CalendarUtils calendarUtils = new CalendarUtils(mSharedPreferences);
         List<Event> oldList = mEventsRepository.queryAllCurrentEventsSync();
-        List<Event> newList = CalendarUtils.getCalendarEventsForToday(this);
+        List<Event> newList = calendarUtils.getCalendarEventsForToday(this);
         //first need to check if the 2 lists are the same or if different what type of update
         //needed
-        HashMap<String, List<Event>> listsToAdd = CalendarUtils.compareCalendars(oldList, newList);
+        HashMap<String, List<Event>> listsToAdd = calendarUtils.compareCalendars(oldList, newList);
         List<Event> geofenceList = listsToAdd.get(Constants.LIST_NEEDS_FENCE_UPDATE);
         List<Event> noGeofenceList = listsToAdd.get(Constants.LIST_NO_FENCE_UPDATE);
         try{

@@ -25,4 +25,8 @@
         android:defaultValue="@string/prefs_alerts_10_minutes_value"
         android:key="@string/prefs_alerts_key"/>
 
+    <MultiSelectListPreference
+        android:title="@string/prefs_calendars_title"
+        android:key="@string/prefs_calendars_key"/>
+
 </PreferenceScreen>
