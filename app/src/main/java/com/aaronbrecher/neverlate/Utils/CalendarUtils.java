@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -29,10 +30,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 
 public class CalendarUtils {
-    public static List<Event> getCalendarEventsForToday(Context context){
+    private SharedPreferences mSharedPreferences;
+    private Set<String> mCalendars;
+
+    public CalendarUtils(SharedPreferences sharedPreferences) {
+        mSharedPreferences = sharedPreferences;
+        mCalendars = mSharedPreferences.getStringSet(Constants.CALENDARS_PREFS_KEY, null);
+    }
+
+    public List<Event> getCalendarEventsForToday(Context context) {
         String[] projection = new String[]{
                 CalendarContract.Instances.BEGIN,
                 CalendarContract.Instances.END,
@@ -43,24 +53,19 @@ public class CalendarUtils {
         ContentUris.appendId(builder, getTimeInMillis(times.first));
         ContentUris.appendId(builder, getTimeInMillis(times.second));
 
-        if(ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) ==
-                PackageManager.PERMISSION_GRANTED){
-            Cursor cursor = context.getContentResolver().query(
-                    builder.build(),
-                    projection,
-                    null,
-                    null,
-                    CalendarContract.Instances.BEGIN + " ASC");
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) ==
+                PackageManager.PERMISSION_GRANTED) {
+            Cursor cursor = CalendarContract.Instances.query(context.getContentResolver(), projection, getTimeInMillis(times.first), getTimeInMillis(times.second));
             return convertToEventList(cursor, context);
-        }else {
+        } else {
             return new ArrayList<>();
         }
     }
 
-    private static List<Event> convertToEventList(Cursor cursor, Context context){
+    private List<Event> convertToEventList(Cursor cursor, Context context) {
         List<Event> eventList = new ArrayList<>();
-        if(cursor != null){
-            while (cursor.moveToNext()){
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
                 int beginIndex = cursor.getColumnIndex(CalendarContract.Instances.BEGIN);
                 int endIndex = cursor.getColumnIndex(CalendarContract.Instances.END);
                 int eventIdIndex = cursor.getColumnIndex(CalendarContract.Instances.EVENT_ID);
@@ -68,13 +73,14 @@ public class CalendarUtils {
                 long begin = cursor.getLong(beginIndex);
                 long end = cursor.getLong(endIndex);
                 String id = String.valueOf(cursor.getInt(eventIdIndex));
-                eventList.add(getEvent(id, begin, end, context));
+                Event event = getEvent(id, begin, end, context);
+                if (event != null) eventList.add(event);
             }
         }
         return eventList;
     }
 
-    private static Event getEvent(String eventId, long begin, long end, Context context) {
+    private Event getEvent(String eventId, long begin, long end, Context context) {
         Event event = new Event();
         event.setStartTime(Converters.dateTimeFromUnix(begin));
         event.setEndTime(Converters.dateTimeFromUnix(end));
@@ -85,7 +91,7 @@ public class CalendarUtils {
         event.setTransportMode(Constants.TRANSPORT_DRIVING);
         event.setOrigin("");
         Cursor eventsCursor = getEventById(context, eventId);
-        if(eventsCursor != null) {
+        if (eventsCursor != null) {
             int titleIndex = eventsCursor.getColumnIndex(Constants.CALENDAR_EVENTS_TITLE);
             int descriptionIndex = eventsCursor.getColumnIndex(Constants.CALENDAR_EVENTS_DESCRIPTION);
             int locationIndex = eventsCursor.getColumnIndex(Constants.CALENDAR_EVENTS_EVENT_LOCATION);
@@ -99,11 +105,12 @@ public class CalendarUtils {
             event.setLocationLatlng(latLng);
             event.setCalendarId(eventsCursor.getLong(calendarIdIndex));
         }
-        return event;
+        if(mCalendars == null) return event;
+        return mCalendars.contains(String.valueOf(event.getCalendarId())) ? event : null;
     }
 
     //only run this on a background thread access dbs as well as other work will block UI
-    private static Cursor getEventById(Context context, String id){
+    private static Cursor getEventById(Context context, String id) {
         String[] projection = new String[]{BaseColumns._ID,
                 Constants.CALENDAR_EVENTS_TITLE,
                 Constants.CALENDAR_EVENTS_DESCRIPTION,
@@ -113,106 +120,55 @@ public class CalendarUtils {
         //as of now filters for only events starting at midnight of that day until 11:59PM
         String selection = Constants.CALENDAR_EVENTS_ID + " = ?";
 
-            @SuppressLint("MissingPermission") Cursor calendarCursor = context.getContentResolver().query(
-                    Constants.CALENDAR_EVENTS_URI,
-                    projection,
-                    selection,
-                    new String[]{id},
-                    null);
-            return calendarCursor;
+        @SuppressLint("MissingPermission") Cursor calendarCursor = context.getContentResolver().query(
+                Constants.CALENDAR_EVENTS_URI,
+                projection,
+                selection,
+                new String[]{id},
+                null);
+        return calendarCursor;
     }
-
-    /**
-     * TODO implement this function to give selection args for calendars {NOT_MVP}
-     * This function will return the selection to only select events for today
-     * Ultimately this will also filter according to shared prefs to only select
-     * calendars that the user would like to have
-     * @return a selection string to query the calendarProvider
-     */
-//    private static String[] getSelectionArgs() {
-//        Pair dates = getDateTimes();
-//        return new String[]{getTimeInMillis((LocalDateTime)dates.first), getTimeInMillis((LocalDateTime)dates.second)};
-//    }
 
     /**
      * Function to get the LocalDateTime objects to define "Today"
      * TODO changed this to only start with current time, end time will still be tommorow midnight
+     *
      * @return a pair where the first is today midnight and second is tommorow midnight
      */
-    private static Pair<LocalDateTime, LocalDateTime> getDateTimes(){
+    private Pair<LocalDateTime, LocalDateTime> getDateTimes() {
         LocalDateTime todayMidnight = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT);
         LocalDateTime tommorowMidnight = todayMidnight.plusDays(1);
         return new Pair<>(LocalDateTime.of(LocalDate.now(), LocalTime.now()), tommorowMidnight);
     }
 
-    private static long getTimeInMillis(LocalDateTime dateTime){
+    private long getTimeInMillis(LocalDateTime dateTime) {
         ZonedDateTime zdt = dateTime.atZone(ZoneId.systemDefault());
         return zdt.toInstant().toEpochMilli();
     }
 
-    private static List<Event> convertCursorToEventList(Cursor cursor){
-        List<Event> eventList = new ArrayList<>();
-        if(cursor != null){
-            while (cursor.moveToNext()){
-                eventList.add(getEvent(cursor));
-            }
-        }
-        return eventList;
-    }
-
-    /*
-        Gets the current data from the cursor and converts it to an event
-        Object
-     */
-    private static Event getEvent(Cursor cursor) {
-        int idIndex = cursor.getColumnIndex(BaseColumns._ID);
-        int titleIndex = cursor.getColumnIndex(Constants.CALENDAR_EVENTS_TITLE);
-        int descriptionIndex = cursor.getColumnIndex(Constants.CALENDAR_EVENTS_DESCRIPTION);
-        int locationIndex = cursor.getColumnIndex(Constants.CALENDAR_EVENTS_EVENT_LOCATION);
-        int calendarIdIndex = cursor.getColumnIndex(Constants.CALENDAR_EVENTS_CALENDAR_ID);
-        int startIndex = cursor.getColumnIndex(Constants.CALENDAR_EVENTS_DTSTART);
-        int endIndex = cursor.getColumnIndex(Constants.CALENDAR_EVENTS_DTEND);
-
-
-        Event event = new Event();
-        event.setId(cursor.getInt(idIndex));
-        event.setTitle(cursor.getString(titleIndex));
-        event.setDescription(cursor.getString(descriptionIndex));
-        event.setLocation(cursor.getString(locationIndex));
-        LatLng latLng = convertLocationToLatLng(cursor.getString(locationIndex));
-        event.setLocationLatlng(latLng);
-        event.setStartTime(Converters.dateTimeFromUnix(cursor.getLong(startIndex)));
-        event.setEndTime(Converters.dateTimeFromUnix(cursor.getLong(endIndex)));
-        event.setCalendarId(cursor.getLong(calendarIdIndex));
-        event.setWatching(true);
-        event.setDistance(Constants.ROOM_INVALID_LONG_VALUE);
-        event.setDrivingTime(Constants.ROOM_INVALID_LONG_VALUE);
-        event.setTransportMode(Constants.TRANSPORT_DRIVING);
-        event.setOrigin("");
-        return event;
-    }
-
     /**
      * Converts the Location String from the calendar to a LatLng object
+     *
      * @param location a string of the location ex. 153 east Broadway
      * @return LatLng of address provided
      */
-    private static LatLng convertLocationToLatLng(String location){
-        if(location == null || location.equals("")) return null;
+    private static LatLng convertLocationToLatLng(String location) {
+        if (location == null || location.equals("")) return null;
         return LocationUtils.latlngFromAddress(NeverLateApp.getApp(), location);
     }
 
     /**
      * Function that compares two Event lists to see if there were changes, and if so check if
      * the change necessitates a new call to Distance Matrix
+     *
      * @param oldEventList the previous list
      * @param newEventList the new list
      * @return a Hashmap of Lists one called needsGeoChanged and another noGeoChange - events without
      * any change will be put in noGeoChange to make it easier when inserting events
-     *
+     * <p>
      * as sorting will not help and the lists will be off need to fix both adding an event to
      */
-    public static HashMap<String, List<Event>> compareCalendars(List<Event> oldEventList, List<Event> newEventList){
+    public HashMap<String, List<Event>> compareCalendars(List<Event> oldEventList, List<Event> newEventList) {
         HashMap<String, List<Event>> map = new HashMap<>();
         //filter out events from the old events that where removed in newEventList
         filterAndRemoveDeletedEvents(oldEventList, newEventList);
@@ -231,10 +187,9 @@ public class CalendarUtils {
         for (int i = 0, listLength = oldEventList.size(); i < listLength; i++) {
             Event newEvent = newEventList.get(i);
             Event oldEvent = oldEventList.get(i);
-            if(oldEvent.getDrivingTime() == Constants.ROOM_INVALID_LONG_VALUE){
+            if (oldEvent.getDrivingTime() == Constants.ROOM_INVALID_LONG_VALUE) {
                 eventsToAddWithGeofences.add(newEvent);
-            }
-            else{
+            } else {
                 Event.Change change = Event.eventChanged(oldEvent, newEvent);
                 switch (change) {
                     case DESCRIPTION_CHANGE:
@@ -264,27 +219,28 @@ public class CalendarUtils {
      * will also remove any geofences associated with them.
      * TODO both this function and the next would be made much easier by using java stream
      * which is not available below API 24
+     *
      * @return a list with all deleted events filtered out
      */
-    private static void filterAndRemoveDeletedEvents(List<Event> oldEvents, List<Event> newEvents){
+    private void filterAndRemoveDeletedEvents(List<Event> oldEvents, List<Event> newEvents) {
         List<Integer> ids = mapToIds(newEvents);
         List<Event> toRemove = new ArrayList<>();
         AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(null).build();
 
-        for(Event event : oldEvents){
-            if(!ids.contains(event.getId())){
-               toRemove.add(event);
+        for (Event event : oldEvents) {
+            if (!ids.contains(event.getId())) {
+                toRemove.add(event);
             }
         }
         oldEvents.removeAll(toRemove);
     }
 
-    private static List<Event> filterOutNewEvents(List<Event> oldEvents, List<Event> newEvents){
+    private List<Event> filterOutNewEvents(List<Event> oldEvents, List<Event> newEvents) {
         List<Event> toRemove = new ArrayList<>();
         List<Integer> ids = mapToIds(oldEvents);
 
-        for(Event event : newEvents){
-            if(!ids.contains(event.getId())){
+        for (Event event : newEvents) {
+            if (!ids.contains(event.getId())) {
                 toRemove.add(event);
             }
         }
@@ -292,13 +248,11 @@ public class CalendarUtils {
         return toRemove;
     }
 
-    private static List<Integer> mapToIds(List<Event> eventList){
+    private List<Integer> mapToIds(List<Event> eventList) {
         List<Integer> ids = new ArrayList<>();
-        for(Event event : eventList){
+        for (Event event : eventList) {
             ids.add(event.getId());
         }
         return ids;
     }
-
-
 }

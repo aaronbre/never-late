@@ -36,9 +36,7 @@ import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.SystemUtils;
-import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
 import com.aaronbrecher.neverlate.interfaces.NavigationControl;
-import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.ui.controllers.MainActivityController;
 import com.aaronbrecher.neverlate.ui.fragments.EventListFragment;
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
@@ -51,9 +49,7 @@ import com.google.android.gms.location.LocationResult;
 import javax.inject.Inject;
 
 import androidx.navigation.NavController;
-import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
-import androidx.navigation.ui.NavigationUI;
 
 import static com.aaronbrecher.neverlate.Constants.PERMISSIONS_REQUEST_CODE;
 
@@ -163,7 +159,12 @@ public class MainActivity extends AppCompatActivity implements NavigationControl
         mViewModel.getAllCurrentEvents().observe(this, events -> {
             hideLoadingIcon();
             if (events != null && events.size() >= 1) {
-                mController.navigateToDestination(R.id.eventListFragment);
+                int currentDestinationId = mController.getCurrentFragment();
+                if (currentDestinationId == R.id.noEventsFragment
+                        || currentDestinationId == R.id.appSnoozedFragment
+                        || currentDestinationId == R.id.noCalendarFragment){
+                    mController.navigateToDestination(R.id.eventListFragment);
+                }
             }
         });
     }
@@ -370,7 +371,7 @@ public class MainActivity extends AppCompatActivity implements NavigationControl
 
     @Override
     public void navigateToDestination(int destination) {
-        if(destination == R.id.snoozeFragment) mFab.hide();
+        if (destination == R.id.snoozeFragment) mFab.hide();
         mController.navigateToDestination(destination);
     }
 }

@@ -121,4 +121,7 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="PreferenceSummary">
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>

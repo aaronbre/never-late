@@ -9,6 +9,7 @@ buildscript {
 }
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 apply plugin: 'io.fabric'
 
 repositories {
@@ -122,10 +123,10 @@ dependencies {
 
     //kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    kapt 'com.google.dagger:dagger-compiler:2.13'
 
     //navigation
-    implementation 'android.arch.navigation:navigation-fragment:1.0.0-alpha07'
-    implementation "android.arch.navigation:navigation-ui:1.0.0-alpha07"
+    implementation 'android.arch.navigation:navigation-fragment:1.0.0-alpha08'
 
     //rating
     implementation 'io.github.kobakei:ratethisapp:1.2.0'

@@ -40,7 +40,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 @WorkerThread
-public class AwarenessFencesCreator{
+public class AwarenessFencesCreator {
     @Inject
     NeverLateApp mApp;
     @Inject
@@ -94,18 +94,18 @@ public class AwarenessFencesCreator{
     @SuppressLint("MissingPermission")
     @WorkerThread
     public void buildAndSaveFences() {
-            mLocationProviderClient.getLastLocation().addOnSuccessListener(mAppExecutors.diskIO(), location -> {
-                if (location == null) return;
-                mLocation = location;
-                //TODO this is probably not needed, as every call to this already added distance info
-                // If the location is older then a day we can assume that distance info needs to be changed
-                //this code should not be needed due to the activity recognition
-                if(location.getTime() < System.currentTimeMillis() - Constants.ONE_DAY){
-                    DirectionsUtils.addDistanceInfoToEventList(mEventList, location);
-                }
-                mEventsRepository.insertAll(mEventList);
-                updateFences();
-            });
+        mLocationProviderClient.getLastLocation().addOnSuccessListener(mAppExecutors.diskIO(), location -> {
+            if (location == null) return;
+            mLocation = location;
+            //TODO this is probably not needed, as every call to this already added distance info
+            // If the location is older then a day we can assume that distance info needs to be changed
+            //this code should not be needed due to the activity recognition
+            if (location.getTime() < System.currentTimeMillis() - Constants.ONE_DAY) {
+                DirectionsUtils.addDistanceInfoToEventList(mEventList, location);
+            }
+            mEventsRepository.insertAll(mEventList);
+            updateFences();
+        });
     }
 
     private List<AwarenessFenceWithName> createFences() {
@@ -124,7 +124,7 @@ public class AwarenessFencesCreator{
                 fenceList.add(arrivalFence);
                 fenceList.add(fence);
 
-                if(relevantTime == Converters.unixFromDateTime(event.getStartTime())){
+                if (relevantTime == Converters.unixFromDateTime(event.getStartTime())) {
                     fenceName = Constants.AWARENESS_FENCE_END_PREFIX + event.getId();
                     triggerTime = Converters.unixFromDateTime(event.getEndTime()) - (event.getDrivingTime() * 1000);
                     AwarenessFenceWithName endFence = new AwarenessFenceWithName(createAwarenessFenceForEvent(triggerTime), fenceName);
@@ -150,7 +150,7 @@ public class AwarenessFencesCreator{
         if (ActivityCompat.checkSelfPermission(mApp, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return null;
         }
-        if(triggerTime < System.currentTimeMillis()) return null;
+        if (triggerTime < System.currentTimeMillis()) return null;
         AwarenessFence locationFence = LocationFence.in(mLocation.getLatitude(),
                 mLocation.getLongitude(),
                 Constants.LOCATION_FENCE_RADIUS,
@@ -174,7 +174,8 @@ public class AwarenessFencesCreator{
 
         long startTime = Converters.unixFromDateTime(event.getStartTime());
         long endTime = Converters.unixFromDateTime(event.getEndTime());
-        if(startTime < System.currentTimeMillis() || endTime < System.currentTimeMillis()) return null;
+        if (startTime < System.currentTimeMillis() || endTime < System.currentTimeMillis())
+            return null;
         @SuppressLint("MissingPermission") AwarenessFence locationFence = LocationFence.in(latLng.latitude,
                 latLng.longitude,
                 Constants.ARRIVAL_FENCE_RADIUS,
@@ -213,13 +214,15 @@ public class AwarenessFencesCreator{
         FenceUpdateRequest request = getUpdateRequest(fencelist);
         if (request == null) return;
         mFenceClient.updateFences(request).addOnSuccessListener(aVoid -> {
+            if (mApp.isInBackground()) return;
             if (fencelist.size() < mEventList.size())
                 Toast.makeText(mApp, R.string.geofence_added_partial_success, Toast.LENGTH_LONG).show();
             else
                 Toast.makeText(mApp, R.string.geofence_added_success, Toast.LENGTH_SHORT).show();
-        }).addOnFailureListener(e ->
-                Toast.makeText(mApp, R.string.geofence_added_failed, Toast.LENGTH_SHORT).show());
-
+        }).addOnFailureListener(e -> {
+            if(mApp.isInBackground()) return;
+            Toast.makeText(mApp, R.string.geofence_added_failed, Toast.LENGTH_SHORT).show();
+        });
     }
 
     @WorkerThread
