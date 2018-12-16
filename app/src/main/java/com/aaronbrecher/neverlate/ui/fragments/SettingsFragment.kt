@@ -16,7 +16,10 @@ import android.view.*
 import com.aaronbrecher.neverlate.AppExecutors
 import com.aaronbrecher.neverlate.NeverLateApp
 import com.aaronbrecher.neverlate.R
+import com.aaronbrecher.neverlate.Utils.BackgroundUtils
 import com.aaronbrecher.neverlate.models.Calendar
+import com.firebase.jobdispatcher.FirebaseJobDispatcher
+import com.firebase.jobdispatcher.GooglePlayDriver
 import javax.inject.Inject
 
 class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
@@ -44,6 +47,10 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         }
 
         getCalendars()
+        /**
+         * Observer for the when the calendar lookup is complete, will set the preferences
+         * entries and values to mirror the calendars name and ID
+         */
         mCalenders.observe(this, Observer {
             if (it == null) return@Observer
             val calendarPrefs = preferenceScreen.findPreference(getString(R.string.prefs_calendars_key)) as MultiSelectListPreference
@@ -59,16 +66,26 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         })
     }
 
+    /**
+     * Gets the calendar summary, due to the calendars being saved by Id in shared prefs
+     * need to convert that to the names
+     */
     private fun getCalendarSummary(entries: Array<CharSequence>, values: Array<CharSequence>, calendarPref: MultiSelectListPreference): String {
         val savedCalendars = preferenceScreen.sharedPreferences.getStringSet(calendarPref.key, null)
         if (savedCalendars == null || savedCalendars.isEmpty()) return ""
         val builder = StringBuilder("")
+        //get the name of the calendar by finding the index of the id in the values list
         savedCalendars.forEach {
             builder.append(entries[values.indexOf(it)]).append("\n")
         }
         return builder.toString()
     }
 
+    /**
+     * Get a list of all the users calendars to display in the
+     * choose calendar preference. To work with async nature will need to
+     * save it to an observed LiveData object
+     */
     @SuppressLint("MissingPermission")
     private fun getCalendars() {
         appExecutors.diskIO().execute {
@@ -92,12 +109,16 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         val preference = findPreference(key)
         if (preference is MultiSelectListPreference) {
             setPreferenceSummary(preference, getCalendarSummary(preference.entries, preference.entryValues, preference))
+            //if additional calendars where added (or removed) need to refresh the list
+            val jobDispatcher = FirebaseJobDispatcher(GooglePlayDriver(context))
+            jobDispatcher.mustSchedule(BackgroundUtils.oneTimeCalendarUpdate(jobDispatcher))
         } else {
             val preferenceValue = sharedPreferences.getString(key, "")!!
             if (null != preference && preference !is CheckBoxPreference) {
                 setPreferenceSummary(preference, preferenceValue)
             }
             if (key == getString(R.string.pref_units_key)) {
+                //if units changed need to update the speed values to new unit system
                 changeSpeedPrefsToUnitSystem(preferenceValue)
             }
         }

@@ -159,7 +159,12 @@ public class MainActivity extends AppCompatActivity implements NavigationControl
         mViewModel.getAllCurrentEvents().observe(this, events -> {
             hideLoadingIcon();
             if (events != null && events.size() >= 1) {
-                mController.navigateToDestination(R.id.eventListFragment);
+                int currentDestinationId = mController.getCurrentFragment();
+                if (currentDestinationId == R.id.noEventsFragment
+                        || currentDestinationId == R.id.appSnoozedFragment
+                        || currentDestinationId == R.id.noCalendarFragment){
+                    mController.navigateToDestination(R.id.eventListFragment);
+                }
             }
         });
     }
@@ -366,7 +371,7 @@ public class MainActivity extends AppCompatActivity implements NavigationControl
 
     @Override
     public void navigateToDestination(int destination) {
-        if(destination == R.id.snoozeFragment) mFab.hide();
+        if (destination == R.id.snoozeFragment) mFab.hide();
         mController.navigateToDestination(destination);
     }
 }

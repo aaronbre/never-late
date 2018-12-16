@@ -271,7 +271,7 @@ public class Event implements Parcelable {
      * GEOFENCE_CHANGE indicates a change in time or location and needs to update fences
      */
     public enum Change {
-        SAME, DESCRIPTION_CHANGE, GEOFENCE_CHANGE;
+        SAME, DESCRIPTION_CHANGE, GEOFENCE_CHANGE
     }
 
     /**

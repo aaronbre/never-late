@@ -69,6 +69,7 @@
 
     <!--calendar prefs strings-->
     <string name="prefs_calendars_title">Calendars</string>
+    <!--if changing this also change constants-->
     <string name="prefs_calendars_key" translatable="false">calendars</string>
 
     <!--Distance prefs strings-->

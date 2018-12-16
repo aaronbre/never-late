@@ -30,13 +30,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 
 public class CalendarUtils {
     private SharedPreferences mSharedPreferences;
+    private Set<String> mCalendars;
 
     public CalendarUtils(SharedPreferences sharedPreferences) {
         mSharedPreferences = sharedPreferences;
+        mCalendars = mSharedPreferences.getStringSet(Constants.CALENDARS_PREFS_KEY, null);
     }
 
     public List<Event> getCalendarEventsForToday(Context context) {
@@ -70,7 +73,8 @@ public class CalendarUtils {
                 long begin = cursor.getLong(beginIndex);
                 long end = cursor.getLong(endIndex);
                 String id = String.valueOf(cursor.getInt(eventIdIndex));
-                eventList.add(getEvent(id, begin, end, context));
+                Event event = getEvent(id, begin, end, context);
+                if (event != null) eventList.add(event);
             }
         }
         return eventList;
@@ -101,7 +105,8 @@ public class CalendarUtils {
             event.setLocationLatlng(latLng);
             event.setCalendarId(eventsCursor.getLong(calendarIdIndex));
         }
-        return event;
+        if(mCalendars == null) return event;
+        return mCalendars.contains(String.valueOf(event.getCalendarId())) ? event : null;
     }
 
     //only run this on a background thread access dbs as well as other work will block UI

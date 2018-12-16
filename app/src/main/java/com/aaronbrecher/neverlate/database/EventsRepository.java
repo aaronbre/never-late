@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 
 import com.aaronbrecher.neverlate.models.Event;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -11,7 +12,7 @@ import javax.inject.Singleton;
 
 @Singleton
 public class EventsRepository {
-    EventsDao mEventsDao;
+    private EventsDao mEventsDao;
 
     @Inject
     public EventsRepository(EventsDao eventsDao) {
@@ -19,10 +20,14 @@ public class EventsRepository {
     }
 
     public void insertAll(List<Event> events) {
-        if(events.size() > 0) mEventsDao.insertAll(events);
+        if(events.size() > 0){
+            events.removeAll(Collections.singleton(null));
+            mEventsDao.insertAll(events);
+        }
     }
 
     public void insertEvent(Event event) {
+        if(event == null) return;
         mEventsDao.insertEvent(event);
     }
 
