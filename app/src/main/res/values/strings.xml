@@ -7,8 +7,8 @@
     <string name="geofence_added_success">Geofences were successfully updated, notifications will be sent when it is time to leave</string>
     <string name="geofence_added_partial_success">Geofences were successfully updated, notifications will be sent when it is time to leave, some geofences failed to load, will try those again on the next scheduled update</string>
     <string name="geofence_added_failed">failed to load the geofences, will try again on the next scheduled update</string>
-    <string name="exiting_geofence_notification_content_with_time">In order to make it in time for your event you need to start driving now to %1$s, Estimated time to arrival is %2$s</string>
-    <string name="exiting_geofence_notification_content">In order to make it in time for your event you need to start driving now to %1$s.</string>
+    <string name="exiting_geofence_notification_content_with_time">In order to make it in time for your event you need to start driving in %1$s minutes to %2$s, Estimated time to arrival is %3$s</string>
+    <string name="exiting_geofence_notification_content">In order to make it in time for your event you need to start driving in %1$s minutes to %2$s.</string>
     <string name="exiting_geofence_notification_title">Time to leave to scheduled event - </string>
     <string name="driving_notification_title_missed">Missed Event </string>
     <string name="driving_notification_content_missed_end">Oops looks like you left the drivable distance to your event. Maybe if you drive fast you can still make it :) </string>

@@ -24,8 +24,8 @@ android {
         applicationId "com.aaronbrecher.neverlate"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 33
-        versionName "2.16"
+        versionCode 34
+        versionName "2.17"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "GOOGLE_API_KEY", GOOGLE_API_KEY)
@@ -74,7 +74,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:16.0.0'
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
     implementation 'com.google.android.gms:play-services-awareness:16.0.0'
-    implementation 'com.google.android.gms:play-services-ads:17.1.0'
+    implementation 'com.google.android.gms:play-services-ads:17.1.2'
 
     //Room live Data and view model
     def room_version = "1.1.1"

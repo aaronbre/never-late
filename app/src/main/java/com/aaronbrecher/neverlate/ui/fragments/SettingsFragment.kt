@@ -159,6 +159,11 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                         getString(R.string.pref_units_key), getDefaultUnitsByLocale()
                 ).apply()
             }
+            if(this.key == getString(R.string.prefs_alerts_key)){
+                preferenceManager.sharedPreferences.edit().putString(
+                        getString(R.string.prefs_alerts_key), "10"
+                ).apply()
+            }
         }
     }
 

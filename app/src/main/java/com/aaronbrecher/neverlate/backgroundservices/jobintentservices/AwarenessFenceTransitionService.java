@@ -98,11 +98,12 @@ public class AwarenessFenceTransitionService extends JobIntentService {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         String notificationText;
+        String leaveTime = mSharedPreferences.getString(getString(R.string.prefs_alerts_key), "10");
         if (event.getDrivingTime() != Constants.ROOM_INVALID_LONG_VALUE) {
             notificationText = getString(R.string.exiting_geofence_notification_content_with_time,
-                    event.getTitle(), DirectionsUtils.readableTravelTime(event.getDrivingTime()));
+                    leaveTime, event.getTitle(), DirectionsUtils.readableTravelTime(event.getDrivingTime()));
         }else {
-            notificationText = getString(R.string.exiting_geofence_notification_content, event.getTitle());
+            notificationText = getString(R.string.exiting_geofence_notification_content, leaveTime, event.getTitle());
         }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID);
