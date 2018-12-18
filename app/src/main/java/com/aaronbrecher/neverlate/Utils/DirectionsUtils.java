@@ -31,7 +31,6 @@ import retrofit2.Response;
  */
 public class DirectionsUtils {
     //Max allowable destinations for DistanceMatrix request
-    private static final int MAX_QUERY_SIZE = 99;
 
     /**
      * function to add distance information (Distance,Duration) to events. The query will be
@@ -43,30 +42,9 @@ public class DirectionsUtils {
      */
     public static boolean addDistanceInfoToEventList(List<Event> events, Location location) {
         if (location == null) return false;
-        boolean wasAdded = false;
         events = removeEventsWithoutLocation(events);
-        if (events.size() > MAX_QUERY_SIZE) {
-            List<List<Event>> lists = splitList(events);
-            for (List<Event> list : lists) {
-                wasAdded = wasAdded || executeHereMatrixQuery(list, location, false);
-            }
-            return wasAdded;
-        } else {
-            return executeHereMatrixQuery(events, location, false);
-        }
-    }
-
-    /**
-     * function to chunk original list
-     * @param events the original list provided by the calendar
-     * @return a list of lists each with a size less then @MAX_QUERY_SIZE
-     */
-    private static List<List<Event>> splitList(List<Event> events) {
-        List<List<Event>> lists = new ArrayList<>();
-        for (int i = 0; i < events.size(); i += MAX_QUERY_SIZE) {
-            lists.add(events.subList(i, Math.min(i + MAX_QUERY_SIZE, events.size())));
-        }
-        return lists;
+        //TODO in server need to split the list if more than 99
+        return executeHereMatrixQuery(events, location, false);
     }
 
     //Filter out all events that do not have a valid location
@@ -116,7 +94,8 @@ public class DirectionsUtils {
     /**
      * convert the event list to a more concise representation to send to server, will include the latitude,
      * longitude, as well as the arrival time
-     * @param events list of all the events
+     *
+     * @param events             list of all the events
      * @param forPublicTransport if for a public transit request need to add the arrival time in iso-format
      * @return a list of the minimized event objects
      */
@@ -168,8 +147,8 @@ public class DirectionsUtils {
     }
 
 
-
     //TODO move these functions to a different class
+
     /**
      * Returns a readable string of distance to the event either in
      * Miles or KM

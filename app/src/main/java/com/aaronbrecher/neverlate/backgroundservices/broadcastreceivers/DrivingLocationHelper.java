@@ -119,8 +119,8 @@ public class DrivingLocationHelper {
                 : LocationUtils.latlngFromAddress(mContext, event.getLocation());
         if(eventLatlng == null) return -1;
         Location eventLocation = new Location("");
-        eventLocation.setLatitude(event.getLocationLatlng().latitude);
-        eventLocation.setLongitude(event.getLocationLatlng().longitude);
+        eventLocation.setLatitude(eventLatlng.latitude);
+        eventLocation.setLongitude(eventLatlng.longitude);
         return (int) location.distanceTo(eventLocation);
     }
 

@@ -213,12 +213,15 @@ public class AwarenessFencesCreator{
         FenceUpdateRequest request = getUpdateRequest(fencelist);
         if (request == null) return;
         mFenceClient.updateFences(request).addOnSuccessListener(aVoid -> {
+            if (mApp.isInBackground()) return;
             if (fencelist.size() < mEventList.size())
                 Toast.makeText(mApp, R.string.geofence_added_partial_success, Toast.LENGTH_LONG).show();
             else
                 Toast.makeText(mApp, R.string.geofence_added_success, Toast.LENGTH_SHORT).show();
-        }).addOnFailureListener(e ->
-                Toast.makeText(mApp, R.string.geofence_added_failed, Toast.LENGTH_SHORT).show());
+        }).addOnFailureListener(e -> {
+            if(mApp.isInBackground()) return;
+            Toast.makeText(mApp, R.string.geofence_added_failed, Toast.LENGTH_SHORT).show();
+        });
 
     }
 
