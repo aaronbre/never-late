@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.text.format.DateUtils;
+import android.util.SparseArray;
 
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.R;
@@ -30,8 +31,6 @@ import retrofit2.Response;
  * will use the Here api https://developer.here.com/
  */
 public class DirectionsUtils {
-    //Max allowable destinations for DistanceMatrix request
-
     /**
      * function to add distance information (Distance,Duration) to events. The query will be
      * constrained by request limits (for Google it is 24) so if the list is more than that will
@@ -44,7 +43,9 @@ public class DirectionsUtils {
         if (location == null) return false;
         events = removeEventsWithoutLocation(events);
         //TODO in server need to split the list if more than 99
-        return executeHereMatrixQuery(events, location, false);
+        SparseArray<List<Event>> transitTypes = splitEventListByTrasportType(events);
+        return executeDrivingQuery(transitTypes.get(Constants.TRANSPORT_DRIVING), location)
+                && executeTransitQuery(transitTypes.get(Constants.TRANSPORT_PUBLIC), location);
     }
 
     //Filter out all events that do not have a valid location
@@ -58,7 +59,25 @@ public class DirectionsUtils {
         return filtered;
     }
 
+    /**
+     * This query will be to check for driving
+     * @return true if the data was added (even partially) false if not
+     */
+    private static boolean executeDrivingQuery(List<Event> events, Location location) {
+        return executeHereMatrixQuery(events, location, false);
+    }
+
+    /**
+     * This query will be to check for public transportation data
+     * @return true if the data was added (even partially) false if not
+     */
+    private static boolean executeTransitQuery(List<Event> events, Location location) {
+        return executeHereMatrixQuery(events, location, true);
+    }
+
+
     private static boolean executeHereMatrixQuery(List<Event> events, Location location, boolean forPublicTransit) {
+        if(events.size() == 0) return true;
         String origin = location.getLatitude() + "," + location.getLongitude();
         List<EventLocationDetails> destinations = convertEventListForQuery(events, forPublicTransit);
         AppApiService service = AppApiUtils.createService();
@@ -80,15 +99,6 @@ public class DirectionsUtils {
             return false;
         }
         return true;
-    }
-
-    /**
-     * This query will be to check for public transportation data
-     *
-     * @return true if the data was added (even partially) false if not
-     */
-    private static boolean executeTransitQuery(List<Event> events, Location location) {
-        return executeHereMatrixQuery(events, location, true);
     }
 
     /**
@@ -121,11 +131,11 @@ public class DirectionsUtils {
      *
      * @return a map containing lists corresponding to all driving types
      */
-    private static Map<Integer, List<Event>> splitEventListByTrasportType(List<Event> eventList) {
+    private static SparseArray<List<Event>> splitEventListByTrasportType(List<Event> eventList) {
         List<Event> drivingEvents = new ArrayList<>();
         List<Event> walkingEvents = new ArrayList<>();
         List<Event> publicEvents = new ArrayList<>();
-        HashMap<Integer, List<Event>> splitMap = new HashMap<>();
+        SparseArray<List<Event>> splitMap = new SparseArray<>();
         for (Event event : eventList) {
             switch (event.getTransportMode()) {
                 case Constants.TRANSPORT_WALKING:
@@ -164,10 +174,10 @@ public class DirectionsUtils {
         float km = distance.floatValue() / 1000;
         DecimalFormat df = new DecimalFormat("#.#");
         if (useMetric) {
-            return df.format(km) + context.getString(R.string.km_signature);
+            return df.format(km) + " " + context.getString(R.string.km_signature);
         } else {
             double miles = LocationUtils.kmToMiles(km);
-            return df.format(miles) + context.getString(R.string.miles_signature);
+            return df.format(miles) + " " + context.getString(R.string.miles_signature);
         }
     }
 
