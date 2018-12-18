@@ -101,7 +101,8 @@ public class AwarenessFencesCreator {
             // If the location is older then a day we can assume that distance info needs to be changed
             //this code should not be needed due to the activity recognition
             if (location.getTime() < System.currentTimeMillis() - Constants.ONE_DAY) {
-                DirectionsUtils.addDistanceInfoToEventList(mEventList, location);
+                double defaultSpeed = Double.valueOf(mSharedPreferences.getString(mApp.getString(R.string.prefs_speed_key), "0.833333"));
+                DirectionsUtils.addDistanceInfoToEventList(mEventList, location, defaultSpeed);
             }
             mEventsRepository.insertAll(mEventList);
             updateFences();

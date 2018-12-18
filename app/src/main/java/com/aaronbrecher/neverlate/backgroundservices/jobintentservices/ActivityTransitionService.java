@@ -11,6 +11,7 @@ import android.support.v4.app.JobIntentService;
 import com.aaronbrecher.neverlate.AppExecutors;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
+import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
 import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.Utils.SystemUtils;
@@ -118,7 +119,8 @@ public class ActivityTransitionService extends JobIntentService {
 
         mLocationProviderClient.getLastLocation().addOnSuccessListener(mAppExecutors.diskIO(), location ->{
             List<Event> eventList = mEventsRepository.queryAllCurrentEventsSync();
-            DirectionsUtils.addDistanceInfoToEventList(eventList, location);
+            double defaultSpeed = Double.valueOf(mSharedPreferences.getString(getString(R.string.prefs_speed_key), "0.833333"));
+            DirectionsUtils.addDistanceInfoToEventList(eventList, location, defaultSpeed);
             AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(eventList).build();
             creator.setEventList(eventList);
             creator.buildAndSaveFences();

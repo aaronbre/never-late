@@ -14,6 +14,7 @@ import android.util.Log;
 import com.aaronbrecher.neverlate.AppExecutors;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
+import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.BackgroundUtils;
 import com.aaronbrecher.neverlate.Utils.CalendarUtils;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
@@ -172,7 +173,8 @@ public class CheckForCalendarChangedService extends JobService {
     private void setOrRemoveFences(List<Event> eventsToAddWithGeofences, Location location) {
         boolean wasAdded;
         AwarenessFencesCreator fencesCreator = new AwarenessFencesCreator.Builder(null).build();
-        wasAdded = DirectionsUtils.addDistanceInfoToEventList(eventsToAddWithGeofences, location);
+        double defaultSpeed = Double.valueOf(mSharedPreferences.getString(getString(R.string.prefs_speed_key), "0.833333"));
+        wasAdded = DirectionsUtils.addDistanceInfoToEventList(eventsToAddWithGeofences, location, defaultSpeed);
         if (wasAdded) {
             fencesCreator.setEventList(eventsToAddWithGeofences);
             fencesCreator.buildAndSaveFences();

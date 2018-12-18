@@ -42,7 +42,7 @@ public class DirectionsUtils {
      * @param events   list of events from the calendar
      * @param location the users current location
      */
-    public static boolean addDistanceInfoToEventList(List<Event> events, Location location) {
+    public static boolean addDistanceInfoToEventList(List<Event> events, Location location, Double defaultSpeed) {
         if (location == null) return false;
         boolean wasAdded = false;
         events = removeEventsWithoutLocation(events);

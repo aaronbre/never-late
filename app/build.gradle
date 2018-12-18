@@ -24,8 +24,8 @@ android {
         applicationId "com.aaronbrecher.neverlate"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 34
-        versionName "2.17"
+        versionCode 35
+        versionName "2.18"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "GOOGLE_API_KEY", GOOGLE_API_KEY)

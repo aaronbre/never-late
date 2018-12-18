@@ -62,7 +62,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
             }
             calendarPrefs.entries = entries.toTypedArray()
             calendarPrefs.entryValues = values.toTypedArray()
-            setPreferenceSummary(calendarPrefs, getCalendarSummary(calendarPrefs.entries, calendarPrefs.entryValues, calendarPrefs))
+            setPreferenceSummary(calendarPrefs, getCalendarSummary())
         })
     }
 
@@ -70,13 +70,19 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
      * Gets the calendar summary, due to the calendars being saved by Id in shared prefs
      * need to convert that to the names
      */
-    private fun getCalendarSummary(entries: Array<CharSequence>, values: Array<CharSequence>, calendarPref: MultiSelectListPreference): String {
+    private fun getCalendarSummary(): String {
+        val calendarPref = preferenceScreen.findPreference(getString(R.string.prefs_calendars_key)) as MultiSelectListPreference
+        val entries = calendarPref.entries
+        val values = calendarPref.values
         val savedCalendars = preferenceScreen.sharedPreferences.getStringSet(calendarPref.key, null)
         if (savedCalendars == null || savedCalendars.isEmpty()) return ""
         val builder = StringBuilder("")
         //get the name of the calendar by finding the index of the id in the values list
         savedCalendars.forEach {
-            builder.append(entries[values.indexOf(it)]).append("\n")
+            val index = values.indexOf(it)
+            if (index != -1) {
+                builder.append(entries[index]).append("\n")
+            }
         }
         return builder.toString()
     }
@@ -106,9 +112,16 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+        //only deal with changes in the preference screen not other prefs
+        val preferenceScreenKeys = setOf(getString(R.string.prefs_alerts_key),
+                getString(R.string.prefs_calendars_key),
+                getString(R.string.prefs_speed_key),
+                getString(R.string.pref_units_key))
+        if (!preferenceScreenKeys.contains(key)) return
+
         val preference = findPreference(key)
         if (preference is MultiSelectListPreference) {
-            setPreferenceSummary(preference, getCalendarSummary(preference.entries, preference.entryValues, preference))
+            setPreferenceSummary(preference, getCalendarSummary())
             //if additional calendars where added (or removed) need to refresh the list
             val jobDispatcher = FirebaseJobDispatcher(GooglePlayDriver(context))
             jobDispatcher.mustSchedule(BackgroundUtils.oneTimeCalendarUpdate(jobDispatcher))
@@ -159,7 +172,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                         getString(R.string.pref_units_key), getDefaultUnitsByLocale()
                 ).apply()
             }
-            if(this.key == getString(R.string.prefs_alerts_key)){
+            if (this.key == getString(R.string.prefs_alerts_key)) {
                 preferenceManager.sharedPreferences.edit().putString(
                         getString(R.string.prefs_alerts_key), "10"
                 ).apply()

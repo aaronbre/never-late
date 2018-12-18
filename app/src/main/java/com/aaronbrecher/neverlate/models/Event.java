@@ -84,7 +84,7 @@ public class Event implements Parcelable {
     }
 
     @Ignore
-    public Event copy(){
+    public Event copy() {
         Event event = new Event(this.getId(), this.getCalendarId(), this.getTitle(), this.getDescription(),
                 this.getStartTime(), this.getEndTime(), this.getLocation(), this.getLocationLatlng(), this.isWatching(), this.getTransportMode());
         event.setDistance(this.getDistance());
@@ -119,7 +119,7 @@ public class Event implements Parcelable {
     }
 
     public String getDescription() {
-        return description;
+        return description != null ? description : "";
     }
 
     public void setDescription(String description) {
@@ -249,12 +249,12 @@ public class Event implements Parcelable {
     };
 
     @Ignore
-    public static String convertEventToJson(Event event){
+    public static String convertEventToJson(Event event) {
         return new Gson().toJson(event);
     }
 
     @Ignore
-    public static Event convertJsonToEvent(String json){
+    public static Event convertJsonToEvent(String json) {
         return new Gson().fromJson(json, Event.class);
     }
 
@@ -276,23 +276,26 @@ public class Event implements Parcelable {
 
     /**
      * Determine if there is a change in event as well as what type of change
-      * @param oldEvent the event as it is saved in DB
+     *
+     * @param oldEvent the event as it is saved in DB
      * @param newEvent the event as it is currently in the calendar
      * @return a Change enum signifying what type of change occured
      */
     @Ignore
-    public static Change eventChanged(Event oldEvent, Event newEvent){
-        if(oldEvent == null && newEvent != null){
+    public static Change eventChanged(Event oldEvent, Event newEvent) {
+        if (oldEvent == null && newEvent != null) {
             return Change.GEOFENCE_CHANGE;
-        }else if((oldEvent != null && newEvent == null) || oldEvent == null){
+        } else if ((oldEvent != null && newEvent == null) || oldEvent == null) {
             return Change.SAME;
         }
-        if(!oldEvent.startTime.equals(newEvent.startTime)
-                || !oldEvent.endTime.equals(newEvent.endTime)
-                || !oldEvent.location.equals(newEvent.location)) return Change.GEOFENCE_CHANGE;
+        if (!oldEvent.getStartTime().equals(newEvent.getStartTime())
+                || !oldEvent.getEndTime().equals(newEvent.getEndTime())
+                || !oldEvent.getLocation().equals(newEvent.getLocation())) return Change.GEOFENCE_CHANGE;
 
-        if(!oldEvent.title.equals(newEvent.title)
-                || !oldEvent.description.equals(newEvent.description)) return Change.DESCRIPTION_CHANGE;
+        //TODO remove null check now that description will always be at least an empty string
+        if (!oldEvent.getTitle().equals(newEvent.getTitle())
+                || !oldEvent.getDescription().equals(newEvent.getDescription()))
+            return Change.DESCRIPTION_CHANGE;
 
         return Change.SAME;
     }

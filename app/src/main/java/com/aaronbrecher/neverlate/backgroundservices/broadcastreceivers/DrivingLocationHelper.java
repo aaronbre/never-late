@@ -51,7 +51,7 @@ public class DrivingLocationHelper {
         NeverLateApp.getApp().getAppComponent().inject(this);
         this.mLocation = location;
         this.mContext = context;
-        String speedString = mSharedPreferences.getString(context.getString(R.string.prefs_speed_key), "");
+        String speedString = mSharedPreferences.getString(context.getString(R.string.prefs_speed_key), "0.833333");
         try{
             mDefaultSpeed = Double.parseDouble(speedString);
         } catch (NumberFormatException e){
@@ -119,8 +119,8 @@ public class DrivingLocationHelper {
                 : LocationUtils.latlngFromAddress(mContext, event.getLocation());
         if(eventLatlng == null) return -1;
         Location eventLocation = new Location("");
-        eventLocation.setLatitude(event.getLocationLatlng().latitude);
-        eventLocation.setLongitude(event.getLocationLatlng().longitude);
+        eventLocation.setLatitude(eventLatlng.latitude);
+        eventLocation.setLongitude(eventLatlng.longitude);
         return (int) location.distanceTo(eventLocation);
     }
 
