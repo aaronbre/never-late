@@ -82,6 +82,7 @@
 
     <!--Speed prefs strings-->
     <string name="prefs_speed_title">Default speed</string>
+    <!--if changing this also change constants-->
     <string name="prefs_speed_key" translatable="false">kpm</string>
 
     <!--Metric-->
@@ -204,4 +205,5 @@
     <string name="app_snoozed_title">App Snoozed</string>
     <string name="conflict_empty_headline">Not enough tracked events</string>
     <string name="conflict_empty_text">There must be more than two tracked events in order to produce a conflict report. Check again when you have more events.</string>
+    <string name="purchase_button">Purchase</string>
 </resources>

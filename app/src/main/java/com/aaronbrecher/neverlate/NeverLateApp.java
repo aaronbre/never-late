@@ -25,7 +25,6 @@ public class NeverLateApp extends Application implements ActivityLifecycleCallba
     @Override
     public void onCreate() {
         super.onCreate();
-        Fabric.with(this, new Crashlytics());
         app = this;
         AndroidThreeTen.init(this);
         mAppComponent = DaggerAppComponent.builder()
@@ -33,6 +32,7 @@ public class NeverLateApp extends Application implements ActivityLifecycleCallba
                 .roomModule(new RoomModule())
                 .build();
         registerActivityLifecycleCallbacks(this);
+        Fabric.with(this, new Crashlytics());
     }
 
     public static NeverLateApp getApp(){

@@ -5,7 +5,7 @@ import com.aaronbrecher.neverlate.backgroundservices.CheckForCalendarChangedServ
 import com.aaronbrecher.neverlate.backgroundservices.broadcastreceivers.DrivingLocationHelper;
 import com.aaronbrecher.neverlate.backgroundservices.jobintentservices.ActivityTransitionService;
 import com.aaronbrecher.neverlate.backgroundservices.jobintentservices.AwarenessFenceTransitionService;
-import com.aaronbrecher.neverlate.geofencing.AwarenessFencesCreator;
+import com.aaronbrecher.neverlate.AwarenessFencesCreator;
 import com.aaronbrecher.neverlate.ui.activities.EventDetailActivity;
 import com.aaronbrecher.neverlate.ui.activities.MainActivity;
 import com.aaronbrecher.neverlate.ui.fragments.ConflictAnalysisFragment;

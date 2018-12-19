@@ -1,4 +1,4 @@
-package com.aaronbrecher.neverlate.geofencing;
+package com.aaronbrecher.neverlate;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -7,16 +7,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
 import android.widget.Toast;
 
-import com.aaronbrecher.neverlate.AppExecutors;
-import com.aaronbrecher.neverlate.Constants;
-import com.aaronbrecher.neverlate.NeverLateApp;
-import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
 import com.aaronbrecher.neverlate.Utils.GeofenceUtils;
 import com.aaronbrecher.neverlate.Utils.LocationUtils;
@@ -101,7 +96,8 @@ public class AwarenessFencesCreator{
                 // If the location is older then a day we can assume that distance info needs to be changed
                 //this code should not be needed due to the activity recognition
                 if(location.getTime() < System.currentTimeMillis() - Constants.ONE_DAY){
-                    DirectionsUtils.addDistanceInfoToEventList(mEventList, location);
+                    DirectionsUtils directionsUtils = new DirectionsUtils(mSharedPreferences, location);
+                    directionsUtils.addDistanceInfoToEventList(mEventList);
                 }
                 mEventsRepository.insertAll(mEventList);
                 updateFences();

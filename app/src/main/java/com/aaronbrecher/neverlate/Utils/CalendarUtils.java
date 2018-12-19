@@ -15,7 +15,7 @@ import android.util.Pair;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.database.Converters;
-import com.aaronbrecher.neverlate.geofencing.AwarenessFencesCreator;
+import com.aaronbrecher.neverlate.AwarenessFencesCreator;
 import com.aaronbrecher.neverlate.models.Event;
 import com.google.android.gms.maps.model.LatLng;
 

@@ -12,11 +12,10 @@ import com.aaronbrecher.neverlate.AppExecutors;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
-import com.aaronbrecher.neverlate.Utils.LocationUtils;
 import com.aaronbrecher.neverlate.Utils.SystemUtils;
 import com.aaronbrecher.neverlate.backgroundservices.broadcastreceivers.DrivingLocationUpdatesBroadcastReceiver;
 import com.aaronbrecher.neverlate.database.EventsRepository;
-import com.aaronbrecher.neverlate.geofencing.AwarenessFencesCreator;
+import com.aaronbrecher.neverlate.AwarenessFencesCreator;
 import com.aaronbrecher.neverlate.models.Event;
 import com.google.android.gms.location.ActivityTransition;
 import com.google.android.gms.location.ActivityTransitionEvent;
@@ -118,7 +117,8 @@ public class ActivityTransitionService extends JobIntentService {
 
         mLocationProviderClient.getLastLocation().addOnSuccessListener(mAppExecutors.diskIO(), location ->{
             List<Event> eventList = mEventsRepository.queryAllCurrentEventsSync();
-            DirectionsUtils.addDistanceInfoToEventList(eventList, location);
+            DirectionsUtils directionsUtils = new DirectionsUtils(mSharedPreferences, location);
+            directionsUtils.addDistanceInfoToEventList(eventList);
             AwarenessFencesCreator creator = new AwarenessFencesCreator.Builder(eventList).build();
             creator.setEventList(eventList);
             creator.buildAndSaveFences();

@@ -5,6 +5,5 @@ import android.os.Parcelable;
 import com.aaronbrecher.neverlate.models.Event;
 
 public interface ListItemClickListener {
-    void onListItemClick(Event event);
-
+    void onListItemClick(Object event);
 }

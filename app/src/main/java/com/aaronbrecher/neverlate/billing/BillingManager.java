@@ -43,6 +43,18 @@ public class BillingManager implements PurchasesUpdatedListener {
         mActivity = activity;
         mBillingUpdatesListener = billingUpdatesListener;
         mBillingClient = BillingClient.newBuilder(mActivity).setListener(this).build();
+
+        startServiceConnection(()->{
+            mBillingUpdatesListener.onBillingClientSetupFinished();
+            queryPurchases();
+        });
+    }
+
+    private void queryPurchases(){
+        Runnable queryToExecute = ()->{
+            long time = System.currentTimeMillis();
+
+        };
     }
 
     public void startServiceConnection(Runnable executeOnSuccess){

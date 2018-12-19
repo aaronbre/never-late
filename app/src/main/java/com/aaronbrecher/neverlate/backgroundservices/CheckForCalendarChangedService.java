@@ -1,14 +1,10 @@
 package com.aaronbrecher.neverlate.backgroundservices;
 
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Looper;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.aaronbrecher.neverlate.AppExecutors;
@@ -17,10 +13,8 @@ import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.Utils.BackgroundUtils;
 import com.aaronbrecher.neverlate.Utils.CalendarUtils;
 import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
-import com.aaronbrecher.neverlate.Utils.LocationUtils;
-import com.aaronbrecher.neverlate.Utils.SystemUtils;
 import com.aaronbrecher.neverlate.database.EventsRepository;
-import com.aaronbrecher.neverlate.geofencing.AwarenessFencesCreator;
+import com.aaronbrecher.neverlate.AwarenessFencesCreator;
 import com.aaronbrecher.neverlate.models.Event;
 import com.aaronbrecher.neverlate.ui.activities.MainActivity;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
@@ -28,15 +22,11 @@ import com.firebase.jobdispatcher.GooglePlayDriver;
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationAvailability;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -171,7 +161,8 @@ public class CheckForCalendarChangedService extends JobService {
     private void setOrRemoveFences(List<Event> eventsToAddWithGeofences, Location location) {
         boolean wasAdded;
         AwarenessFencesCreator fencesCreator = new AwarenessFencesCreator.Builder(null).build();
-        wasAdded = DirectionsUtils.addDistanceInfoToEventList(eventsToAddWithGeofences, location);
+        DirectionsUtils directionsUtils = new DirectionsUtils(mSharedPreferences, location);
+        wasAdded = directionsUtils.addDistanceInfoToEventList(eventsToAddWithGeofences);
         if (wasAdded) {
             fencesCreator.setEventList(eventsToAddWithGeofences);
             fencesCreator.buildAndSaveFences();

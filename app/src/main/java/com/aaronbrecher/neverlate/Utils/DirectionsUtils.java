@@ -13,15 +13,14 @@ import com.aaronbrecher.neverlate.models.EventLocationDetails;
 import com.aaronbrecher.neverlate.models.retrofitmodels.EventDistanceDuration;
 import com.aaronbrecher.neverlate.network.AppApiService;
 import com.aaronbrecher.neverlate.network.AppApiUtils;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -31,25 +30,34 @@ import retrofit2.Response;
  * will use the Here api https://developer.here.com/
  */
 public class DirectionsUtils {
+
+    private SharedPreferences mSharedPreferences;
+    private Location mLocation;
+    private double mspeed;
+
+    public DirectionsUtils(SharedPreferences preferences, Location location) {
+        mSharedPreferences = preferences;
+        mLocation = location;
+        mspeed = Double.valueOf(mSharedPreferences.getString(Constants.SPEED_PREFS_KEY, "0.666667"));
+
+    }
+
     /**
-     * function to add distance information (Distance,Duration) to events. The query will be
-     * constrained by request limits (for Google it is 24) so if the list is more than that will
-     * create sublists to do multiple requests
+     * function to add distance information (Distance,Duration) to events
+     * TODO for subscriptions - will execute this code always, if server response is that the user is not subscribed than will use as the crow flies data instead
      *
      * @param events   list of events from the calendar
-     * @param location the users current location
      */
-    public static boolean addDistanceInfoToEventList(List<Event> events, Location location) {
-        if (location == null) return false;
+    public boolean addDistanceInfoToEventList(List<Event> events) {
+        if (mLocation == null) return false;
         events = removeEventsWithoutLocation(events);
-        //TODO in server need to split the list if more than 99
         SparseArray<List<Event>> transitTypes = splitEventListByTrasportType(events);
-        return executeDrivingQuery(transitTypes.get(Constants.TRANSPORT_DRIVING), location)
-                && executeTransitQuery(transitTypes.get(Constants.TRANSPORT_PUBLIC), location);
+        return executeDrivingQuery(transitTypes.get(Constants.TRANSPORT_DRIVING))
+                && executeTransitQuery(transitTypes.get(Constants.TRANSPORT_PUBLIC));
     }
 
     //Filter out all events that do not have a valid location
-    private static List<Event> removeEventsWithoutLocation(List<Event> eventList) {
+    private List<Event> removeEventsWithoutLocation(List<Event> eventList) {
         List<Event> filtered = new ArrayList<>();
         for (Event event : eventList) {
             if (event.getLocationLatlng() != null) {
@@ -61,24 +69,26 @@ public class DirectionsUtils {
 
     /**
      * This query will be to check for driving
+     *
      * @return true if the data was added (even partially) false if not
      */
-    private static boolean executeDrivingQuery(List<Event> events, Location location) {
-        return executeHereMatrixQuery(events, location, false);
+    private boolean executeDrivingQuery(List<Event> events) {
+        return executeHereMatrixQuery(events, false);
     }
 
     /**
      * This query will be to check for public transportation data
+     *
      * @return true if the data was added (even partially) false if not
      */
-    private static boolean executeTransitQuery(List<Event> events, Location location) {
-        return executeHereMatrixQuery(events, location, true);
+    private boolean executeTransitQuery(List<Event> events) {
+        return executeHereMatrixQuery(events, true);
     }
 
 
-    private static boolean executeHereMatrixQuery(List<Event> events, Location location, boolean forPublicTransit) {
-        if(events.size() == 0) return true;
-        String origin = location.getLatitude() + "," + location.getLongitude();
+    private boolean executeHereMatrixQuery(List<Event> events, boolean forPublicTransit) {
+        if (events.size() == 0) return true;
+        String origin = mLocation.getLatitude() + "," + mLocation.getLongitude();
         List<EventLocationDetails> destinations = convertEventListForQuery(events, forPublicTransit);
         AppApiService service = AppApiUtils.createService();
 
@@ -86,6 +96,10 @@ public class DirectionsUtils {
                 : service.queryHereMatrix(origin, destinations);
         try {
             Response<List<EventDistanceDuration>> response = request.execute();
+            if (response.code() == 403) {
+                addCrowFliesDistanceInfo(events);
+                return true;
+            }
             List<EventDistanceDuration> durationList = response.body();
             if (durationList == null || durationList.size() < 1) return false;
             for (int i = 0; i < durationList.size(); i++) {
@@ -101,6 +115,20 @@ public class DirectionsUtils {
         return true;
     }
 
+    private void addCrowFliesDistanceInfo(List<Event> events) {
+        for (Event event : events) {
+            Location eventLocation = new Location("never-late");
+            eventLocation.setLatitude(event.getLocationLatlng().latitude);
+            eventLocation.setLongitude(event.getLocationLatlng().longitude);
+            long distance = (long) mLocation.distanceTo(eventLocation);
+            if(distance <= 0) continue;
+            long distanceInKilometers = distance/1000;
+            long time = (long) (distanceInKilometers/mspeed) * 60;
+            event.setDrivingTime(time);
+            event.setDistance(distance);
+        }
+    }
+
     /**
      * convert the event list to a more concise representation to send to server, will include the latitude,
      * longitude, as well as the arrival time
@@ -109,7 +137,7 @@ public class DirectionsUtils {
      * @param forPublicTransport if for a public transit request need to add the arrival time in iso-format
      * @return a list of the minimized event objects
      */
-    private static List<EventLocationDetails> convertEventListForQuery(List<Event> events, boolean forPublicTransport) {
+    private List<EventLocationDetails> convertEventListForQuery(List<Event> events, boolean forPublicTransport) {
         List<EventLocationDetails> destinations = new ArrayList<>();
         for (Event event : events) {
             long eventTime = GeofenceUtils.determineRelevantTime(event.getStartTime(), event.getEndTime());
@@ -131,16 +159,12 @@ public class DirectionsUtils {
      *
      * @return a map containing lists corresponding to all driving types
      */
-    private static SparseArray<List<Event>> splitEventListByTrasportType(List<Event> eventList) {
+    private SparseArray<List<Event>> splitEventListByTrasportType(List<Event> eventList) {
         List<Event> drivingEvents = new ArrayList<>();
-        List<Event> walkingEvents = new ArrayList<>();
         List<Event> publicEvents = new ArrayList<>();
         SparseArray<List<Event>> splitMap = new SparseArray<>();
         for (Event event : eventList) {
             switch (event.getTransportMode()) {
-                case Constants.TRANSPORT_WALKING:
-                    walkingEvents.add(event);
-                    break;
                 case Constants.TRANSPORT_PUBLIC:
                     publicEvents.add(event);
                     break;
@@ -151,7 +175,6 @@ public class DirectionsUtils {
             }
         }
         splitMap.put(Constants.TRANSPORT_DRIVING, drivingEvents);
-        splitMap.put(Constants.TRANSPORT_WALKING, walkingEvents);
         splitMap.put(Constants.TRANSPORT_PUBLIC, publicEvents);
         return splitMap;
     }

@@ -27,7 +27,7 @@ import com.aaronbrecher.neverlate.adapters.EventListAdapter;
 import com.aaronbrecher.neverlate.adapters.EventListSwipeToDeleteCallback;
 import com.aaronbrecher.neverlate.databinding.FragmentMainActivityListBinding;
 import com.aaronbrecher.neverlate.dependencyinjection.AppComponent;
-import com.aaronbrecher.neverlate.geofencing.AwarenessFencesCreator;
+import com.aaronbrecher.neverlate.AwarenessFencesCreator;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
 import com.aaronbrecher.neverlate.interfaces.NavigationControl;
 import com.aaronbrecher.neverlate.interfaces.SwipeToDeleteListener;
@@ -177,11 +177,12 @@ public class EventListFragment extends Fragment implements SwipeToDeleteListener
     }
 
     @Override
-    public void onListItemClick(Event event) {
-        Intent intent = new Intent(getContext(), EventDetailActivity.class);
-        intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, Event.convertEventToJson(event));
-        startActivity(intent);
-
+    public void onListItemClick(Object event) {
+        if(event instanceof Event){
+            Intent intent = new Intent(getContext(), EventDetailActivity.class);
+            intent.putExtra(Constants.EVENT_DETAIL_INTENT_EXTRA, Event.convertEventToJson((Event) event));
+            startActivity(intent);
+        }
     }
 
 
