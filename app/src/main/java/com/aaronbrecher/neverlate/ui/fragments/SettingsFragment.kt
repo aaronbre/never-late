@@ -73,7 +73,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     private fun getCalendarSummary(): String {
         val calendarPref = preferenceScreen.findPreference(getString(R.string.prefs_calendars_key)) as MultiSelectListPreference
         val entries = calendarPref.entries
-        val values = calendarPref.values
+        val values = calendarPref.entryValues
         val savedCalendars = preferenceScreen.sharedPreferences.getStringSet(calendarPref.key, null)
         if (savedCalendars == null || savedCalendars.isEmpty()) return ""
         val builder = StringBuilder("")
