@@ -1,5 +1,6 @@
 package com.aaronbrecher.neverlate.ui.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -23,10 +24,11 @@ import com.android.billingclient.api.SkuDetails;
 public class PurchaseSubscriptionFragment extends Fragment implements ListItemClickListener {
     private BillingViewController mViewController;
     private SkuListAdapter mSkuListAdapter;
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        mViewController = new BillingViewController(context);
+        mViewController = new BillingViewController(getActivity());
         //TODO find a better way to do this
         if(getActivity() instanceof MainActivity){
             ((MainActivity) getActivity()).setHomeAsUpIcon(true);
@@ -50,7 +52,7 @@ public class PurchaseSubscriptionFragment extends Fragment implements ListItemCl
     @Override
     public void onListItemClick(Object skuDetails) {
         if(skuDetails instanceof SkuDetails){
-            mViewController.initiatePurchase((SkuDetails) skuDetails, getActivity());
+            mViewController.initiatePurchase((SkuDetails) skuDetails);
         }
     }
 }
