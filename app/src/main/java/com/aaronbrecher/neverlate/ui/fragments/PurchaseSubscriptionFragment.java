@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,6 +16,7 @@ import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.adapters.SkuListAdapter;
 import com.aaronbrecher.neverlate.adapters.VerticalSpaceItemDecoration;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
+import com.aaronbrecher.neverlate.ui.activities.MainActivity;
 import com.aaronbrecher.neverlate.ui.controllers.BillingViewController;
 import com.android.billingclient.api.SkuDetails;
 
@@ -25,6 +27,10 @@ public class PurchaseSubscriptionFragment extends Fragment implements ListItemCl
     public void onAttach(Context context) {
         super.onAttach(context);
         mViewController = new BillingViewController(context);
+        //TODO find a better way to do this
+        if(getActivity() instanceof MainActivity){
+            ((MainActivity) getActivity()).setHomeAsUpIcon(true);
+        }
     }
 
     @Nullable

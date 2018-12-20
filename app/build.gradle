@@ -125,6 +125,7 @@ dependencies {
 
     //navigation
     implementation 'android.arch.navigation:navigation-fragment:1.0.0-alpha08'
+    implementation "android.arch.navigation:navigation-ui:1.0.0-alpha08"
 
     //rating
     implementation 'io.github.kobakei:ratethisapp:1.2.0'

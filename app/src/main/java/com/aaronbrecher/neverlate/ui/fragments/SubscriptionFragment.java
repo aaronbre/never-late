@@ -29,8 +29,7 @@ public class SubscriptionFragment extends Fragment {
         Button subscribeButton = rootView.findViewById(R.id.subscribe_button);
         premiumList.setText(R.string.subscription_bullet_list);
         standardList.setText(R.string.standard_bullet_list);
-        subscribeButton.setOnClickListener((view)->{Navigation.findNavController(getActivity(), R.id.nav_host_fragment);
-        });
+        subscribeButton.setOnClickListener((view)-> Navigation.findNavController(getActivity(), R.id.nav_host_fragment).navigate(R.id.action_subscriptionFragment_to_purchaseSubscriptionFragment));
         return rootView;
     }
 }

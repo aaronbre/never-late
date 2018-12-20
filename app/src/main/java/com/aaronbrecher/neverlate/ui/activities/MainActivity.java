@@ -1,5 +1,6 @@
 package com.aaronbrecher.neverlate.ui.activities;
 
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.SearchManager;
 import android.arch.lifecycle.MutableLiveData;
@@ -20,13 +21,16 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.graphics.drawable.DrawerArrowDrawable;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -97,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements NavigationControl
     private DrawerLayout mDrawerLayout;
     private MainActivityController mController;
     private boolean shouldShowAllEvents = false;
+    private DrawerArrowDrawable homeDrawable;
     private boolean mNotSnoozed;
 
     @Override
@@ -120,9 +125,12 @@ public class MainActivity extends AppCompatActivity implements NavigationControl
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionbar = getSupportActionBar();
-        //NavigationUI.setupActionBarWithNavController(this, navController);
         actionbar.setDisplayHomeAsUpEnabled(true);
-        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
+        homeDrawable = new DrawerArrowDrawable(this);
+        homeDrawable.setColor(getColor(android.R.color.white));
+        actionbar.setHomeAsUpIndicator(homeDrawable);
+//        NavigationUI.setupActionBarWithNavController(this, navController, mDrawerLayout);
+//        NavigationUI.setupWithNavController((NavigationView) findViewById(R.id.nav_view), navController);
         mController.setUpNotificationChannel();
         mController.checkIfUpdateNeeded();
         mController.setupRateThisApp();
@@ -276,7 +284,16 @@ public class MainActivity extends AppCompatActivity implements NavigationControl
         int id = item.getItemId();
         switch (id) {
             case android.R.id.home:
-                mDrawerLayout.openDrawer(GravityCompat.START);
+                if(mController.getCurrentFragment() == R.id.purchaseSubscriptionFragment){
+                    mController.navigateUp();
+                    setHomeAsUpIcon(false);
+                }else {
+                    if (mDrawerLayout.isDrawerOpen(GravityCompat.START)){
+                        mDrawerLayout.closeDrawer(GravityCompat.START);
+                    } else {
+                        mDrawerLayout.openDrawer(GravityCompat.START);
+                    }
+                }
                 return true;
             case R.id.main_activity_menu_sync:
                 if (mSharedPreferences.getLong(Constants.SNOOZE_PREFS_KEY, Constants.ROOM_INVALID_LONG_VALUE) != Constants.ROOM_INVALID_LONG_VALUE
@@ -368,5 +385,16 @@ public class MainActivity extends AppCompatActivity implements NavigationControl
     public void navigateToDestination(int destination) {
         if(destination == R.id.snoozeFragment) mFab.hide();
         mController.navigateToDestination(destination);
+    }
+
+    public void setHomeAsUpIcon(boolean setToUp){
+            ValueAnimator anim = setToUp ? ValueAnimator.ofFloat(0, 1) : ValueAnimator.ofFloat(1, 0);
+            anim.addUpdateListener(valueAnimator -> {
+                float slideOffset = (Float) valueAnimator.getAnimatedValue();
+                homeDrawable.setProgress(slideOffset);
+            });
+            anim.setInterpolator(new DecelerateInterpolator());
+            anim.setDuration(400);
+            anim.start();
     }
 }

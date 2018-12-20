@@ -30,6 +30,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.kobakei.ratethisapp.RateThisApp;
 
 import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -132,6 +133,16 @@ public class MainActivityController {
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    public int getCurrentFragment(){
+        NavDestination destination = mNavController.getCurrentDestination();
+        if(destination == null) return -1;
+        else return destination.getId();
+    }
+
+    public void navigateUp(){
+        mNavController.navigateUp();
     }
 
     public void navigateToDestination(int id){

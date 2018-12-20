@@ -8,16 +8,16 @@
     <fragment
         android:id="@+id/noCalendarFragment"
         android:name="com.aaronbrecher.neverlate.ui.fragments.NoCalendarFragment"
-        android:label="Never Late"
+        android:label="No Calendars"
         tools:layout="@layout/fragment_no_calendar" />
     <fragment
         android:id="@+id/eventListFragment"
         android:name="com.aaronbrecher.neverlate.ui.fragments.EventListFragment"
-        android:label="Never Late" />
+        android:label="Upcoming Events" />
     <fragment
         android:id="@+id/noEventsFragment"
         android:name="com.aaronbrecher.neverlate.ui.fragments.NoEventsFragment"
-        android:label="Never Late"
+        android:label="No Upcoming Events"
         tools:layout="@layout/fragment_no_events" />
     <fragment
         android:id="@+id/settingsFragment"
@@ -35,7 +35,11 @@
         tools:layout="@layout/fragment_subscription" >
         <action
             android:id="@+id/action_subscriptionFragment_to_purchaseSubscriptionFragment"
-            app:destination="@id/purchaseSubscriptionFragment" />
+            app:destination="@id/purchaseSubscriptionFragment"
+            app:enterAnim="@anim/slide_up"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/slide_down" />
     </fragment>
     <fragment
         android:id="@+id/snoozeFragment"
@@ -55,5 +59,5 @@
         android:id="@+id/purchaseSubscriptionFragment"
         android:name="com.aaronbrecher.neverlate.ui.fragments.PurchaseSubscriptionFragment"
         android:label="fragment_purchase_subscription"
-        tools:layout="@layout/fragment_purchase_subscription" />
+        tools:layout="@layout/fragment_purchase_subscription" ></fragment>
 </navigation>
