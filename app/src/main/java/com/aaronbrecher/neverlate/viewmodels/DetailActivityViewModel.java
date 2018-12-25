@@ -1,6 +1,6 @@
 package com.aaronbrecher.neverlate.viewmodels;
 
-import android.arch.lifecycle.MutableLiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import com.aaronbrecher.neverlate.AppExecutors;
 import com.aaronbrecher.neverlate.database.EventsRepository;

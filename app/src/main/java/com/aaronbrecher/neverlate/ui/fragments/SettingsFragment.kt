@@ -1,18 +1,14 @@
 package com.aaronbrecher.neverlate.ui.fragments
 
 import android.annotation.SuppressLint
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import android.provider.CalendarContract
-import android.support.v14.preference.MultiSelectListPreference
-import android.support.v7.preference.CheckBoxPreference
-import android.support.v7.preference.ListPreference
-import android.support.v7.preference.Preference
-import android.support.v7.preference.PreferenceFragmentCompat
 import android.view.*
+import androidx.preference.*
 import com.aaronbrecher.neverlate.AppExecutors
 import com.aaronbrecher.neverlate.NeverLateApp
 import com.aaronbrecher.neverlate.R
@@ -37,7 +33,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
             val preference = preferenceScreen.getPreference(index)
             if (preference !is CheckBoxPreference && preference !is MultiSelectListPreference) {
                 if (preference.key == getString(R.string.prefs_speed_key)) {
-                    val unitPref = preferenceScreen.findPreference(getString(R.string.pref_units_key))
+                    val unitPref : Preference = preferenceScreen.findPreference(getString(R.string.pref_units_key))
                     changeSpeedPrefsToUnitSystem(preferenceScreen.sharedPreferences.getString(unitPref.key, getString(R.string.pref_units_metric))!!)
                 }
                 preference.createDefaultValueIfNull()
@@ -119,7 +115,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                 getString(R.string.pref_units_key))
         if (!preferenceScreenKeys.contains(key)) return
 
-        val preference = findPreference(key)
+        val preference : Preference = findPreference(key)
         if (preference is MultiSelectListPreference) {
             setPreferenceSummary(preference, getCalendarSummary())
             //if additional calendars where added (or removed) need to refresh the list

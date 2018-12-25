@@ -7,8 +7,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.support.annotation.WorkerThread;
-import android.support.v4.app.ActivityCompat;
+import androidx.annotation.WorkerThread;
+import androidx.core.app.ActivityCompat;
 import android.text.TextUtils;
 import android.widget.Toast;
 

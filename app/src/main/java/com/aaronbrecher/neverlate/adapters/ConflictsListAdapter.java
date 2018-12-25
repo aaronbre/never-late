@@ -1,8 +1,6 @@
 package com.aaronbrecher.neverlate.adapters;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -19,6 +17,9 @@ import org.threeten.bp.format.DateTimeFormatter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import static com.aaronbrecher.neverlate.models.EventCompatibility.Compatible;
 

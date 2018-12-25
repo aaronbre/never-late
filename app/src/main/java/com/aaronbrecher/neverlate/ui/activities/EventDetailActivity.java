@@ -1,19 +1,11 @@
 package com.aaronbrecher.neverlate.ui.activities;
 
-import android.arch.lifecycle.ViewModelProvider;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.provider.CalendarContract;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.TabLayout;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import android.provider.CalendarContract;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,8 +24,17 @@ import com.aaronbrecher.neverlate.ui.fragments.PassedEventFragment;
 import com.aaronbrecher.neverlate.viewmodels.DetailActivityViewModel;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.tabs.TabLayout;
 
 import javax.inject.Inject;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.viewpager.widget.ViewPager;
 
 public class EventDetailActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener, EventDetailFragment.EditedEventListener {
     @Inject

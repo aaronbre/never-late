@@ -1,8 +1,8 @@
 package com.aaronbrecher.neverlate.dependencyinjection;
 
 import android.app.Application;
-import android.arch.lifecycle.ViewModelProvider;
-import android.arch.persistence.room.Room;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.room.Room;
 
 import com.aaronbrecher.neverlate.AppExecutors;
 import com.aaronbrecher.neverlate.database.EventCompatibilityDao;

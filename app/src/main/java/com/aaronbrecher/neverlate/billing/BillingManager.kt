@@ -2,14 +2,21 @@ package com.aaronbrecher.neverlate.billing
 
 
 import android.app.Activity
-import android.content.Context
+import android.util.Log
+import com.aaronbrecher.neverlate.network.AppApiService
+import com.aaronbrecher.neverlate.network.AppApiUtils
 import com.android.billingclient.api.*
 import com.android.billingclient.api.BillingClient.BillingResponse
 import com.android.billingclient.api.BillingClient.SkuType
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.util.*
+import javax.inject.Inject
 
 // Default value of mBillingClientResponseCode until BillingManager was not yeat initialized
 private const val BILLING_MANAGER_NOT_INITIALIZED = -1
+private const val TAG = "Billing Manager"
 
 class BillingManager(private val mActivity: Activity, private val mBillingUpdatesListener: BillingUpdatesListener) : PurchasesUpdatedListener {
     private var mBillingClientResponseCode = BILLING_MANAGER_NOT_INITIALIZED
@@ -20,10 +27,9 @@ class BillingManager(private val mActivity: Activity, private val mBillingUpdate
 
     private val mPurchases = ArrayList<Purchase>()
 
-    private val mTokensToBeConsumed: Set<String>? = null
 
     init {
-        startServiceConnection(Runnable{
+        startServiceConnection(Runnable {
             mBillingUpdatesListener.onBillingClientSetupFinished()
         })
     }
@@ -51,7 +57,7 @@ class BillingManager(private val mActivity: Activity, private val mBillingUpdate
     fun querySkuDetailsAsync(@SkuType itemType: String, skuList: List<String>,
                              listener: SkuDetailsResponseListener) {
         // Creating a runnable from the request to use it inside our connection retry policy below
-        val queryRequest = Runnable{
+        val queryRequest = Runnable {
             // Query the purchase async
             val params = SkuDetailsParams.newBuilder()
             params.setSkusList(skuList).setType(itemType)
@@ -61,7 +67,7 @@ class BillingManager(private val mActivity: Activity, private val mBillingUpdate
         executeServiceRequest(queryRequest)
     }
 
-    fun initiatePurchaseFlow(skuDetails: SkuDetails){
+    fun initiatePurchaseFlow(skuDetails: SkuDetails) {
         executeServiceRequest(Runnable {
             mBillingClient.launchBillingFlow(mActivity, BillingFlowParams.newBuilder().setSkuDetails(skuDetails).build())
         })
@@ -83,11 +89,40 @@ class BillingManager(private val mActivity: Activity, private val mBillingUpdate
     }
 
     override fun onPurchasesUpdated(responseCode: Int, purchases: List<Purchase>?) {
+        when (responseCode) {
+            BillingResponse.OK -> purchases?.let { purchaseList ->
+                purchaseList.forEach {
+                    handlePurchase(it)
+                }
+            }
+            BillingResponse.USER_CANCELED -> Log.i(TAG, "onPurchasesUpdated() - user cancelled the purchase flow - skipping")
+            else -> Log.w(TAG, "onPurchasesUpdated() got unknown resultCode: $responseCode")
+        }
+    }
 
+    private fun handlePurchase(purchase: Purchase) {
+        val networkService = AppApiUtils.createService()
+        networkService.verifyPurchase(purchase.purchaseToken, purchase.sku, purchase.packageName).enqueue(object : Callback<Boolean>{
+            override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                mBillingUpdatesListener.onPurchaseVerified(purchase, PurchaseVerification.UNKNOWN)
+            }
+            override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                val valid = response.isSuccessful && response.body() == true
+                mBillingUpdatesListener.onPurchaseVerified(purchase, if(valid) PurchaseVerification.VALID else PurchaseVerification.INVALID)
+            }
+        })
     }
 }
+
+
+
 
 interface BillingUpdatesListener {
     fun onBillingClientSetupFinished()
     fun onPurchasesUpdated(purchases: List<Purchase>)
+    fun onPurchaseVerified(purchase: Purchase, valid: PurchaseVerification)
+}
+
+enum class PurchaseVerification{
+    VALID, INVALID, UNKNOWN
 }

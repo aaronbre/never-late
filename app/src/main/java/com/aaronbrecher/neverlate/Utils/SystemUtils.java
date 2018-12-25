@@ -6,12 +6,13 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.view.View;
 
 import com.aaronbrecher.neverlate.R;
+import com.google.android.material.snackbar.Snackbar;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import static com.aaronbrecher.neverlate.Constants.PERMISSIONS_REQUEST_CODE;
 

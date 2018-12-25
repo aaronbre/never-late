@@ -2,9 +2,6 @@ package com.aaronbrecher.neverlate.ui.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +12,10 @@ import com.aaronbrecher.neverlate.database.EventCompatibilityRepository;
 import com.aaronbrecher.neverlate.interfaces.NavigationControl;
 
 import javax.inject.Inject;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 public class ConflictEmptyFragment extends Fragment {
     private NavigationControl mNavController;

@@ -1,6 +1,6 @@
 package com.aaronbrecher.neverlate.database;
 
-import android.arch.lifecycle.LiveData;
+import androidx.lifecycle.LiveData;
 
 import com.aaronbrecher.neverlate.models.Event;
 

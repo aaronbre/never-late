@@ -4,14 +4,15 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 
 import com.aaronbrecher.neverlate.R;
 import com.aaronbrecher.neverlate.interfaces.SwipeToDeleteListener;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class EventListSwipeToDeleteCallback extends ItemTouchHelper.SimpleCallback {
     private EventListAdapter mAdapter;

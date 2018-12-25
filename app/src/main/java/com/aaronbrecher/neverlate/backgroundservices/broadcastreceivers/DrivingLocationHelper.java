@@ -6,8 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.aaronbrecher.neverlate.AppExecutors;
 import com.aaronbrecher.neverlate.Constants;
@@ -62,6 +62,7 @@ public class DrivingLocationHelper {
     @SuppressLint("MissingPermission")
     public void checkAllEvents(){
         if(!SystemUtils.hasLocationPermissions(mContext)) return;
+
         mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(mAppExecutors.diskIO(), location -> {
             mEvents = mEventsRepository.queryAllCurrentEventsSync();
             if(mEvents == null) return;

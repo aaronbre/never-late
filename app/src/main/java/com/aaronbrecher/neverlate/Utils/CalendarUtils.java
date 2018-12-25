@@ -9,7 +9,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.provider.CalendarContract;
-import android.support.v4.content.ContextCompat;
+import androidx.core.content.ContextCompat;
 import android.util.Pair;
 
 import com.aaronbrecher.neverlate.Constants;

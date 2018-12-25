@@ -1,23 +1,15 @@
 package com.aaronbrecher.neverlate.ui.fragments;
 
 import android.annotation.SuppressLint;
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProvider;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
-import com.aaronbrecher.neverlate.Utils.DirectionsUtils;
-import com.aaronbrecher.neverlate.Utils.GeofenceUtils;
 import com.aaronbrecher.neverlate.Utils.SystemUtils;
 import com.aaronbrecher.neverlate.dependencyinjection.AppComponent;
 import com.aaronbrecher.neverlate.models.Event;
@@ -36,6 +28,13 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import javax.inject.Inject;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 
 public class EventDetailMapFragment extends Fragment implements OnMapReadyCallback {
 

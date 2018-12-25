@@ -1,11 +1,11 @@
 package com.aaronbrecher.neverlate.adapters;
 
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment;
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailMapFragment;
+
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
 
 public class EventDetailPagerAdapter extends FragmentPagerAdapter {
     private int numTabs;

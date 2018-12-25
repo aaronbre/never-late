@@ -1,24 +1,15 @@
 package com.aaronbrecher.neverlate.ui.fragments;
 
 import android.annotation.SuppressLint;
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProvider;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.aaronbrecher.neverlate.AwarenessFencesCreator;
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.NeverLateApp;
 import com.aaronbrecher.neverlate.R;
@@ -27,7 +18,6 @@ import com.aaronbrecher.neverlate.adapters.EventListAdapter;
 import com.aaronbrecher.neverlate.adapters.EventListSwipeToDeleteCallback;
 import com.aaronbrecher.neverlate.databinding.FragmentMainActivityListBinding;
 import com.aaronbrecher.neverlate.dependencyinjection.AppComponent;
-import com.aaronbrecher.neverlate.AwarenessFencesCreator;
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener;
 import com.aaronbrecher.neverlate.interfaces.NavigationControl;
 import com.aaronbrecher.neverlate.interfaces.SwipeToDeleteListener;
@@ -38,10 +28,21 @@ import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
 
 import javax.inject.Inject;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 //TODO when the list becomes empty need to close the fragment and load the no-events-fragment, probably needs to be done in mainActivity via a interface
 public class EventListFragment extends Fragment implements SwipeToDeleteListener, ListItemClickListener {
@@ -91,7 +92,7 @@ public class EventListFragment extends Fragment implements SwipeToDeleteListener
         mBinding.eventListRv.addItemDecoration(dividerItemDecoration);
         setupDeleteTouchHelper();
         mRootView = mBinding.getRoot();
-        return mBinding.getRoot();
+        return mRootView;
     }
 
     private void setupDeleteTouchHelper() {

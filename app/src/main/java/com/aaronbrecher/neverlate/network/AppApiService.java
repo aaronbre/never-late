@@ -25,4 +25,7 @@ public interface AppApiService {
 
     @GET(AppApiUtils.VERSION_ENDPOINT)
     Call<Version> queryVersionNumber(@Query("usersversion")int version);
+
+    @GET(AppApiUtils.VERIFY_PURCHASE_ENDPOINT)
+    Call<Boolean> verifyPurchase(@Query("token") String token, @Query("productId") String productId, @Query("packageName") String packageName);
 }

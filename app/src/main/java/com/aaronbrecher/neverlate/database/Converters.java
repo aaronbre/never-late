@@ -1,18 +1,14 @@
 package com.aaronbrecher.neverlate.database;
 
 
-import android.arch.persistence.room.TypeConverter;
+import androidx.room.TypeConverter;
 
-import com.aaronbrecher.neverlate.models.EventCompatibility;
 import com.aaronbrecher.neverlate.models.EventCompatibility.Compatible;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.threeten.bp.Instant;
 import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.ZoneId;
-import org.threeten.bp.ZonedDateTime;
-
-import java.util.TimeZone;
 
 public class Converters {
     @TypeConverter

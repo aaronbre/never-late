@@ -13,7 +13,7 @@ import com.jakewharton.threetenabp.AndroidThreeTen;
 
 import io.fabric.sdk.android.Fabric;
 
-import static android.app.Application.*;
+import static android.app.Application.ActivityLifecycleCallbacks;
 
 public class NeverLateApp extends Application implements ActivityLifecycleCallbacks {
     private static NeverLateApp app;

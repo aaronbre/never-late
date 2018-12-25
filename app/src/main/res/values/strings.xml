@@ -206,4 +206,7 @@
     <string name="conflict_empty_headline">Not enough tracked events</string>
     <string name="conflict_empty_text">There must be more than two tracked events in order to produce a conflict report. Check again when you have more events.</string>
     <string name="purchase_button">Purchase</string>
+    <string name="purchase_success_toast">Your purchase of was successful, your order ID is %1$s</string>
+    <string name="purchase_failed_toast">Purchase was not successful, please try again</string>
+    <string name="purchase_unkown_toast">Unable to verify purchase at this time, will try again soon</string>
 </resources>
