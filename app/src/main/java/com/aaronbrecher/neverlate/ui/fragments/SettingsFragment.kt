@@ -27,7 +27,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
 
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        NeverLateApp.getApp().appComponent.inject(this)
+        NeverLateApp.app.appComponent.inject(this)
         addPreferencesFromResource(R.xml.prefs)
         for (index in 0 until preferenceScreen.preferenceCount) {
             val preference = preferenceScreen.getPreference(index)

@@ -17,7 +17,7 @@ import com.android.billingclient.api.SkuDetailsResponseListener
 class BillingViewController(private val mActivity: Activity) :  BillingUpdatesListener {
 
     private val mBillingManager: BillingManager = BillingManager(mActivity, this)
-    val skuDetailList = MutableLiveData<List<SkuDetails>>()
+    val skuDetailList = MutableLiveData<List<SkuDetails>?>()
 
     fun querySkus() {
         mBillingManager.querySkuDetailsAsync(SkuType.SUBS, BillingConstants.getSkuList(), SkuDetailsResponseListener { responseCode, skuDetailsList ->

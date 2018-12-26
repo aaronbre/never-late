@@ -3,8 +3,7 @@ package com.aaronbrecher.neverlate.billing
 
 import android.app.Activity
 import android.util.Log
-import com.aaronbrecher.neverlate.network.AppApiService
-import com.aaronbrecher.neverlate.network.AppApiUtils
+import com.aaronbrecher.neverlate.network.createRetrofitService
 import com.android.billingclient.api.*
 import com.android.billingclient.api.BillingClient.BillingResponse
 import com.android.billingclient.api.BillingClient.SkuType
@@ -12,7 +11,6 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
-import javax.inject.Inject
 
 // Default value of mBillingClientResponseCode until BillingManager was not yeat initialized
 private const val BILLING_MANAGER_NOT_INITIALIZED = -1
@@ -101,7 +99,7 @@ class BillingManager(private val mActivity: Activity, private val mBillingUpdate
     }
 
     private fun handlePurchase(purchase: Purchase) {
-        val networkService = AppApiUtils.createService()
+        val networkService = createRetrofitService()
         networkService.verifyPurchase(purchase.purchaseToken, purchase.sku, purchase.packageName).enqueue(object : Callback<Boolean>{
             override fun onFailure(call: Call<Boolean>, t: Throwable) {
                 mBillingUpdatesListener.onPurchaseVerified(purchase, PurchaseVerification.UNKNOWN)
