@@ -13,13 +13,20 @@ import retrofit2.http.Query
 interface AppApiService {
 
     @POST(DIRECTION_MATRIX_API_ENDPOINT)
-    fun queryHereMatrix(@Query("origin") origin: String, @Body destinations: List<EventLocationDetails>): Call<List<EventDistanceDuration>>
+    fun queryHereMatrix(@Query("origin") origin: String,
+                        @Query("token") token: String,
+                        @Query("sku") sku: String,
+                        @Body destinations: List<EventLocationDetails>): Call<List<EventDistanceDuration>>
 
     @POST(DIRECTION_API_ENDPOINT)
-    fun queryDirections(@Query("origin") origin: String, @Body destination: EventLocationDetails): Call<EventDistanceDuration>
+    fun queryDirections(@Query("origin") origin: String,
+                        @Body destination: EventLocationDetails): Call<EventDistanceDuration>
 
     @POST(PUBLIC_TRANSIT_API_ENDPOINT)
-    fun queryHerePublicTransit(@Query("origin") origin: String, @Body destinations: List<EventLocationDetails>): Call<List<EventDistanceDuration>>
+    fun queryHerePublicTransit(@Query("origin") origin: String,
+                               @Query("token") token: String,
+                               @Query("sku") sku: String,
+                               @Body destinations: List<EventLocationDetails>): Call<List<EventDistanceDuration>>
 
     @GET(VERSION_ENDPOINT)
     fun queryVersionNumber(@Query("usersversion") version: Int): Call<Version>

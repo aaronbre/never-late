@@ -18,7 +18,6 @@ class BillingViewController(private val mActivity: Activity) :  BillingUpdatesLi
 
     private val mBillingManager: BillingManager = BillingManager(mActivity, this)
     val skuDetailList = MutableLiveData<List<SkuDetails>?>()
-
     fun querySkus() {
         mBillingManager.querySkuDetailsAsync(SkuType.SUBS, BillingConstants.getSkuList(), SkuDetailsResponseListener { responseCode, skuDetailsList ->
             if(responseCode == BillingResponse.OK && skuDetailsList != null)

@@ -3,17 +3,22 @@ package com.aaronbrecher.neverlate.Utils
 import android.content.Context
 import android.content.SharedPreferences
 import android.location.Location
+import android.os.Looper
 import android.text.format.DateUtils
 import android.util.SparseArray
+import com.aaronbrecher.neverlate.AppExecutors
 
 import com.aaronbrecher.neverlate.Constants
 import com.aaronbrecher.neverlate.R
+import com.aaronbrecher.neverlate.billing.BillingManager
+import com.aaronbrecher.neverlate.billing.BillingUpdatesListener
+import com.aaronbrecher.neverlate.interfaces.DistanceInfoAddedListener
 import com.aaronbrecher.neverlate.models.Event
 import com.aaronbrecher.neverlate.models.EventLocationDetails
-import com.aaronbrecher.neverlate.models.retrofitmodels.EventDistanceDuration
 import com.aaronbrecher.neverlate.network.AppApiService
 import com.aaronbrecher.neverlate.network.*
-import com.google.android.gms.maps.model.LatLng
+import com.android.billingclient.api.Purchase
+import com.android.billingclient.api.PurchaseHistoryResponseListener
 
 import java.io.IOException
 import java.text.DecimalFormat
@@ -21,15 +26,20 @@ import java.text.SimpleDateFormat
 import java.util.ArrayList
 import java.util.Date
 
-import retrofit2.Call
-import retrofit2.Response
-
 /**
  * Class that contains functions to get distance information,
  * will use the Here api https://developer.here.com/
  */
-class DirectionsUtils(mSharedPreferences: SharedPreferences, private val mLocation: Location?) {
-    private val mspeed: Double = java.lang.Double.valueOf(mSharedPreferences.getString(Constants.SPEED_PREFS_KEY, "0.666667")!!)
+class DirectionsUtils(mSharedPreferences: SharedPreferences,
+                      private val mLocation: Location?,
+                      private val distanceInfoAddedListener: DistanceInfoAddedListener,
+                      private val context: Context) : PurchaseHistoryResponseListener, BillingUpdatesListener {
+
+    private val mspeed: Double = mSharedPreferences.getString(Constants.SPEED_PREFS_KEY, "0.666667")!!.toDouble()
+    private val retrofitService: AppApiService = createRetrofitService()
+    private lateinit var billingManager: BillingManager
+    private lateinit var filteredEvents: List<Event>
+    private val appExecutors = AppExecutors()
 
     /**
      * function to add distance information (Distance,Duration) to events
@@ -37,11 +47,70 @@ class DirectionsUtils(mSharedPreferences: SharedPreferences, private val mLocati
      *
      * @param events   list of events from the calendar
      */
-    fun addDistanceInfoToEventList(events: List<Event>): Boolean {
-        if (mLocation == null) return false
-        val filtered = removeEventsWithoutLocation(events)
-        val transitTypes = splitEventListByTrasportType(filtered)
-        return executeDrivingQuery(transitTypes.get(Constants.TRANSPORT_DRIVING)) && executeTransitQuery(transitTypes.get(Constants.TRANSPORT_PUBLIC))
+    fun addDistanceInfoToEventList(events: List<Event>) {
+        if (mLocation == null) return
+        filteredEvents = removeEventsWithoutLocation(events)
+        billingManager = BillingManager(context, this)
+    }
+
+    override fun onBillingClientSetupFinished() {
+        val purchases = billingManager.checkSubFromLocalPurchases()
+        for (index in 0 until purchases.size) {
+            val purchase = purchases[index]
+            val responseType = addDistanceFromHereApi(purchase.purchaseToken, purchase.sku)
+            when (responseType) {
+                QueryResponseType.SUCCESS ->{
+                    appExecutors.diskIO().execute { distanceInfoAddedListener.distanceUpdated() }
+                    return
+                }
+                QueryResponseType.FAILED -> {
+                    addCrowFliesDistanceInfo(filteredEvents)
+                    return
+                }
+            }
+        }
+        billingManager.checkSubFromAsyncPurchases(this)
+    }
+
+    //will use this to determine what type of data should be served to user
+    override fun onPurchaseHistoryResponse(responseCode: Int, purchasesList: MutableList<Purchase>?) {
+        appExecutors.networkIO().execute {
+            purchasesList?.let {
+                for (index in 0 until purchasesList.size) {
+                    val purchase = purchasesList[index]
+                    val responseType = addDistanceFromHereApi(purchase.purchaseToken, purchase.sku)
+                    when (responseType) {
+                        QueryResponseType.SUCCESS ->{
+                            distanceInfoAddedListener.distanceUpdated()
+                            return@execute
+                        }
+                        QueryResponseType.FAILED -> {
+                            addCrowFliesDistanceInfo(filteredEvents)
+                            return@execute
+                        }
+                    }
+                }
+            }
+            addCrowFliesDistanceInfo(filteredEvents)
+        }
+    }
+
+    override fun onBillingSetupFailed() {
+        addCrowFliesDistanceInfo(filteredEvents)
+    }
+
+    private fun addDistanceFromHereApi(token: String, sku: String): QueryResponseType {
+        val transitTypes = splitEventListByTrasportType(filteredEvents)
+        val drivingQueryResponseType = executeDrivingQuery(transitTypes.get(Constants.TRANSPORT_DRIVING), token, sku)
+        val transitQueryResponseType = executeTransitQuery(transitTypes.get(Constants.TRANSPORT_PUBLIC), token, sku)
+        return if (drivingQueryResponseType == QueryResponseType.UNVERIFIED
+                || transitQueryResponseType == QueryResponseType.UNVERIFIED) {
+            QueryResponseType.UNVERIFIED
+        } else if (drivingQueryResponseType == QueryResponseType.SUCCESS || transitQueryResponseType == QueryResponseType.SUCCESS) {
+            QueryResponseType.SUCCESS
+        } else {
+            QueryResponseType.FAILED
+        }
     }
 
     //Filter out all events that do not have a valid location
@@ -51,41 +120,37 @@ class DirectionsUtils(mSharedPreferences: SharedPreferences, private val mLocati
 
     /**
      * This query will be to check for driving
-     *
      * @return true if the data was added (even partially) false if not
      */
-    private fun executeDrivingQuery(events: List<Event>): Boolean {
-        return executeHereMatrixQuery(events, false)
+    private fun executeDrivingQuery(events: List<Event>, token: String, sku: String): QueryResponseType {
+        return executeHereMatrixQuery(events, false, token, sku)
     }
 
     /**
      * This query will be to check for public transportation data
-     *
      * @return true if the data was added (even partially) false if not
      */
-    private fun executeTransitQuery(events: List<Event>): Boolean {
-        return executeHereMatrixQuery(events, true)
+    private fun executeTransitQuery(events: List<Event>, token: String, sku: String): QueryResponseType {
+        return executeHereMatrixQuery(events, true, token, sku)
     }
 
 
-    private fun executeHereMatrixQuery(events: List<Event>, forPublicTransit: Boolean): Boolean {
-        if (events.isEmpty()) return true
+    private fun executeHereMatrixQuery(events: List<Event>, forPublicTransit: Boolean, token: String, sku: String): QueryResponseType {
+        if (events.isEmpty()) return QueryResponseType.SUCCESS
         val origin = mLocation!!.latitude.toString() + "," + mLocation.longitude
         val destinations = convertEventListForQuery(events, forPublicTransit)
-        val service = createRetrofitService()
-
         val request = if (forPublicTransit)
-            service.queryHerePublicTransit(origin, destinations)
+            retrofitService.queryHerePublicTransit(origin, token, sku, destinations)
         else
-            service.queryHereMatrix(origin, destinations)
+            retrofitService.queryHereMatrix(origin, token, sku, destinations)
         try {
             val response = request.execute()
             if (response.code() == 403) {
-                addCrowFliesDistanceInfo(events)
-                return true
+//                addCrowFliesDistanceInfo(events)
+                return QueryResponseType.UNVERIFIED
             }
             val durationList = response.body()
-            if (durationList == null || durationList.isEmpty()) return false
+            if (durationList == null || durationList.isEmpty()) return QueryResponseType.FAILED
             for (i in durationList.indices) {
                 val event = events[i]
                 val (distance, duration) = durationList[i]
@@ -94,24 +159,26 @@ class DirectionsUtils(mSharedPreferences: SharedPreferences, private val mLocati
             }
         } catch (e: IOException) {
             e.printStackTrace()
-            return false
+            return QueryResponseType.FAILED
         }
 
-        return true
+        return QueryResponseType.SUCCESS
     }
 
     private fun addCrowFliesDistanceInfo(events: List<Event>) {
-        for (event in events) {
+        events.forEach {
             val eventLocation = Location("never-late")
-            eventLocation.latitude = event.locationLatlng!!.latitude
-            eventLocation.longitude = event.locationLatlng!!.longitude
+            eventLocation.latitude = it.locationLatlng!!.latitude
+            eventLocation.longitude = it.locationLatlng!!.longitude
             val distance = mLocation!!.distanceTo(eventLocation).toLong()
-            if (distance <= 0) continue
-            val distanceInKilometers = distance / 1000
-            val time = (distanceInKilometers / mspeed).toLong() * 60
-            event.drivingTime = time
-            event.distance = distance
+            if (distance > 0) {
+                val distanceInKilometers = distance / 1000
+                val time = (distanceInKilometers / mspeed).toLong() * 60
+                it.drivingTime = time
+                it.distance = distance
+            }
         }
+        appExecutors.diskIO().execute { distanceInfoAddedListener.distanceUpdated()}
     }
 
     /**
@@ -210,4 +277,8 @@ class DirectionsUtils(mSharedPreferences: SharedPreferences, private val mLocati
             return hours.toString() + ":" + minutes
         }
     }
+}
+
+enum class QueryResponseType {
+    SUCCESS, FAILED, UNVERIFIED
 }

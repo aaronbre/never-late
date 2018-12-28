@@ -5,6 +5,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.os.Handler
+import android.os.Looper
 import androidx.annotation.NonNull
 import androidx.core.app.JobIntentService
 
@@ -16,9 +18,9 @@ import com.aaronbrecher.neverlate.Utils.SystemUtils
 import com.aaronbrecher.neverlate.backgroundservices.broadcastreceivers.DrivingLocationUpdatesBroadcastReceiver
 import com.aaronbrecher.neverlate.database.EventsRepository
 import com.aaronbrecher.neverlate.AwarenessFencesCreator
+import com.aaronbrecher.neverlate.interfaces.DistanceInfoAddedListener
 import com.aaronbrecher.neverlate.models.Event
 import com.google.android.gms.location.ActivityTransition
-import com.google.android.gms.location.ActivityTransitionEvent
 import com.google.android.gms.location.ActivityTransitionResult
 import com.google.android.gms.location.DetectedActivity
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -27,8 +29,7 @@ import com.google.android.gms.tasks.OnSuccessListener
 
 import javax.inject.Inject
 
-class ActivityTransitionService : JobIntentService() {
-
+class ActivityTransitionService : JobIntentService(), DistanceInfoAddedListener {
     @Inject
     internal lateinit var mLocationProviderClient: FusedLocationProviderClient
     @Inject
@@ -37,6 +38,8 @@ class ActivityTransitionService : JobIntentService() {
     internal lateinit var mEventsRepository: EventsRepository
     @Inject
     internal lateinit var mAppExecutors: AppExecutors
+
+    private lateinit var mEventList: List<Event>
 
     private val pendingIntent: PendingIntent
         get() {
@@ -108,13 +111,18 @@ class ActivityTransitionService : JobIntentService() {
         }
 
         mLocationProviderClient.lastLocation.addOnSuccessListener(mAppExecutors.diskIO(), OnSuccessListener { location ->
-            val eventList = mEventsRepository.queryAllCurrentEventsSync()
-            val directionsUtils = DirectionsUtils(mSharedPreferences, location)
-            directionsUtils.addDistanceInfoToEventList(eventList)
-            val creator = AwarenessFencesCreator.Builder(eventList).build()
-            creator.eventList = eventList
-            creator.buildAndSaveFences()
+            mEventList = mEventsRepository.queryAllCurrentEventsSync()
+            val directionsUtils = DirectionsUtils(mSharedPreferences, location, this, this)
+            Handler(Looper.getMainLooper()).post { directionsUtils.addDistanceInfoToEventList(mEventList) }
         })
+    }
+
+    override fun distanceUpdated() {
+            mAppExecutors.diskIO().run {
+                val creator = AwarenessFencesCreator.Builder(mEventList).build()
+                creator.eventList = mEventList
+                creator.buildAndSaveFences()
+            }
     }
 
     companion object {

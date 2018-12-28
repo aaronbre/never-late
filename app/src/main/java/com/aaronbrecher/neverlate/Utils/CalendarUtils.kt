@@ -51,9 +51,10 @@ object CalendarUtils {
      */
     private val dateTimes: Pair<LocalDateTime, LocalDateTime>
         get() {
-            val todayMidnight = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT)
-            val tommorowMidnight = todayMidnight.plusDays(1)
-            return Pair(LocalDateTime.of(LocalDate.now(), LocalTime.now()), tommorowMidnight)
+            //val todayMidnight = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT)
+            //val tommorowMidnight = todayMidnight.plusDays(1)
+            val now = LocalDateTime.of(LocalDate.now(), LocalTime.now())
+            return Pair(now, now.plusDays(1))
         }
 
     fun getCalendarEventsForToday(context: Context): List<Event> {

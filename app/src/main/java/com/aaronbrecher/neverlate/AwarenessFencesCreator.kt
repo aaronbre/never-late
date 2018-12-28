@@ -7,6 +7,8 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.Location
+import android.os.Handler
+import android.os.Looper
 import androidx.annotation.WorkerThread
 import androidx.core.app.ActivityCompat
 import android.text.TextUtils
@@ -18,6 +20,7 @@ import com.aaronbrecher.neverlate.Utils.LocationUtils
 import com.aaronbrecher.neverlate.backgroundservices.broadcastreceivers.StartJobIntentServiceBroadcastReceiver
 import com.aaronbrecher.neverlate.database.Converters
 import com.aaronbrecher.neverlate.database.EventsRepository
+import com.aaronbrecher.neverlate.interfaces.DistanceInfoAddedListener
 import com.aaronbrecher.neverlate.models.Event
 import com.google.android.gms.awareness.Awareness
 import com.google.android.gms.awareness.FenceClient
@@ -35,7 +38,7 @@ import java.util.ConcurrentModificationException
 import javax.inject.Inject
 
 @WorkerThread
-class AwarenessFencesCreator private constructor(var eventList: List<Event>) {
+class AwarenessFencesCreator private constructor(var eventList: List<Event>) : DistanceInfoAddedListener {
     @Inject
     lateinit var mApp: NeverLateApp
     @Inject
@@ -88,20 +91,28 @@ class AwarenessFencesCreator private constructor(var eventList: List<Event>) {
     @SuppressLint("MissingPermission")
     @WorkerThread
     fun buildAndSaveFences() {
-        mLocationProviderClient.lastLocation.addOnSuccessListener(mAppExecutors.diskIO(), OnSuccessListener {
-            it?.let {
+        mLocationProviderClient.lastLocation.addOnSuccessListener(mAppExecutors.diskIO(), OnSuccessListener { location ->
+            location?.let {
                 mLocation = it
                 //TODO this is probably not needed, as every call to this already added distance info
                 // If the location is older then a day we can assume that distance info needs to be changed
                 //this code should not be needed due to the activity recognition
                 if (it.time < System.currentTimeMillis() - Constants.ONE_DAY) {
-                    val directionsUtils = DirectionsUtils(mSharedPreferences, it)
-                    directionsUtils.addDistanceInfoToEventList(eventList)
+                    val directionsUtils = DirectionsUtils(mSharedPreferences, it, this, mApp)
+                    Handler(Looper.getMainLooper()).run { directionsUtils.addDistanceInfoToEventList(eventList)}
+                }else{
+                    mEventsRepository.insertAll(eventList)
+                    updateFences()
                 }
-                mEventsRepository.insertAll(eventList)
-                updateFences()
             }
         })
+    }
+
+    override fun distanceUpdated() {
+        mAppExecutors.diskIO().execute {
+            mEventsRepository.insertAll(eventList)
+            updateFences()
+        }
     }
 
     private fun createFences(): List<AwarenessFenceWithName> {

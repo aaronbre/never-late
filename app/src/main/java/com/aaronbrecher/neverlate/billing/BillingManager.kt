@@ -2,7 +2,11 @@ package com.aaronbrecher.neverlate.billing
 
 
 import android.app.Activity
+import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import com.aaronbrecher.neverlate.AppExecutors
 import com.aaronbrecher.neverlate.network.createRetrofitService
 import com.android.billingclient.api.*
 import com.android.billingclient.api.BillingClient.BillingResponse
@@ -16,19 +20,23 @@ import java.util.*
 private const val BILLING_MANAGER_NOT_INITIALIZED = -1
 private const val TAG = "Billing Manager"
 
-class BillingManager(private val mActivity: Activity, private val mBillingUpdatesListener: BillingUpdatesListener) : PurchasesUpdatedListener {
+class BillingManager(private val mContext: Context, private val mBillingUpdatesListener: BillingUpdatesListener?) : PurchasesUpdatedListener, PurchaseHistoryResponseListener{
     private var mBillingClientResponseCode = BILLING_MANAGER_NOT_INITIALIZED
 
-    private val mBillingClient: BillingClient = BillingClient.newBuilder(mActivity).setListener(this).build()
+    private val mBillingClient: BillingClient = BillingClient.newBuilder(mContext).setListener(this).build()
+
+    private val mRetrofitService = createRetrofitService()
 
     private var mIsServiceConnected: Boolean = false
+
+    private val mAppExecutors = AppExecutors()
 
     private val mPurchases = ArrayList<Purchase>()
 
 
     init {
         startServiceConnection(Runnable {
-            mBillingUpdatesListener.onBillingClientSetupFinished()
+            mBillingUpdatesListener?.onBillingClientSetupFinished()
         })
     }
 
@@ -38,6 +46,8 @@ class BillingManager(private val mActivity: Activity, private val mBillingUpdate
                 if (responseCode == BillingResponse.OK) {
                     mIsServiceConnected = true
                     executeOnSuccess.run()
+                }else{
+                    mBillingUpdatesListener?.onBillingSetupFailed()
                 }
                 mBillingClientResponseCode = responseCode
             }
@@ -67,8 +77,60 @@ class BillingManager(private val mActivity: Activity, private val mBillingUpdate
 
     fun initiatePurchaseFlow(skuDetails: SkuDetails) {
         executeServiceRequest(Runnable {
-            mBillingClient.launchBillingFlow(mActivity, BillingFlowParams.newBuilder().setSkuDetails(skuDetails).build())
+            if(mContext is Activity){
+                mBillingClient.launchBillingFlow(mContext, BillingFlowParams.newBuilder().setSkuDetails(skuDetails).build())
+            }
         })
+    }
+
+    fun verifySub() {
+        val purchases = checkSubFromLocalPurchases()
+        var isValid = false
+        mAppExecutors.networkIO().execute {
+            purchases.forEach {
+                if(verifyPurchase(it)){
+                    mBillingUpdatesListener?.onSubscriptionVerified(true)
+                    isValid = true
+                    return@forEach
+                }
+            }
+            if(!isValid){
+                Handler(Looper.getMainLooper()).post {
+                    checkSubFromAsyncPurchases(this)
+                }
+            }
+        }
+    }
+
+    override fun onPurchaseHistoryResponse(responseCode: Int, purchasesList: MutableList<Purchase>?) {
+        if(responseCode != BillingResponse.OK){
+            mBillingUpdatesListener?.onSubscriptionVerified(false)
+        } else {
+            mAppExecutors.networkIO().execute{
+                var isValid = false
+                purchasesList?.forEach {
+                    if(verifyPurchase(it)){
+                        isValid = true
+                        return@forEach
+                    }
+                }
+                mBillingUpdatesListener?.onSubscriptionVerified(isValid)
+            }
+        }
+    }
+
+    fun checkSubFromAsyncPurchases(listener: PurchaseHistoryResponseListener){
+        if(mIsServiceConnected) mBillingClient.queryPurchaseHistoryAsync(SkuType.SUBS, listener)
+    }
+
+    fun checkSubFromLocalPurchases(): List<Purchase>{
+        val purchases = mBillingClient.queryPurchases(SkuType.SUBS)
+        return purchases.purchasesList
+    }
+
+    private fun verifyPurchase(purchase: Purchase) : Boolean{
+        val valid = mRetrofitService.verifyPurchase(purchase.purchaseToken, purchase.sku, purchase.packageName).execute().body()
+        return valid ?: false
     }
 
     /**
@@ -102,11 +164,11 @@ class BillingManager(private val mActivity: Activity, private val mBillingUpdate
         val networkService = createRetrofitService()
         networkService.verifyPurchase(purchase.purchaseToken, purchase.sku, purchase.packageName).enqueue(object : Callback<Boolean>{
             override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                mBillingUpdatesListener.onPurchaseVerified(purchase, PurchaseVerification.UNKNOWN)
+                mBillingUpdatesListener?.onPurchaseVerified(purchase, PurchaseVerification.UNKNOWN)
             }
             override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
                 val valid = response.isSuccessful && response.body() == true
-                mBillingUpdatesListener.onPurchaseVerified(purchase, if(valid) PurchaseVerification.VALID else PurchaseVerification.INVALID)
+                mBillingUpdatesListener?.onPurchaseVerified(purchase, if(valid) PurchaseVerification.VALID else PurchaseVerification.INVALID)
             }
         })
     }
@@ -117,8 +179,10 @@ class BillingManager(private val mActivity: Activity, private val mBillingUpdate
 
 interface BillingUpdatesListener {
     fun onBillingClientSetupFinished()
-    fun onPurchasesUpdated(purchases: List<Purchase>)
-    fun onPurchaseVerified(purchase: Purchase, valid: PurchaseVerification)
+    fun onBillingSetupFailed(){/* default method */}
+    fun onPurchasesUpdated(purchases: List<Purchase>){/*default method */}
+    fun onPurchaseVerified(purchase: Purchase, valid: PurchaseVerification) {/*default method */}
+    fun onSubscriptionVerified(isVerified: Boolean){/* default method */}
 }
 
 enum class PurchaseVerification{

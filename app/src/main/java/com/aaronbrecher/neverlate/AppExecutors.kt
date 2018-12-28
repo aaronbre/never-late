@@ -29,7 +29,7 @@ class AppExecutors(private val diskIO: Executor, private val networkIO: Executor
         return mainThread
     }
 
-    private class MainThreadExecutor : Executor {
+    class MainThreadExecutor : Executor {
         private val mainThreadHandler = Handler(Looper.getMainLooper())
         override fun execute(@NonNull command: Runnable) {
             mainThreadHandler.post(command)

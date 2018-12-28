@@ -5,6 +5,8 @@ import android.location.Location
 import com.aaronbrecher.neverlate.AppExecutors
 import com.aaronbrecher.neverlate.Constants
 import com.aaronbrecher.neverlate.NeverLateApp
+import com.aaronbrecher.neverlate.billing.BillingManager
+import com.aaronbrecher.neverlate.billing.BillingUpdatesListener
 import com.aaronbrecher.neverlate.database.Converters
 import com.aaronbrecher.neverlate.database.EventCompatibilityRepository
 import com.aaronbrecher.neverlate.database.EventsRepository
@@ -26,7 +28,8 @@ import javax.inject.Inject
 
 import retrofit2.Call
 
-class AnaylizeEventsJobService : JobService() {
+class AnaylizeEventsJobService : JobService(), BillingUpdatesListener {
+
     @Inject
     lateinit var mEventsRepository: EventsRepository
     @Inject
@@ -36,6 +39,7 @@ class AnaylizeEventsJobService : JobService() {
 
     private lateinit var mApiService: AppApiService
     private lateinit var mJobParameters: JobParameters
+    private lateinit var mBillingManager: BillingManager
     private var mEventList: List<Event> = ArrayList()
     private var mEventCompatibilities: MutableList<EventCompatibility>? = null
 
@@ -48,8 +52,26 @@ class AnaylizeEventsJobService : JobService() {
 
     override fun onStartJob(job: JobParameters): Boolean {
         mJobParameters = job
-        mAppExecutors.diskIO().execute { this.doWork() }
+        mBillingManager = BillingManager(this, this)
         return true
+    }
+
+    override fun onBillingClientSetupFinished() {
+        mBillingManager.verifySub()
+    }
+
+    override fun onBillingSetupFailed() {
+        MainActivity.setFinishedLoading(true)
+        jobFinished(mJobParameters, false)
+    }
+
+    override fun onSubscriptionVerified(isVerified: Boolean) {
+        if(isVerified){
+            mAppExecutors.diskIO().execute { this.doWork() }
+        } else{
+            MainActivity.setFinishedLoading(true)
+            jobFinished(mJobParameters, false)
+        }
     }
 
     override fun onStopJob(job: JobParameters): Boolean {
