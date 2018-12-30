@@ -8,6 +8,7 @@ import com.aaronbrecher.neverlate.billing.BillingConstants
 import com.aaronbrecher.neverlate.billing.BillingManager
 import com.aaronbrecher.neverlate.billing.BillingUpdatesListener
 import com.aaronbrecher.neverlate.billing.PurchaseVerification
+import com.aaronbrecher.neverlate.models.PurchaseData
 import com.android.billingclient.api.BillingClient.BillingResponse
 import com.android.billingclient.api.BillingClient.SkuType
 import com.android.billingclient.api.Purchase
@@ -33,8 +34,7 @@ class BillingViewController(private val mActivity: Activity) :  BillingUpdatesLi
         querySkus()
     }
 
-    override fun onPurchasesUpdated(purchases: List<Purchase>) {
-
+    override fun onPurchasesUpdated(purchases: List<PurchaseData>, wasAsync: Boolean) {
     }
 
     override fun onPurchaseVerified(purchase: Purchase, valid: PurchaseVerification) {

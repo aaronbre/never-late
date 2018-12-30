@@ -1,8 +1,10 @@
 package com.aaronbrecher.neverlate.network
 
 import com.aaronbrecher.neverlate.models.EventLocationDetails
+import com.aaronbrecher.neverlate.models.HereApiBody
 import com.aaronbrecher.neverlate.models.retrofitmodels.EventDistanceDuration
 import com.aaronbrecher.neverlate.models.retrofitmodels.Version
+import com.android.billingclient.api.Purchase
 
 import retrofit2.Call
 import retrofit2.http.Body
@@ -14,19 +16,15 @@ interface AppApiService {
 
     @POST(DIRECTION_MATRIX_API_ENDPOINT)
     fun queryHereMatrix(@Query("origin") origin: String,
-                        @Query("token") token: String,
-                        @Query("sku") sku: String,
-                        @Body destinations: List<EventLocationDetails>): Call<List<EventDistanceDuration>>
+                        @Body body: HereApiBody): Call<List<EventDistanceDuration>>
 
     @POST(DIRECTION_API_ENDPOINT)
     fun queryDirections(@Query("origin") origin: String,
-                        @Body destination: EventLocationDetails): Call<EventDistanceDuration>
+                        @Body body: HereApiBody): Call<EventDistanceDuration>
 
     @POST(PUBLIC_TRANSIT_API_ENDPOINT)
     fun queryHerePublicTransit(@Query("origin") origin: String,
-                               @Query("token") token: String,
-                               @Query("sku") sku: String,
-                               @Body destinations: List<EventLocationDetails>): Call<List<EventDistanceDuration>>
+                               @Body body: HereApiBody): Call<List<EventDistanceDuration>>
 
     @GET(VERSION_ENDPOINT)
     fun queryVersionNumber(@Query("usersversion") version: Int): Call<Version>

@@ -7,6 +7,8 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.aaronbrecher.neverlate.AppExecutors
+import com.aaronbrecher.neverlate.Constants
+import com.aaronbrecher.neverlate.models.PurchaseData
 import com.aaronbrecher.neverlate.network.createRetrofitService
 import com.android.billingclient.api.*
 import com.android.billingclient.api.BillingClient.BillingResponse
@@ -15,6 +17,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
+import kotlin.collections.ArrayList
 
 // Default value of mBillingClientResponseCode until BillingManager was not yeat initialized
 private const val BILLING_MANAGER_NOT_INITIALIZED = -1
@@ -31,7 +34,7 @@ class BillingManager(private val mContext: Context, private val mBillingUpdatesL
 
     private val mAppExecutors = AppExecutors()
 
-    private val mPurchases = ArrayList<Purchase>()
+    private val mPurchases = ArrayList<PurchaseData>()
 
 
     init {
@@ -83,6 +86,8 @@ class BillingManager(private val mContext: Context, private val mBillingUpdatesL
         })
     }
 
+    //TODO change this to do validation in app to find correct purchase, then send data to server
+    //for secure validation
     fun verifySub() {
         val purchases = checkSubFromLocalPurchases()
         var isValid = false
@@ -101,6 +106,34 @@ class BillingManager(private val mContext: Context, private val mBillingUpdatesL
             }
         }
     }
+
+    // Gets the list of purchase either sync or async and updates via the
+    // purchases updated listener
+    fun getSubList(doAsync: Boolean){
+        if(!doAsync){
+            val purchases = checkSubFromLocalPurchases()
+            purchases.forEach {
+                if(it.sku == BillingConstants.SKU_PREMIUM_MONTHLY || it.sku == BillingConstants.SKU_PREMIUM_YEARLY)
+                    mPurchases.add(PurchaseData(it.purchaseToken, it.sku, it.packageName))
+            }
+        }
+        if(mPurchases.size < 1 || doAsync){
+            getAsyncPurchases()
+        } else{
+            mBillingUpdatesListener?.onPurchasesUpdated(mPurchases, false)
+        }
+    }
+
+    fun getAsyncPurchases(){
+        mBillingClient.queryPurchaseHistoryAsync(SkuType.SUBS) { responseCode, purchasesList ->
+            if(responseCode == BillingResponse.OK)
+                purchasesList.forEach { mPurchases.add(PurchaseData(it.purchaseToken, it.sku, it.packageName))
+            }
+            mBillingUpdatesListener?.onPurchasesUpdated(mPurchases, true)
+        }
+    }
+
+
 
     override fun onPurchaseHistoryResponse(responseCode: Int, purchasesList: MutableList<Purchase>?) {
         if(responseCode != BillingResponse.OK){
@@ -180,7 +213,7 @@ class BillingManager(private val mContext: Context, private val mBillingUpdatesL
 interface BillingUpdatesListener {
     fun onBillingClientSetupFinished()
     fun onBillingSetupFailed(){/* default method */}
-    fun onPurchasesUpdated(purchases: List<Purchase>){/*default method */}
+    fun onPurchasesUpdated(purchases: List<PurchaseData>, wasAsync: Boolean){/*default method */}
     fun onPurchaseVerified(purchase: Purchase, valid: PurchaseVerification) {/*default method */}
     fun onSubscriptionVerified(isVerified: Boolean){/* default method */}
 }

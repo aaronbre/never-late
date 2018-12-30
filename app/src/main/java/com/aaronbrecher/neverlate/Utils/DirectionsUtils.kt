@@ -3,6 +3,7 @@ package com.aaronbrecher.neverlate.Utils
 import android.content.Context
 import android.content.SharedPreferences
 import android.location.Location
+import android.os.Handler
 import android.os.Looper
 import android.text.format.DateUtils
 import android.util.SparseArray
@@ -15,6 +16,8 @@ import com.aaronbrecher.neverlate.billing.BillingUpdatesListener
 import com.aaronbrecher.neverlate.interfaces.DistanceInfoAddedListener
 import com.aaronbrecher.neverlate.models.Event
 import com.aaronbrecher.neverlate.models.EventLocationDetails
+import com.aaronbrecher.neverlate.models.HereApiBody
+import com.aaronbrecher.neverlate.models.PurchaseData
 import com.aaronbrecher.neverlate.network.AppApiService
 import com.aaronbrecher.neverlate.network.*
 import com.android.billingclient.api.Purchase
@@ -33,13 +36,15 @@ import java.util.Date
 class DirectionsUtils(mSharedPreferences: SharedPreferences,
                       private val mLocation: Location?,
                       private val distanceInfoAddedListener: DistanceInfoAddedListener,
-                      private val context: Context) : PurchaseHistoryResponseListener, BillingUpdatesListener {
+                      private val context: Context) : BillingUpdatesListener {
 
     private val mspeed: Double = mSharedPreferences.getString(Constants.SPEED_PREFS_KEY, "0.666667")!!.toDouble()
     private val retrofitService: AppApiService = createRetrofitService()
     private lateinit var billingManager: BillingManager
     private lateinit var filteredEvents: List<Event>
+    private val purchaseList: MutableList<PurchaseData> = ArrayList()
     private val appExecutors = AppExecutors()
+    private val mainThreadHandler = Handler(Looper.getMainLooper())
 
     /**
      * function to add distance information (Distance,Duration) to events
@@ -53,45 +58,23 @@ class DirectionsUtils(mSharedPreferences: SharedPreferences,
         billingManager = BillingManager(context, this)
     }
 
+    //TODO change this to do the validation in app to get the correct token,
+    //then pass token to server for secure validation
     override fun onBillingClientSetupFinished() {
-        val purchases = billingManager.checkSubFromLocalPurchases()
-        for (index in 0 until purchases.size) {
-            val purchase = purchases[index]
-            val responseType = addDistanceFromHereApi(purchase.purchaseToken, purchase.sku)
-            when (responseType) {
-                QueryResponseType.SUCCESS ->{
-                    appExecutors.diskIO().execute { distanceInfoAddedListener.distanceUpdated() }
-                    return
-                }
-                QueryResponseType.FAILED -> {
-                    addCrowFliesDistanceInfo(filteredEvents)
-                    return
-                }
-            }
-        }
-        billingManager.checkSubFromAsyncPurchases(this)
+       billingManager.getSubList(false)
     }
 
-    //will use this to determine what type of data should be served to user
-    override fun onPurchaseHistoryResponse(responseCode: Int, purchasesList: MutableList<Purchase>?) {
+    override fun onPurchasesUpdated(purchases: List<PurchaseData>, wasAsync: Boolean) {
         appExecutors.networkIO().execute {
-            purchasesList?.let {
-                for (index in 0 until purchasesList.size) {
-                    val purchase = purchasesList[index]
-                    val responseType = addDistanceFromHereApi(purchase.purchaseToken, purchase.sku)
-                    when (responseType) {
-                        QueryResponseType.SUCCESS ->{
-                            distanceInfoAddedListener.distanceUpdated()
-                            return@execute
-                        }
-                        QueryResponseType.FAILED -> {
-                            addCrowFliesDistanceInfo(filteredEvents)
-                            return@execute
-                        }
-                    }
+            val responseType = addDistanceFromHereApi()
+            when(responseType){
+                QueryResponseType.SUCCESS -> distanceInfoAddedListener.distanceUpdated()
+                QueryResponseType.FAILED -> addCrowFliesDistanceInfo(filteredEvents)
+                QueryResponseType.UNVERIFIED -> {
+                    if(wasAsync) addCrowFliesDistanceInfo(filteredEvents)
+                    else mainThreadHandler.post { billingManager.getSubList(true) }
                 }
             }
-            addCrowFliesDistanceInfo(filteredEvents)
         }
     }
 
@@ -99,10 +82,10 @@ class DirectionsUtils(mSharedPreferences: SharedPreferences,
         addCrowFliesDistanceInfo(filteredEvents)
     }
 
-    private fun addDistanceFromHereApi(token: String, sku: String): QueryResponseType {
+    private fun addDistanceFromHereApi(): QueryResponseType {
         val transitTypes = splitEventListByTrasportType(filteredEvents)
-        val drivingQueryResponseType = executeDrivingQuery(transitTypes.get(Constants.TRANSPORT_DRIVING), token, sku)
-        val transitQueryResponseType = executeTransitQuery(transitTypes.get(Constants.TRANSPORT_PUBLIC), token, sku)
+        val drivingQueryResponseType = executeDrivingQuery(transitTypes.get(Constants.TRANSPORT_DRIVING))
+        val transitQueryResponseType = executeTransitQuery(transitTypes.get(Constants.TRANSPORT_PUBLIC))
         return if (drivingQueryResponseType == QueryResponseType.UNVERIFIED
                 || transitQueryResponseType == QueryResponseType.UNVERIFIED) {
             QueryResponseType.UNVERIFIED
@@ -122,27 +105,27 @@ class DirectionsUtils(mSharedPreferences: SharedPreferences,
      * This query will be to check for driving
      * @return true if the data was added (even partially) false if not
      */
-    private fun executeDrivingQuery(events: List<Event>, token: String, sku: String): QueryResponseType {
-        return executeHereMatrixQuery(events, false, token, sku)
+    private fun executeDrivingQuery(events: List<Event>): QueryResponseType {
+        return executeHereMatrixQuery(events, false)
     }
 
     /**
      * This query will be to check for public transportation data
      * @return true if the data was added (even partially) false if not
      */
-    private fun executeTransitQuery(events: List<Event>, token: String, sku: String): QueryResponseType {
-        return executeHereMatrixQuery(events, true, token, sku)
+    private fun executeTransitQuery(events: List<Event>): QueryResponseType {
+        return executeHereMatrixQuery(events, true)
     }
 
 
-    private fun executeHereMatrixQuery(events: List<Event>, forPublicTransit: Boolean, token: String, sku: String): QueryResponseType {
+    private fun executeHereMatrixQuery(events: List<Event>, forPublicTransit: Boolean): QueryResponseType {
         if (events.isEmpty()) return QueryResponseType.SUCCESS
         val origin = mLocation!!.latitude.toString() + "," + mLocation.longitude
         val destinations = convertEventListForQuery(events, forPublicTransit)
         val request = if (forPublicTransit)
-            retrofitService.queryHerePublicTransit(origin, token, sku, destinations)
+            retrofitService.queryHerePublicTransit(origin, HereApiBody(destinations, purchaseList))
         else
-            retrofitService.queryHereMatrix(origin, token, sku, destinations)
+            retrofitService.queryHereMatrix(origin, HereApiBody(destinations, purchaseList))
         try {
             val response = request.execute()
             if (response.code() == 403) {

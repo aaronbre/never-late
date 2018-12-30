@@ -1,7 +1,6 @@
 package com.aaronbrecher.neverlate.backgroundservices
 
 import android.location.Location
-
 import com.aaronbrecher.neverlate.AppExecutors
 import com.aaronbrecher.neverlate.Constants
 import com.aaronbrecher.neverlate.NeverLateApp
@@ -10,23 +9,16 @@ import com.aaronbrecher.neverlate.billing.BillingUpdatesListener
 import com.aaronbrecher.neverlate.database.Converters
 import com.aaronbrecher.neverlate.database.EventCompatibilityRepository
 import com.aaronbrecher.neverlate.database.EventsRepository
-import com.aaronbrecher.neverlate.models.Event
-import com.aaronbrecher.neverlate.models.EventCompatibility
-import com.aaronbrecher.neverlate.models.EventLocationDetails
-import com.aaronbrecher.neverlate.models.retrofitmodels.EventDistanceDuration
+import com.aaronbrecher.neverlate.models.*
 import com.aaronbrecher.neverlate.network.AppApiService
-import com.aaronbrecher.neverlate.network.*
+import com.aaronbrecher.neverlate.network.createRetrofitService
 import com.aaronbrecher.neverlate.ui.activities.MainActivity
 import com.firebase.jobdispatcher.JobParameters
 import com.firebase.jobdispatcher.JobService
 import com.google.android.gms.maps.model.LatLng
-
 import java.io.IOException
-import java.util.ArrayList
-
+import java.util.*
 import javax.inject.Inject
-
-import retrofit2.Call
 
 class AnaylizeEventsJobService : JobService(), BillingUpdatesListener {
 
@@ -41,6 +33,7 @@ class AnaylizeEventsJobService : JobService(), BillingUpdatesListener {
     private lateinit var mJobParameters: JobParameters
     private lateinit var mBillingManager: BillingManager
     private var mEventList: List<Event> = ArrayList()
+    private val mPurchasesList: MutableList<PurchaseData> = ArrayList()
     private var mEventCompatibilities: MutableList<EventCompatibility>? = null
 
     override fun onCreate() {
@@ -57,20 +50,23 @@ class AnaylizeEventsJobService : JobService(), BillingUpdatesListener {
     }
 
     override fun onBillingClientSetupFinished() {
-        mBillingManager.verifySub()
+        mBillingManager.getSubList(false)
     }
 
     override fun onBillingSetupFailed() {
-        MainActivity.setFinishedLoading(true)
+        mAppExecutors.mainThread().execute { MainActivity.setFinishedLoading(true) }
         jobFinished(mJobParameters, false)
     }
 
-    override fun onSubscriptionVerified(isVerified: Boolean) {
-        if(isVerified){
-            mAppExecutors.diskIO().execute { this.doWork() }
+    override fun onPurchasesUpdated(purchases: List<PurchaseData>, wasAsync: Boolean) {
+        if(purchases.isEmpty()){
+            mAppExecutors.mainThread().execute {
+                MainActivity.setFinishedLoading(true)
+                jobFinished(mJobParameters, false)
+            }
         } else{
-            MainActivity.setFinishedLoading(true)
-            jobFinished(mJobParameters, false)
+            mPurchasesList.addAll(purchases)
+            doWork()
         }
     }
 
@@ -127,7 +123,7 @@ class AnaylizeEventsJobService : JobService(), BillingUpdatesListener {
     private fun getDrivingDuration(origin: String, event: Event): Int {
         val details = EventLocationDetails(event.locationLatlng!!.latitude.toString(),
                 event.locationLatlng!!.longitude.toString())
-        val call = mApiService.queryDirections(origin, details)
+        val call = mApiService.queryDirections(origin, HereApiBody(listOf(details), mPurchasesList))
         try {
             val duration = call.execute().body()
             if (duration != null) return duration.duration
