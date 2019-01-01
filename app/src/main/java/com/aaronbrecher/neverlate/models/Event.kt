@@ -33,11 +33,10 @@ class Event {
     var calendarId: Long = 0
 
     @ColumnInfo
-    var title: String? = null
+    var title: String = ""
 
     @ColumnInfo
-    var description: String? = null
-        get() = if (field != null) field else ""
+    var description: String = ""
 
     @ColumnInfo
     var startTime: LocalDateTime? = null
@@ -49,26 +48,26 @@ class Event {
     var locationLatlng: LatLng? = null
 
     @ColumnInfo
-    var location: String? = null
+    var location: String = ""
 
     @ColumnInfo
     var watching: Boolean? = false
 
     @ColumnInfo
-    var distance: Long? = null
+    var distance: Long = -1
 
     @ColumnInfo
-    var drivingTime: Long? = null
+    var drivingTime: Long = -1
 
     @ColumnInfo
-    var origin: String? = null
+    var origin: String = ""
 
     @ColumnInfo
     var transportMode: Int? = null
 
     @Ignore
-    constructor(@NonNull id: Int, @NonNull calendarId: Long, title: String?, description: String?,
-                startTime: LocalDateTime?, endTime: LocalDateTime?, location: String?, locationLatlng: LatLng?, watching: Boolean?, transportMode: Int?) {
+    constructor(@NonNull id: Int, @NonNull calendarId: Long, title: String, description: String,
+                startTime: LocalDateTime?, endTime: LocalDateTime?, location: String, locationLatlng: LatLng?, watching: Boolean?, transportMode: Int?) {
         this.id = id
         this.calendarId = calendarId
         this.title = title

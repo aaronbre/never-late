@@ -25,6 +25,10 @@ constructor(private var mEventsDao: EventsDao) {
         return mEventsDao.queryEventsNoLocation(System.currentTimeMillis())
     }
 
+    fun queryEventsNoLocationSync(): List<Event>{
+        return mEventsDao.queryAllEventsSync()
+    }
+
 
     //query all the tracked events in the database - events with a watching set to false
     // will NOT be returned - performs async

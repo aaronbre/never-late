@@ -217,12 +217,10 @@ object CalendarUtils {
 
         // For each event check if it was changed and add it to the corresponding list
         // events with only a title or description change do not need new fences
-        var i = 0
-        val listLength = oldEventList.size
-        while (i < listLength) {
+        for (i in 0 until oldEventList.size) {
             val newEvent = newEventList[i]
             val oldEvent = oldEventList[i]
-            if (oldEvent.drivingTime == Constants.ROOM_INVALID_LONG_VALUE) {
+            if (oldEvent.drivingTime == Constants.ROOM_INVALID_LONG_VALUE && !newEvent.location.isEmpty()) {
                 eventsToAddWithGeofences.add(newEvent)
             } else {
                 val change = Event.eventChanged(oldEvent, newEvent)
@@ -241,7 +239,6 @@ object CalendarUtils {
                     Event.Change.SAME -> eventsToAddNoGeofences.add(oldEvent)
                 }
             }
-            i++
         }
         map[Constants.LIST_NEEDS_FENCE_UPDATE] = eventsToAddWithGeofences
         map[Constants.LIST_NO_FENCE_UPDATE] = eventsToAddNoGeofences
@@ -278,7 +275,7 @@ object CalendarUtils {
             }
         }
         newEvents.removeAll(toRemove)
-        return toRemove
+        return toRemove.filter {!it.location.isEmpty()}.toMutableList()
     }
 
     private fun mapToIds(eventList: List<Event>): List<Int> {

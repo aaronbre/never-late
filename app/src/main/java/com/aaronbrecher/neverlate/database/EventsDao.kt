@@ -20,9 +20,13 @@ interface EventsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertEvent(event: Event)
 
-    //query all events in the database
+    //query ALL events in the database
     @Query("SELECT * FROM events ORDER BY startTime")
     fun queryAllEvents(): LiveData<List<Event>>
+
+    //query ALL events in the database synchronously
+    @Query("SELECT * FROM events ORDER BY startTime")
+    fun queryAllEventsSync(): List<Event>
 
     //query all not expired events in the database
     @Query("SELECT * FROM events WHERE endTime > :currentTime AND location IS NOT NULL AND location != '' AND watching = 1 ORDER BY startTime")

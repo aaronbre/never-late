@@ -3,6 +3,7 @@ package com.aaronbrecher.neverlate.Utils
 import android.content.Context
 import android.content.SharedPreferences
 import android.location.Location
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.format.DateUtils
@@ -20,8 +21,7 @@ import com.aaronbrecher.neverlate.models.HereApiBody
 import com.aaronbrecher.neverlate.models.PurchaseData
 import com.aaronbrecher.neverlate.network.AppApiService
 import com.aaronbrecher.neverlate.network.*
-import com.android.billingclient.api.Purchase
-import com.android.billingclient.api.PurchaseHistoryResponseListener
+import com.google.firebase.analytics.FirebaseAnalytics
 
 import java.io.IOException
 import java.text.DecimalFormat
@@ -48,7 +48,6 @@ class DirectionsUtils(mSharedPreferences: SharedPreferences,
 
     /**
      * function to add distance information (Distance,Duration) to events
-     * TODO for subscriptions - will execute this code always, if server response is that the user is not subscribed than will use as the crow flies data instead
      *
      * @param events   list of events from the calendar
      */
@@ -58,20 +57,19 @@ class DirectionsUtils(mSharedPreferences: SharedPreferences,
         billingManager = BillingManager(context, this)
     }
 
-    //TODO change this to do the validation in app to get the correct token,
-    //then pass token to server for secure validation
     override fun onBillingClientSetupFinished() {
-       billingManager.getSubList(false)
+        billingManager.getSubList(false)
     }
 
     override fun onPurchasesUpdated(purchases: List<PurchaseData>, wasAsync: Boolean) {
         appExecutors.networkIO().execute {
+            purchaseList.addAll(purchases)
             val responseType = addDistanceFromHereApi()
-            when(responseType){
+            when (responseType) {
                 QueryResponseType.SUCCESS -> distanceInfoAddedListener.distanceUpdated()
                 QueryResponseType.FAILED -> addCrowFliesDistanceInfo(filteredEvents)
                 QueryResponseType.UNVERIFIED -> {
-                    if(wasAsync) addCrowFliesDistanceInfo(filteredEvents)
+                    if (wasAsync) addCrowFliesDistanceInfo(filteredEvents)
                     else mainThreadHandler.post { billingManager.getSubList(true) }
                 }
             }
@@ -83,7 +81,7 @@ class DirectionsUtils(mSharedPreferences: SharedPreferences,
     }
 
     private fun addDistanceFromHereApi(): QueryResponseType {
-        val transitTypes = splitEventListByTrasportType(filteredEvents)
+        val transitTypes = splitEventListByTransportType()
         val drivingQueryResponseType = executeDrivingQuery(transitTypes.get(Constants.TRANSPORT_DRIVING))
         val transitQueryResponseType = executeTransitQuery(transitTypes.get(Constants.TRANSPORT_PUBLIC))
         return if (drivingQueryResponseType == QueryResponseType.UNVERIFIED
@@ -161,7 +159,7 @@ class DirectionsUtils(mSharedPreferences: SharedPreferences,
                 it.distance = distance
             }
         }
-        appExecutors.diskIO().execute { distanceInfoAddedListener.distanceUpdated()}
+        appExecutors.diskIO().execute { distanceInfoAddedListener.distanceUpdated() }
     }
 
     /**
@@ -194,11 +192,11 @@ class DirectionsUtils(mSharedPreferences: SharedPreferences,
      *
      * @return a map containing lists corresponding to all driving types
      */
-    private fun splitEventListByTrasportType(eventList: List<Event>): SparseArray<List<Event>> {
+    private fun splitEventListByTransportType(): SparseArray<List<Event>> {
         val drivingEvents = ArrayList<Event>()
         val publicEvents = ArrayList<Event>()
         val splitMap = SparseArray<List<Event>>()
-        for (event in eventList) {
+        for (event in filteredEvents) {
             when (event.transportMode) {
                 Constants.TRANSPORT_PUBLIC -> publicEvents.add(event)
                 Constants.TRANSPORT_DRIVING -> drivingEvents.add(event)

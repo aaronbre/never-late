@@ -66,7 +66,7 @@ class AnaylizeEventsJobService : JobService(), BillingUpdatesListener {
             }
         } else{
             mPurchasesList.addAll(purchases)
-            doWork()
+            mAppExecutors.diskIO().execute{doWork()}
         }
     }
 

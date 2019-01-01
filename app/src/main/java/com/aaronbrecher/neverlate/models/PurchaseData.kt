@@ -1,5 +1,5 @@
 package com.aaronbrecher.neverlate.models
 
-class PurchaseData(token: String,
-                   sku: String,
-                   packageName: String)
+class PurchaseData(var token: String,
+                   var sku: String,
+                   var packageName: String)

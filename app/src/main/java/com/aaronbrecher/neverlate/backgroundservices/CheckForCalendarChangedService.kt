@@ -77,7 +77,7 @@ class CheckForCalendarChangedService : JobService(), DistanceInfoAddedListener {
     @SuppressLint("MissingPermission")
     private fun doWork() {
         Log.i(TAG, "doWork: checking for calendar changes")
-        var oldList = mEventsRepository.queryAllCurrentEventsSync()
+        val oldList = mEventsRepository.queryEventsNoLocationSync()
         val newList = CalendarUtils.getCalendarEventsForToday(this)
         //first need to check if the 2 lists are the same or if different what type of update
         //needed
