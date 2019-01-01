@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="skuDetails"
+            type="com.android.billingclient.api.SkuDetails" />
+    </data>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/sku_list_item_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/small_margin"
+        android:layout_marginEnd="@dimen/small_margin"
+        android:elevation="1dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/small_margin">
+
+            <TextView
+                android:id="@+id/sku_list_item_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/small_margin"
+                android:textColor="#555"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/sku_list_item_price"
+                tools:text="Premium Subscription Yearly" />
+
+            <TextView
+                android:id="@+id/sku_list_item_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/sku_list_item_name"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/sku_list_item_name"
+                android:text="@{skuDetails.price}"
+                tools:text="$11.99" />
+
+            <TextView
+                android:id="@+id/sku_list_item_description"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/material_layout_vertical_spacing_between_content_areas"
+                android:letterSpacing=".02"
+                android:lineSpacingExtra="2dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/sku_list_item_name"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:text="@{skuDetails.description}"
+                tools:text="Better driving data, access different transit types, and more premium features." />
+
+            <Button
+                android:id="@+id/sku_list_item_purchase_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="36dp"
+                android:background="@drawable/rounded_button"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:text="@string/purchase_button"
+                android:textColor="@android:color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/sku_list_item_description" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+</layout>

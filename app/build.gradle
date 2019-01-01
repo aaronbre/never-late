@@ -19,32 +19,38 @@ repositories {
 
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'neverlatekey'
+            keyPassword 'Tvritrhv1'
+            storeFile file('/Users/aaronbrecher/Documents/Android_Keystores_and_private_keys/never-late-keystore')
+            storePassword 'Tvritrhv1'
+        }
+    }
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.aaronbrecher.neverlate"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 36
-        versionName "2.19"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
+        versionCode 48
+        versionName "test-with-real-billing-3"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GOOGLE_API_KEY", GOOGLE_API_KEY)
         resValue "string", "GOOGLE_API_KEY", GOOGLE_API_KEY
-
-
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
             }
         }
+        signingConfig signingConfigs.config
     }
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
-        debug{
-            applicationIdSuffix ".debug"
+        debug {
+            // TODO uncomment applicationIdSuffix ".debug"
         }
     }
     dataBinding {
@@ -54,87 +60,73 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    productFlavors {
+    }
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.android.support:customtabs:28.0.0'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
-    implementation 'com.android.support:design:28.0.0'
-    implementation 'com.android.support:preference-v7:28.0.0'
-
+    implementation 'androidx.appcompat:appcompat:1.1.0-alpha01'
+    implementation 'androidx.browser:browser:1.0.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha2'
+    implementation 'com.google.android.material:material:1.1.0-alpha02'
+    implementation 'androidx.preference:preference:1.1.0-alpha02'
     //need to manually add to fix transient libraries of play-services
-    implementation 'com.android.support:animated-vector-drawable:28.0.0'
-    implementation 'com.android.support:mediarouter-v7:28.0.0'
-    implementation 'com.android.support:support-v4:28.0.0'
-
+    implementation 'androidx.vectordrawable:vectordrawable-animated:1.1.0-alpha01'
+    implementation 'androidx.mediarouter:mediarouter:1.1.0-alpha01'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     //play services dependencies
     implementation 'com.google.android.gms:play-services-location:16.0.0'
     implementation 'com.google.android.gms:play-services-maps:16.0.0'
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
     implementation 'com.google.android.gms:play-services-awareness:16.0.0'
     implementation 'com.google.android.gms:play-services-ads:17.1.2'
-
     //Room live Data and view model
-    def room_version = "1.1.1"
-    def lifecycle_version = "1.1.1"
-    implementation "android.arch.lifecycle:extensions:$lifecycle_version"
-    implementation "android.arch.persistence.room:runtime:$room_version"
-    kapt "android.arch.persistence.room:compiler:1.1.1"
-    annotationProcessor "android.arch.persistence.room:compiler:$room_version"
-
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0-alpha01'
+    implementation 'androidx.room:room-runtime:2.1.0-alpha03'
+    kapt "androidx.room:room-compiler:2.1.0-alpha03"
+    annotationProcessor 'androidx.room:room-compiler:2.1.0-alpha03'
     //Retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.8.0'
-
     //Helper for time functions
     implementation 'com.jakewharton.threetenabp:threetenabp:1.1.0'
-
     //dagger 2 dependency injection
     implementation 'com.google.dagger:dagger:2.13'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.13'
+    kapt 'com.google.dagger:dagger-compiler:2.13'
     implementation 'com.google.dagger:dagger-android-support:2.13'
-
     //material dimensions
     implementation 'com.dmitrymalkovich.android:material-design-dimens:1.4'
-
     //testing dependencies
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-
+    androidTestImplementation 'androidx.test:runner:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
     //view the database at localhost
     debugImplementation 'com.amitshekhar.android:debug-db:1.0.4'
-
     //firebase crashlytics and performance
-    implementation 'com.google.firebase:firebase-core:16.0.4'
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.6'
-    implementation 'com.google.firebase:firebase-perf:16.2.0'
-
+    implementation 'com.google.firebase:firebase-core:16.0.6'
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.8'
+    implementation 'com.google.firebase:firebase-perf:16.2.3'
     //leak canary
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.2'
     // Optional, if you use support library fragments:
     debugImplementation 'com.squareup.leakcanary:leakcanary-support-fragment:1.6.2'
-
     //billing
     implementation 'com.android.billingclient:billing:1.2'
-
     //kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    kapt 'com.google.dagger:dagger-compiler:2.13'
-
     //navigation
-    implementation 'android.arch.navigation:navigation-fragment:1.0.0-alpha08'
-
+    implementation 'android.arch.navigation:navigation-fragment:1.0.0-alpha09'
+    implementation 'android.arch.navigation:navigation-ui:1.0.0-alpha09'
     //rating
     implementation 'io.github.kobakei:ratethisapp:1.2.0'
 }
 
-configurations.all(){
-    resolutionStrategy.force 'com.google.android.gms:play-services-ads:17.1.0'
-}
+//configurations.all(){
+//    resolutionStrategy.force 'com.google.android.gms:play-services-ads:17.1.0'
+//}
 
 apply plugin: 'com.google.firebase.firebase-perf'
 apply plugin: 'com.google.gms.google-services'

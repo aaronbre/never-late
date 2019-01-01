@@ -1,7 +1,7 @@
 package com.aaronbrecher.neverlate.models
 
-import android.arch.persistence.room.*
-import android.arch.persistence.room.ForeignKey.CASCADE
+import androidx.room.*
+import androidx.room.ForeignKey.CASCADE
 
 @Entity(tableName = "compatibility")
 data class EventCompatibility(

@@ -7,7 +7,7 @@
     <string name="geofence_added_success">Geofences were successfully updated, notifications will be sent when it is time to leave</string>
     <string name="geofence_added_partial_success">Geofences were successfully updated, notifications will be sent when it is time to leave, some geofences failed to load, will try those again on the next scheduled update</string>
     <string name="geofence_added_failed">failed to load the geofences, will try again on the next scheduled update</string>
-    <string name="exiting_geofence_notification_content_with_time">In order to make it in time for your event you need to start driving in %1$s minutes to %2$s, Estimated travel time is %3$s</string>
+    <string name="exiting_geofence_notification_content_with_time">In order to make it in time for your event you need to start driving in %1$s minutes to %2$s, Estimated time to arrival is %3$s</string>
     <string name="exiting_geofence_notification_content">In order to make it in time for your event you need to start driving in %1$s minutes to %2$s.</string>
     <string name="exiting_geofence_notification_title">Time to leave to scheduled event - </string>
     <string name="driving_notification_title_missed">Missed Event </string>
@@ -82,6 +82,7 @@
 
     <!--Speed prefs strings-->
     <string name="prefs_speed_title">Default speed</string>
+    <!--if changing this also change constants-->
     <string name="prefs_speed_key" translatable="false">kpm</string>
 
     <!--Metric-->
@@ -204,4 +205,8 @@
     <string name="app_snoozed_title">App Snoozed</string>
     <string name="conflict_empty_headline">Not enough tracked events</string>
     <string name="conflict_empty_text">There must be more than two tracked events in order to produce a conflict report. Check again when you have more events.</string>
+    <string name="purchase_button">Purchase</string>
+    <string name="purchase_success_toast">Your purchase of was successful, your order ID is %1$s</string>
+    <string name="purchase_failed_toast">Purchase was not successful, please try again</string>
+    <string name="purchase_unkown_toast">Unable to verify purchase at this time, will try again soon</string>
 </resources>

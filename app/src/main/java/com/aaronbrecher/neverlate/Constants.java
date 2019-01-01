@@ -53,6 +53,8 @@ public class Constants {
     public static final int CHECK_CALENDAR_END_WINDOW = CHECK_CALENDAR_START_WINDOW + 120;
 
     //prefs key
+    public static final String SPEED_PREFS_KEY = "kpm";
+    public static final String UNIT_SYSTEM_PREFS_KEY = "units";
     public static final String ALERTS_PREFS_KEY = "alert-time";
     public static final String ALERT_TIME_SHORT = "5";
     public static final String ALERT_TIME_MEDIUM = "10";
@@ -60,7 +62,6 @@ public class Constants {
     public static final String SNOOZE_PREFS_KEY = "snooze-time";
     public static final String SNOOZE_ONLY_NOTIFICATIONS_PREFS_KEY = "snooze-type";
     public static final String DISABLED_DRIVING_EVENTS = "disabled-driving";
-    public static final String CALENDARS_PREFS_KEY = "calendars";
 
 
 
