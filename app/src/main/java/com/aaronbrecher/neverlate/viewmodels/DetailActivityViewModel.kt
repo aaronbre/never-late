@@ -14,11 +14,10 @@ constructor(eventsRepository: EventsRepository, appExecutors: AppExecutors) : Ba
         mAppExecutors.diskIO().execute { mEventsRepository.updateEvents(event) }
     }
 
-    fun resetFenceForEvent(event: Event) {
-        val events = ArrayList<Event>()
-        events.add(event)
+    fun resetFenceForEventForTransportChange(event: Event) {
+        val events = listOf(event)
         val creator = AwarenessFencesCreator.Builder(events).build()
-        creator.buildAndSaveFences()
+        creator.buildAndSaveFences(true)
     }
 
     fun removeGeofenceForEvent(event: Event) {

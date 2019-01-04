@@ -54,7 +54,20 @@ class DirectionsUtils(mSharedPreferences: SharedPreferences,
     fun addDistanceInfoToEventList(events: List<Event>) {
         if (mLocation == null) return
         filteredEvents = removeEventsWithoutLocation(events)
-        billingManager = BillingManager(context, this)
+//      TODO when want to start billing uncomment and change subscribe button to enabled in xml
+//      billingManager = BillingManager(context, this)
+
+//      TODO when want to start billing remove this
+        appExecutors.networkIO().execute {
+            val responseType = addDistanceFromHereApi()
+            when (responseType) {
+                QueryResponseType.SUCCESS -> distanceInfoAddedListener.distanceUpdated()
+                QueryResponseType.FAILED,
+                QueryResponseType.UNVERIFIED -> addCrowFliesDistanceInfo(filteredEvents)
+
+            }
+        }
+
     }
 
     override fun onBillingClientSetupFinished() {

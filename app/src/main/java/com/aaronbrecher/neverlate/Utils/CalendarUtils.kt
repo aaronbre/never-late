@@ -234,6 +234,7 @@ object CalendarUtils {
                     Event.Change.GEOFENCE_CHANGE -> {
                         newEvent.watching = oldEvent.watching
                         //TODO add all other data that would not be in the new event
+                        newEvent.transportMode = oldEvent.transportMode
                         eventsToAddWithGeofences.add(newEvent)
                     }
                     Event.Change.SAME -> eventsToAddNoGeofences.add(oldEvent)
@@ -255,35 +256,21 @@ object CalendarUtils {
      */
     private fun filterAndRemoveDeletedEvents(oldEvents: MutableList<Event>, newEvents: List<Event>) {
         val ids = mapToIds(newEvents)
-        val toRemove = ArrayList<Event>()
-        val creator = AwarenessFencesCreator.Builder(null).build()
-
-        for (event in oldEvents) {
-            if (!ids.contains(event.id)) {
-                toRemove.add(event)
-            }
-        }
+        val toRemove = oldEvents.filter { !ids.contains(it.id) }
         oldEvents.removeAll(toRemove)
     }
 
     private fun filterOutNewEvents(oldEvents: List<Event>, newEvents: MutableList<Event>): MutableList<Event> {
-        val toRemove = ArrayList<Event>()
         val ids = mapToIds(oldEvents)
-        for (event in newEvents) {
-            if (!ids.contains(event.id)) {
-                toRemove.add(event)
-            }
-        }
+        val toRemove = newEvents.filter { !ids.contains(it.id) }
         newEvents.removeAll(toRemove)
-        return toRemove.filter {!it.location.isEmpty()}.toMutableList()
+        return toRemove.asSequence()
+                .filter { !it.location.isEmpty() }
+                .toMutableList()
     }
 
     private fun mapToIds(eventList: List<Event>): List<Int> {
-        val ids = ArrayList<Int>()
-        for (event in eventList) {
-            ids.add(event.id)
-        }
-        return ids
+        return eventList.map { it.id }
     }
 
 

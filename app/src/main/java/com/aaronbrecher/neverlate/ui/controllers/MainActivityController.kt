@@ -129,6 +129,11 @@ class MainActivityController(private val mActivity: MainActivity, private val mN
 
     }
 
+    fun backToHome() {
+        mNavController.popBackStack(R.id.eventListFragment, true)
+        mActivity.setTitle(R.string.list_title)
+    }
+
     fun navigateUp() {
         mNavController.navigateUp()
     }

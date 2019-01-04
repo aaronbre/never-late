@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.CalendarContract
 import android.util.Log
@@ -111,7 +112,9 @@ class MainActivity : AppCompatActivity(), NavigationControl {
         val actionbar = supportActionBar
         actionbar?.setDisplayHomeAsUpEnabled(true)
         homeDrawable = DrawerArrowDrawable(this)
-        homeDrawable.color = getColor(android.R.color.white)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            homeDrawable.color = getColor(R.color.material_light_white)
+        }
         actionbar?.setHomeAsUpIndicator(homeDrawable)
         //        NavigationUI.setupActionBarWithNavController(this, navController, mDrawerLayout);
         //        NavigationUI.setupWithNavController((NavigationView) findViewById(R.id.nav_view), navController);
@@ -258,6 +261,13 @@ class MainActivity : AppCompatActivity(), NavigationControl {
     private fun showAnalyzeMenu() {
         toggleOptionsMenu(false)
         mMenu.setGroupVisible(R.id.analyze_menu, true)
+    }
+
+    override fun onBackPressed() {
+        if(mController.currentFragment.let { it == R.id.eventListFragment || it == R.id.noEventsFragment }){
+            super.onBackPressed()
+        }
+        mController.backToHome()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

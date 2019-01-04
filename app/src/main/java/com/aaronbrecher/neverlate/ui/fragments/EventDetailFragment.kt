@@ -1,6 +1,7 @@
 package com.aaronbrecher.neverlate.ui.fragments
 
 import android.content.Context
+import android.content.DialogInterface
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
@@ -72,34 +73,25 @@ class EventDetailFragment : Fragment() {
             builder.setNegativeButton(R.string.cancel, null)
             builder.create().show()
         } else if (id == mBinding.eventDetailChangeTransportButton.id) {
-            Toast.makeText(activity, "This feature is not implemented yet, we are working hard to get this up and running", Toast.LENGTH_SHORT).show()
-            //                TODO this is not yet implemented
-            //                builder.setTitle("Select driving mode");
-            //                builder.setItems(R.array.event_detail_edit_transport, (dialog, which) ->{
-            //                    String transportMode = "";
-            //                    switch (which + 1){
-            //                        case Constants.TRANSPORT_DRIVING:
-            //                            transportMode = getString(R.string.transport_mode_driving);
-            //                            break;
-            //                        case Constants.TRANSPORT_WALKING:
-            //                            transportMode = getString(R.string.transport_mode_walking);
-            //                            break;
-            //                        case Constants.TRANSPORT_PUBLIC:
-            //                            transportMode = getString(R.string.transport_mode_public);
-            //                            break;
-            //                    }
-            //                    mBinding.eventDetailTransportMode.setText(transportMode);
-            //                    Event editedEvent = mEvent.copy();
-            //                    editedEvent.setTransportMode(which+1);
-            //                    mEditedEventListener.updateEvent(editedEvent);
-            //                    if(mEvent.getTransportMode() == which+1){
-            //                        mActivity.hideOptionsMenu();
-            //                    }else {
-            //                        mActivity.showOptionsMenu();
-            //                    }
-            //                });
-            //                builder.setNegativeButton(R.string.cancel, null);
-            //                builder.create().show();
+            //Toast.makeText(activity, "This feature is not implemented yet, we are working hard to get this up and running", Toast.LENGTH_SHORT).show()
+            builder.setTitle("Select driving mode")
+            builder.setItems(R.array.event_detail_edit_transport) { _, which ->
+                val transportMode = when(which){
+                    Constants.TRANSPORT_DRIVING -> getString(R.string.transport_mode_driving)
+                    Constants.TRANSPORT_PUBLIC -> getString(R.string.transport_mode_public)
+                    else -> ""
+                }
+                mBinding.eventDetailTransportMode.text = transportMode
+                if(mEvent != null){
+                    val editedEvent = mEvent?.copy() ?: Event()
+                    editedEvent.transportMode = which
+                    mEditedEventListener.updateEvent(editedEvent)
+                    if(mEvent?.transportMode == which) mActivity.hideOptionsMenu()
+                    else mActivity.showOptionsMenu()
+                }
+            }
+            builder.setNegativeButton(R.string.cancel, null)
+            builder.create().show()
         }
     }
 
@@ -121,7 +113,7 @@ class EventDetailFragment : Fragment() {
             it?.let {
                 mBinding.event = it
                 mEvent = it
-                val timeToLeave = DirectionsUtils.getTimeToLeaveHumanReadable(it.drivingTime!!,
+                val timeToLeave = DirectionsUtils.getTimeToLeaveHumanReadable(it.drivingTime,
                         GeofenceUtils.determineRelevantTime(it.startTime, it.endTime))
                 val formatted = getString(R.string.event_detail_leave_time, timeToLeave)
                 mBinding.eventDetailLeaveTime.text = formatted
@@ -139,7 +131,6 @@ class EventDetailFragment : Fragment() {
         val mode = mEvent?.transportMode!!
         val modeString: String
         modeString = when (mode) {
-            Constants.TRANSPORT_WALKING -> getString(R.string.transport_mode_walking)
             Constants.TRANSPORT_PUBLIC -> getString(R.string.transport_mode_public)
             else -> getString(R.string.transport_mode_driving)
         }

@@ -90,14 +90,14 @@ class AwarenessFencesCreator private constructor(var eventList: List<Event>) : D
      */
     @SuppressLint("MissingPermission")
     @WorkerThread
-    fun buildAndSaveFences() {
+    fun buildAndSaveFences(transportChange: Boolean = false) {
         mLocationProviderClient.lastLocation.addOnSuccessListener(mAppExecutors.diskIO(), OnSuccessListener { location ->
             location?.let {
                 mLocation = it
                 //TODO this is probably not needed, as every call to this already added distance info
-                // If the location is older then a day we can assume that distance info needs to be changed
-                //this code should not be needed due to the activity recognition
-                if (it.time < System.currentTimeMillis() - Constants.ONE_DAY) {
+                // If the location is older then a day we can assume that distance OR if the save was
+                // for a transport change need to update
+                if (it.time < System.currentTimeMillis() - Constants.ONE_DAY || transportChange) {
                     val directionsUtils = DirectionsUtils(mSharedPreferences, it, this, mApp)
                     Handler(Looper.getMainLooper()).run { directionsUtils.addDistanceInfoToEventList(eventList)}
                 }else{

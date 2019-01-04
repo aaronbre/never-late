@@ -76,7 +76,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         //get the name of the calendar by finding the index of the id in the values list
         savedCalendars.forEach {
             val index = values.indexOf(it)
-            if (index != -1) {
+            if (index != -1 && index < entries.size) {
                 builder.append(entries[index]).append("\n")
             }
         }

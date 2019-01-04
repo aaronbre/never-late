@@ -134,7 +134,7 @@ class EventDetailActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener
                     if (!it.watching!!) {
                         mViewModel.removeGeofenceForEvent(it)
                     } else if (it.transportMode != mEvent.transportMode) {
-                        mViewModel.resetFenceForEvent(it)
+                        mViewModel.resetFenceForEventForTransportChange(it)
                     }
                     mEvent = it
                     mEditedEvent = null
