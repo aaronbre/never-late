@@ -62,6 +62,7 @@ public class Constants {
     public static final String SNOOZE_PREFS_KEY = "snooze-time";
     public static final String SNOOZE_ONLY_NOTIFICATIONS_PREFS_KEY = "snooze-type";
     public static final String DISABLED_DRIVING_EVENTS = "disabled-driving";
+    public static final String CALENDAR_PREFS_KEY = "calendars";
 
 
 

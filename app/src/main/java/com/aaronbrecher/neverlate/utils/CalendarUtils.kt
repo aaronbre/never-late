@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ContentUris
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.provider.BaseColumns
@@ -27,23 +28,14 @@ import java.util.Collections
 import java.util.HashMap
 
 
-object CalendarUtils {
 
-    /**
-     * TODO implement this function to give selection args for calendars {NOT_MVP}
-     * This function will return the selection to only select events for today
-     * Ultimately this will also filter according to shared prefs to only select
-     * calendars that the user would like to have
-     * @return a selection string to query the calendarProvider
-     */
-    //    private static String[] getSelectionArgs() {
-    //        Pair dates = getDateTimes();
-    //        return new String[]{getTimeInMillis((LocalDateTime)dates.first), getTimeInMillis((LocalDateTime)dates.second)};
-    //    }
+
+class CalendarUtils(sharedPrefs: SharedPreferences){
+    private val calendars: Set<String>? = sharedPrefs.getStringSet(Constants.CALENDAR_PREFS_KEY, null)
+
 
     /**
      * Function to get the LocalDateTime objects to define "Today"
-     * TODO changed this to only start with current time, end time will still be tommorow midnight
      * @return a pair where the first is today midnight and second is tommorow midnight
      */
     private val dateTimes: Pair<LocalDateTime, LocalDateTime>
@@ -57,15 +49,8 @@ object CalendarUtils {
     fun getCalendarEventsForToday(context: Context): List<Event> {
         val projection = arrayOf(CalendarContract.Instances.BEGIN, CalendarContract.Instances.END, CalendarContract.Instances.EVENT_ID)
         val times = dateTimes
-        val builder = CalendarContract.Instances.CONTENT_URI.buildUpon()
-        ContentUris.appendId(builder, getTimeInMillis(times.first))
-        ContentUris.appendId(builder, getTimeInMillis(times.second))
-
         return if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
-            val cursor = context.contentResolver.query(
-                    builder.build(),
-                    projection, null, null,
-                    CalendarContract.Instances.BEGIN + " ASC")
+            val cursor = CalendarContract.Instances.query(context.contentResolver, projection, getTimeInMillis(times.first), getTimeInMillis(times.second))
             convertToEventList(cursor, context)
         } else {
             ArrayList()
@@ -83,13 +68,14 @@ object CalendarUtils {
                 val begin = cursor.getLong(beginIndex)
                 val end = cursor.getLong(endIndex)
                 val id = cursor.getInt(eventIdIndex).toString()
-                eventList.add(getEvent(id, begin, end, context))
+                val event = getEvent(id,begin,end, context)
+                event?.let { eventList.add(it) }
             }
         }
         return eventList
     }
 
-    private fun getEvent(eventId: String, begin: Long, end: Long, context: Context): Event {
+    private fun getEvent(eventId: String, begin: Long, end: Long, context: Context): Event? {
         val event = Event()
         event.startTime = Converters.dateTimeFromUnix(begin)
         event.endTime = Converters.dateTimeFromUnix(end)
@@ -114,7 +100,9 @@ object CalendarUtils {
             event.locationLatlng = latLng
             event.calendarId = eventsCursor.getLong(calendarIdIndex)
         }
-        return event
+        if(calendars == null) return event
+        return if(calendars.contains(event.calendarId.toString())) event
+        else null
     }
 
     //only run this on a background thread access dbs as well as other work will block UI

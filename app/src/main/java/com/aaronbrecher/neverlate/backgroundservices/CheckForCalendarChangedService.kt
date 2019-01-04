@@ -73,12 +73,13 @@ class CheckForCalendarChangedService : JobService(), DistanceInfoAddedListener {
 
     @SuppressLint("MissingPermission")
     private fun doWork() {
+        val calendarUtils = CalendarUtils(mSharedPreferences)
         Log.i(TAG, "doWork: checking for calendar changes")
         val oldList = mEventsRepository.queryEventsNoLocationSync()
-        val newList = CalendarUtils.getCalendarEventsForToday(this)
+        val newList = calendarUtils.getCalendarEventsForToday(this)
         //first need to check if the 2 lists are the same or if different what type of update
         //needed
-        val listsToAdd = CalendarUtils.compareCalendars(oldList.toMutableList(), newList.toMutableList())
+        val listsToAdd = calendarUtils.compareCalendars(oldList.toMutableList(), newList.toMutableList())
         mGeofenceList = listsToAdd[Constants.LIST_NEEDS_FENCE_UPDATE]?.toMutableList() ?: ArrayList()
         mNoGeofenceList = listsToAdd[Constants.LIST_NO_FENCE_UPDATE]?.toMutableList() ?: ArrayList()
         try {
