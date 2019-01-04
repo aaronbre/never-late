@@ -5,7 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
 import com.aaronbrecher.neverlate.AppExecutors
-import com.aaronbrecher.neverlate.Utils.BackgroundUtils
+import com.aaronbrecher.neverlate.utils.BackgroundUtils
 import com.aaronbrecher.neverlate.database.EventsRepository
 import com.aaronbrecher.neverlate.models.Event
 import com.firebase.jobdispatcher.FirebaseJobDispatcher

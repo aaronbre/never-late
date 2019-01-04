@@ -3,7 +3,7 @@ package com.aaronbrecher.neverlate.backgroundservices
 import android.preference.PreferenceManager
 
 import com.aaronbrecher.neverlate.Constants
-import com.aaronbrecher.neverlate.Utils.BackgroundUtils
+import com.aaronbrecher.neverlate.utils.BackgroundUtils
 import com.firebase.jobdispatcher.FirebaseJobDispatcher
 import com.firebase.jobdispatcher.GooglePlayDriver
 import com.firebase.jobdispatcher.JobParameters

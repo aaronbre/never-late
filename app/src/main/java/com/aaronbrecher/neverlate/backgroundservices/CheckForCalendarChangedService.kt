@@ -11,9 +11,9 @@ import android.util.Log
 import com.aaronbrecher.neverlate.AppExecutors
 import com.aaronbrecher.neverlate.Constants
 import com.aaronbrecher.neverlate.NeverLateApp
-import com.aaronbrecher.neverlate.Utils.BackgroundUtils
-import com.aaronbrecher.neverlate.Utils.CalendarUtils
-import com.aaronbrecher.neverlate.Utils.DirectionsUtils
+import com.aaronbrecher.neverlate.utils.BackgroundUtils
+import com.aaronbrecher.neverlate.utils.CalendarUtils
+import com.aaronbrecher.neverlate.utils.DirectionsUtils
 import com.aaronbrecher.neverlate.database.EventsRepository
 import com.aaronbrecher.neverlate.AwarenessFencesCreator
 import com.aaronbrecher.neverlate.interfaces.DistanceInfoAddedListener
@@ -29,9 +29,6 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.tasks.Tasks
 import java.lang.Exception
-
-import java.util.HashMap
-import java.util.concurrent.ExecutionException
 
 import javax.inject.Inject
 

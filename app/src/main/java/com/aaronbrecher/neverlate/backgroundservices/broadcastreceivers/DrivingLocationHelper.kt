@@ -13,15 +13,14 @@ import com.aaronbrecher.neverlate.AppExecutors
 import com.aaronbrecher.neverlate.Constants
 import com.aaronbrecher.neverlate.NeverLateApp
 import com.aaronbrecher.neverlate.R
-import com.aaronbrecher.neverlate.Utils.GeofenceUtils
-import com.aaronbrecher.neverlate.Utils.LocationUtils
-import com.aaronbrecher.neverlate.Utils.SystemUtils
+import com.aaronbrecher.neverlate.utils.GeofenceUtils
+import com.aaronbrecher.neverlate.utils.LocationUtils
+import com.aaronbrecher.neverlate.utils.SystemUtils
 import com.aaronbrecher.neverlate.database.Converters
 import com.aaronbrecher.neverlate.database.EventsRepository
 import com.aaronbrecher.neverlate.models.Event
 import com.aaronbrecher.neverlate.ui.activities.EventDetailActivity
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.OnSuccessListener
 
 import java.util.HashSet

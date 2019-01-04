@@ -3,7 +3,6 @@ package com.aaronbrecher.neverlate.ui.activities
 import android.content.ContentUris
 import android.content.Intent
 import android.content.SharedPreferences
-import android.net.Uri
 import android.os.Bundle
 import android.provider.CalendarContract
 import android.view.Menu
@@ -15,8 +14,8 @@ import android.widget.Toast
 import com.aaronbrecher.neverlate.Constants
 import com.aaronbrecher.neverlate.NeverLateApp
 import com.aaronbrecher.neverlate.R
-import com.aaronbrecher.neverlate.Utils.BackgroundUtils
-import com.aaronbrecher.neverlate.Utils.GeofenceUtils
+import com.aaronbrecher.neverlate.utils.BackgroundUtils
+import com.aaronbrecher.neverlate.utils.GeofenceUtils
 import com.aaronbrecher.neverlate.adapters.EventDetailPagerAdapter
 import com.aaronbrecher.neverlate.models.Event
 import com.aaronbrecher.neverlate.ui.fragments.EventDetailFragment
@@ -29,7 +28,6 @@ import com.google.android.material.tabs.TabLayout
 
 import javax.inject.Inject
 
-import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.ViewModelProvider

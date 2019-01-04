@@ -1,14 +1,8 @@
-package com.aaronbrecher.neverlate.Utils;
-
-import android.util.Log;
+package com.aaronbrecher.neverlate.utils;
 
 import com.aaronbrecher.neverlate.database.Converters;
-import com.aaronbrecher.neverlate.models.Event;
 
-import org.threeten.bp.Instant;
 import org.threeten.bp.LocalDateTime;
-
-import java.util.List;
 
 public class GeofenceUtils {
     private static final String TAG = GeofenceUtils.class.getSimpleName();

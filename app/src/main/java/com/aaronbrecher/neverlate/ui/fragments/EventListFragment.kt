@@ -13,11 +13,10 @@ import com.aaronbrecher.neverlate.AwarenessFencesCreator
 import com.aaronbrecher.neverlate.Constants
 import com.aaronbrecher.neverlate.NeverLateApp
 import com.aaronbrecher.neverlate.R
-import com.aaronbrecher.neverlate.Utils.BackgroundUtils
+import com.aaronbrecher.neverlate.utils.BackgroundUtils
 import com.aaronbrecher.neverlate.adapters.EventListAdapter
 import com.aaronbrecher.neverlate.adapters.EventListSwipeToDeleteCallback
 import com.aaronbrecher.neverlate.databinding.FragmentMainActivityListBinding
-import com.aaronbrecher.neverlate.dependencyinjection.AppComponent
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener
 import com.aaronbrecher.neverlate.interfaces.NavigationControl
 import com.aaronbrecher.neverlate.interfaces.SwipeToDeleteListener

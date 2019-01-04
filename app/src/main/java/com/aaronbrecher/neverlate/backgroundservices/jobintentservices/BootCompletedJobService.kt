@@ -7,7 +7,7 @@ import androidx.core.app.JobIntentService
 import android.util.Log
 
 import com.aaronbrecher.neverlate.NeverLateApp
-import com.aaronbrecher.neverlate.Utils.BackgroundUtils
+import com.aaronbrecher.neverlate.utils.BackgroundUtils
 import com.firebase.jobdispatcher.FirebaseJobDispatcher
 import com.firebase.jobdispatcher.GooglePlayDriver
 

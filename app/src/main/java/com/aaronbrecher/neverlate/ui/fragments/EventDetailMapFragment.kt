@@ -10,14 +10,12 @@ import android.view.ViewGroup
 
 import com.aaronbrecher.neverlate.NeverLateApp
 import com.aaronbrecher.neverlate.R
-import com.aaronbrecher.neverlate.Utils.SystemUtils
-import com.aaronbrecher.neverlate.dependencyinjection.AppComponent
+import com.aaronbrecher.neverlate.utils.SystemUtils
 import com.aaronbrecher.neverlate.models.Event
 import com.aaronbrecher.neverlate.viewmodels.BaseViewModel
 import com.aaronbrecher.neverlate.viewmodels.DetailActivityViewModel
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.maps.CameraUpdate
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback

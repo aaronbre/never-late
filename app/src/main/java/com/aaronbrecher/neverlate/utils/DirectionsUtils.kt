@@ -1,15 +1,13 @@
-package com.aaronbrecher.neverlate.Utils
+package com.aaronbrecher.neverlate.utils
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.location.Location
-import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.format.DateUtils
 import android.util.SparseArray
 import com.aaronbrecher.neverlate.AppExecutors
-
 import com.aaronbrecher.neverlate.Constants
 import com.aaronbrecher.neverlate.R
 import com.aaronbrecher.neverlate.billing.BillingManager
@@ -20,14 +18,11 @@ import com.aaronbrecher.neverlate.models.EventLocationDetails
 import com.aaronbrecher.neverlate.models.HereApiBody
 import com.aaronbrecher.neverlate.models.PurchaseData
 import com.aaronbrecher.neverlate.network.AppApiService
-import com.aaronbrecher.neverlate.network.*
-import com.google.firebase.analytics.FirebaseAnalytics
-
+import com.aaronbrecher.neverlate.network.createRetrofitService
 import java.io.IOException
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
-import java.util.ArrayList
-import java.util.Date
+import java.util.*
 
 /**
  * Class that contains functions to get distance information,
@@ -38,7 +33,7 @@ class DirectionsUtils(mSharedPreferences: SharedPreferences,
                       private val distanceInfoAddedListener: DistanceInfoAddedListener,
                       private val context: Context) : BillingUpdatesListener {
 
-    private val mspeed: Double = mSharedPreferences.getString(Constants.SPEED_PREFS_KEY, "0.666667")!!.toDouble()
+    private val mSpeed: Double = mSharedPreferences.getString(Constants.SPEED_PREFS_KEY, "0.666667")!!.toDouble()
     private val retrofitService: AppApiService = createRetrofitService()
     private lateinit var billingManager: BillingManager
     private lateinit var filteredEvents: List<Event>
@@ -167,7 +162,7 @@ class DirectionsUtils(mSharedPreferences: SharedPreferences,
             val distance = mLocation!!.distanceTo(eventLocation).toLong()
             if (distance > 0) {
                 val distanceInKilometers = distance / 1000
-                val time = (distanceInKilometers / mspeed).toLong() * 60
+                val time = (distanceInKilometers / mSpeed).toLong() * 60
                 it.drivingTime = time
                 it.distance = distance
             }

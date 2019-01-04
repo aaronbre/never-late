@@ -9,12 +9,11 @@ import android.widget.Filter
 import android.widget.Filterable
 
 import com.aaronbrecher.neverlate.Constants
-import com.aaronbrecher.neverlate.Utils.DirectionsUtils
+import com.aaronbrecher.neverlate.utils.DirectionsUtils
 import com.aaronbrecher.neverlate.databinding.EventsListItemBinding
 import com.aaronbrecher.neverlate.interfaces.ListItemClickListener
 import com.aaronbrecher.neverlate.models.Event
 
-import org.threeten.bp.LocalDateTime
 import org.threeten.bp.format.DateTimeFormatter
 
 import java.util.ArrayList

@@ -1,19 +1,13 @@
-package com.aaronbrecher.neverlate.Utils;
+package com.aaronbrecher.neverlate.utils;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationManager;
-import android.preference.PreferenceManager;
 
-import com.aaronbrecher.neverlate.Constants;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.gson.Gson;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.List;
 
 public class LocationUtils {

@@ -13,8 +13,8 @@ import androidx.core.app.JobIntentService
 import com.aaronbrecher.neverlate.AppExecutors
 import com.aaronbrecher.neverlate.Constants
 import com.aaronbrecher.neverlate.NeverLateApp
-import com.aaronbrecher.neverlate.Utils.DirectionsUtils
-import com.aaronbrecher.neverlate.Utils.SystemUtils
+import com.aaronbrecher.neverlate.utils.DirectionsUtils
+import com.aaronbrecher.neverlate.utils.SystemUtils
 import com.aaronbrecher.neverlate.backgroundservices.broadcastreceivers.DrivingLocationUpdatesBroadcastReceiver
 import com.aaronbrecher.neverlate.database.EventsRepository
 import com.aaronbrecher.neverlate.AwarenessFencesCreator

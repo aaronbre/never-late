@@ -24,10 +24,9 @@ import com.aaronbrecher.neverlate.AppExecutors
 import com.aaronbrecher.neverlate.Constants
 import com.aaronbrecher.neverlate.NeverLateApp
 import com.aaronbrecher.neverlate.R
-import com.aaronbrecher.neverlate.Utils.SystemUtils
+import com.aaronbrecher.neverlate.utils.SystemUtils
 import com.aaronbrecher.neverlate.interfaces.NavigationControl
 import com.aaronbrecher.neverlate.ui.controllers.MainActivityController
-import com.aaronbrecher.neverlate.ui.fragments.EventListFragment
 import com.aaronbrecher.neverlate.viewmodels.MainActivityViewModel
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -41,19 +40,16 @@ import com.google.android.material.snackbar.Snackbar
 import javax.inject.Inject
 
 import androidx.annotation.NonNull
-import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.NavController
 import androidx.navigation.Navigation
 
 import com.aaronbrecher.neverlate.Constants.PERMISSIONS_REQUEST_CODE

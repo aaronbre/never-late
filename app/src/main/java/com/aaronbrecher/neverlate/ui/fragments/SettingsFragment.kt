@@ -12,7 +12,7 @@ import androidx.preference.*
 import com.aaronbrecher.neverlate.AppExecutors
 import com.aaronbrecher.neverlate.NeverLateApp
 import com.aaronbrecher.neverlate.R
-import com.aaronbrecher.neverlate.Utils.BackgroundUtils
+import com.aaronbrecher.neverlate.utils.BackgroundUtils
 import com.aaronbrecher.neverlate.models.Calendar
 import com.firebase.jobdispatcher.FirebaseJobDispatcher
 import com.firebase.jobdispatcher.GooglePlayDriver

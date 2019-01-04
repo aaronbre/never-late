@@ -1,4 +1,4 @@
-package com.aaronbrecher.neverlate.Utils;
+package com.aaronbrecher.neverlate.utils;
 
 import android.Manifest;
 import android.app.Activity;

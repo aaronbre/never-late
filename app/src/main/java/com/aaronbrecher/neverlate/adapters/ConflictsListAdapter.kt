@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 
 import com.aaronbrecher.neverlate.R
-import com.aaronbrecher.neverlate.Utils.DirectionsUtils
+import com.aaronbrecher.neverlate.utils.DirectionsUtils
 import com.aaronbrecher.neverlate.database.Converters
 import com.aaronbrecher.neverlate.databinding.CompatibilityLastListItemBinding
 import com.aaronbrecher.neverlate.databinding.CompatibilityListItemBinding

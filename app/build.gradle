@@ -50,7 +50,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            // TODO uncomment applicationIdSuffix ".debug"
+            applicationIdSuffix ".debug"
         }
     }
     dataBinding {

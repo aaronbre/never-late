@@ -10,7 +10,7 @@ import android.os.Build
 
 import com.aaronbrecher.neverlate.Constants
 import com.aaronbrecher.neverlate.R
-import com.aaronbrecher.neverlate.Utils.BackgroundUtils
+import com.aaronbrecher.neverlate.utils.BackgroundUtils
 import com.aaronbrecher.neverlate.models.retrofitmodels.Version
 import com.aaronbrecher.neverlate.ui.activities.MainActivity
 import com.aaronbrecher.neverlate.ui.activities.NeedUpdateActivity

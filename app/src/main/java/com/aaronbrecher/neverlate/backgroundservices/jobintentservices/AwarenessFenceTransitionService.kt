@@ -12,7 +12,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.aaronbrecher.neverlate.Constants
 import com.aaronbrecher.neverlate.NeverLateApp
 import com.aaronbrecher.neverlate.R
-import com.aaronbrecher.neverlate.Utils.DirectionsUtils
+import com.aaronbrecher.neverlate.utils.DirectionsUtils
 import com.aaronbrecher.neverlate.database.EventsRepository
 import com.aaronbrecher.neverlate.AwarenessFencesCreator
 import com.aaronbrecher.neverlate.models.Event

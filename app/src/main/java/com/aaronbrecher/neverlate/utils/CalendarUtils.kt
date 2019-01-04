@@ -1,4 +1,4 @@
-package com.aaronbrecher.neverlate.Utils
+package com.aaronbrecher.neverlate.utils
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -6,7 +6,6 @@ import android.content.ContentUris
 import android.content.Context
 import android.content.pm.PackageManager
 import android.database.Cursor
-import android.net.Uri
 import android.provider.BaseColumns
 import android.provider.CalendarContract
 import androidx.core.content.ContextCompat
@@ -15,7 +14,6 @@ import android.util.Pair
 import com.aaronbrecher.neverlate.Constants
 import com.aaronbrecher.neverlate.NeverLateApp
 import com.aaronbrecher.neverlate.database.Converters
-import com.aaronbrecher.neverlate.AwarenessFencesCreator
 import com.aaronbrecher.neverlate.models.Event
 import com.google.android.gms.maps.model.LatLng
 
@@ -23,7 +21,6 @@ import org.threeten.bp.LocalDate
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.LocalTime
 import org.threeten.bp.ZoneId
-import org.threeten.bp.ZonedDateTime
 
 import java.util.ArrayList
 import java.util.Collections

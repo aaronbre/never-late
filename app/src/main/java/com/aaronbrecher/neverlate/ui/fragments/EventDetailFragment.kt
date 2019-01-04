@@ -1,14 +1,12 @@
 package com.aaronbrecher.neverlate.ui.fragments
 
 import android.content.Context
-import android.content.DialogInterface
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import androidx.appcompat.app.AlertDialog
@@ -19,8 +17,8 @@ import androidx.lifecycle.ViewModelProviders
 import com.aaronbrecher.neverlate.Constants
 import com.aaronbrecher.neverlate.NeverLateApp
 import com.aaronbrecher.neverlate.R
-import com.aaronbrecher.neverlate.Utils.DirectionsUtils
-import com.aaronbrecher.neverlate.Utils.GeofenceUtils
+import com.aaronbrecher.neverlate.utils.DirectionsUtils
+import com.aaronbrecher.neverlate.utils.GeofenceUtils
 import com.aaronbrecher.neverlate.databinding.FragmentEventDetailBinding
 import com.aaronbrecher.neverlate.models.Event
 import com.aaronbrecher.neverlate.ui.activities.EventDetailActivity

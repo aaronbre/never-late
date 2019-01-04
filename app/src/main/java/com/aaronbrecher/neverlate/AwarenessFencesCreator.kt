@@ -14,9 +14,9 @@ import androidx.core.app.ActivityCompat
 import android.text.TextUtils
 import android.widget.Toast
 
-import com.aaronbrecher.neverlate.Utils.DirectionsUtils
-import com.aaronbrecher.neverlate.Utils.GeofenceUtils
-import com.aaronbrecher.neverlate.Utils.LocationUtils
+import com.aaronbrecher.neverlate.utils.DirectionsUtils
+import com.aaronbrecher.neverlate.utils.GeofenceUtils
+import com.aaronbrecher.neverlate.utils.LocationUtils
 import com.aaronbrecher.neverlate.backgroundservices.broadcastreceivers.StartJobIntentServiceBroadcastReceiver
 import com.aaronbrecher.neverlate.database.Converters
 import com.aaronbrecher.neverlate.database.EventsRepository
@@ -29,7 +29,6 @@ import com.google.android.gms.awareness.fence.FenceUpdateRequest
 import com.google.android.gms.awareness.fence.LocationFence
 import com.google.android.gms.awareness.fence.TimeFence
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.OnSuccessListener
 
 import java.util.ArrayList

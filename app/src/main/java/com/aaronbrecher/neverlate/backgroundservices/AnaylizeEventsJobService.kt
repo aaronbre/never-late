@@ -45,7 +45,9 @@ class AnaylizeEventsJobService : JobService(), BillingUpdatesListener {
 
     override fun onStartJob(job: JobParameters): Boolean {
         mJobParameters = job
-        mBillingManager = BillingManager(this, this)
+        //TODO when adding billing uncomment
+        //mBillingManager = BillingManager(this, this)
+        mAppExecutors.diskIO().execute { doWork() }
         return true
     }
 

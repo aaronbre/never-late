@@ -1,4 +1,4 @@
-package com.aaronbrecher.neverlate.Utils;
+package com.aaronbrecher.neverlate.utils;
 
 import com.aaronbrecher.neverlate.Constants;
 import com.aaronbrecher.neverlate.backgroundservices.AnaylizeEventsJobService;
